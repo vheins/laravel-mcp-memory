@@ -169,7 +169,8 @@ class MemoryService
         // Order by priority (User > Repo > Org > System) or Recency which is simpler.
         // Usually relevant memories are most specific.
         // Let's order by created_at desc for now as requested by user initially.
-        return $q->orderByDesc('created_at')->get();
+        $results = $q->orderByDesc('created_at')->get();
+        return $results;
     }
 
     protected function createVersion(Memory $memory, string $content): void

@@ -39,6 +39,10 @@ class SearchMemoriesTool extends Tool
     {
         $filters = $request->get('filters', []);
 
+        if ($user = $request->user()) {
+            $filters['user_id'] = $user->getAuthIdentifier();
+        }
+
         $results = $service->search(
             $request->get('repository'),
             $request->get('query'),

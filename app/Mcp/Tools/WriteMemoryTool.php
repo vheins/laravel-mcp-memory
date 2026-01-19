@@ -9,6 +9,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Exceptions\JsonRpcException;
 
 class WriteMemoryTool extends Tool
 {
@@ -48,7 +49,11 @@ class WriteMemoryTool extends Tool
         $actorId = (string) ($user ? $user->getAuthIdentifier() : 'system');
         $actorType = $user ? 'human' : 'ai';
 
-        $memory = $service->write($arguments, $actorId, $actorType);
+        try {
+            $memory = $service->write($arguments, $actorId, $actorType);
+        } catch (\Exception $e) {
+            throw new JsonRpcException($e->getMessage(), -32000, $request->get('id'));
+        }
 
         return Response::make([
             Response::text(json_encode($memory->toArray())),
