@@ -33,7 +33,7 @@ it('can attach a term', function () {
         'ownerRecord' => $this->user,
         'pageClass' => \App\Filament\Resources\Users\Pages\EditUser::class,
     ])
-    ->callAction(AttachAction::class, data: [
+    ->callTableAction('attach', data: [
         'recordId' => $this->term->getKey(),
     ])
     ->assertHasNoActionErrors();
@@ -45,12 +45,10 @@ it('can detach a term', function () {
     $this->user->terms()->attach($this->term);
 
     Livewire::test(EntityTermsRelationManager::class, [
-        'ownerRecord' => $this->user,
+        'ownerRecord' => $this->user, // @phpstan-ignore-line
         'pageClass' => \App\Filament\Resources\Users\Pages\EditUser::class,
     ])
-    ->callAction(DetachAction::class, arguments: [
-        'record' => $this->term->getKey(),
-    ])
+    ->callTableAction('detach', $this->term)
     ->assertHasNoActionErrors();
 
     expect($this->user->fresh()->terms)->toHaveCount(0);

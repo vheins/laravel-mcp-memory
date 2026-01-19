@@ -38,4 +38,9 @@ class Term extends Model
     {
         return $this->hasMany(Term::class, 'parent_id');
     }
+
+    public function users(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'entity', 'entity_terms');
+    }
 }
