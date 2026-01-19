@@ -14,7 +14,7 @@ class DeleteMemoryTool extends Tool
 {
     public function name(): string
     {
-        return 'memory.delete';
+        return 'memory-delete';
     }
 
     public function description(): string

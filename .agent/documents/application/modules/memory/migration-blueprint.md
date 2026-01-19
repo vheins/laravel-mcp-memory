@@ -77,7 +77,7 @@ Sistem Memory terdiri dari 4 tabel utama yang saling berelasi:
 ## 4. Indexing Strategy (Wajib)
 
 Untuk performa lookup `Scope Resolution` yang cepat, index berikut wajib dibuat:
-1. `index_memory_scope`: `(repository_id, scope_type, status)` - Digunakan saat `memory.search`.
+1. `index_memory_scope`: `(repository_id, scope_type, status)` - Digunakan saat `memory-search`.
 2. `index_memory_classification`: `(memory_type, status)` - Digunakan untuk filter dashboard.
 3. `index_audit_lookup`: `(memory_id, created_at)` - Untuk timeline sejarah di UI.
 

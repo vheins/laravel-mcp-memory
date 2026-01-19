@@ -11,7 +11,7 @@
 | **MEM-BE-01** | Migration     | Done   | Create tables: `memories`, `repositories`, `audit_logs`. Index on `repository_id` & `type`.        |
 | **MEM-BE-02** | Model         | Done   | Setup Model `Memory` with Scopes (`RepositoryScope`) & Relations. Implement `Auditable`.           |
 | **MEM-BE-03** | Service       | Done   | Implement `MemoryService`: Logic for hierarchy resolution, collision handling, and search ranking. |
-| **MEM-BE-04** | MCP API       | Done   | Implement JSON-RPC Controller for `memory.write`, `memory.read`, `memory.search`.                  |
+| **MEM-BE-04** | MCP API       | Done   | Implement JSON-RPC Controller for `memory-write`, `memory.read`, `memory-search`.                  |
 | **MEM-BE-05** | Validation    | Done   | Implement Rules: `ImmutableTypeRule` (prevent AI editing locked types).                            |
 | **MEM-BE-06** | Seeder        | Done   | Seed default System Constraints and Demo Repository.                                               |
 | **MEM-BE-07** | Tests & Fixes | Done   | Add `user_id` to memories. Implement & Test Scope Hierarchy fallback. Feature Test API isolation.  |

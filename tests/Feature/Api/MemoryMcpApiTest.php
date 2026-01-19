@@ -14,10 +14,10 @@ beforeEach(function () {
 it('can write memory via MCP', function () {
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory.write',
+        'method' => 'memory-write',
         'params' => [
-            'organization_id' => $this->repository->organization_id,
-            'repository_id' => $this->repository->id,
+            'organization' => $this->repository->organization_id,
+            'repository' => $this->repository->id,
             'scope_type' => 'repository',
             'memory_type' => 'business_rule',
             'created_by_type' => 'human',
@@ -27,10 +27,13 @@ it('can write memory via MCP', function () {
     ];
 
     $response = $this->actingAs($this->user)
-        ->postJson('/api/v1/mcp', $payload);
+        ->postJson('/api/v1/mcp/memory', $payload);
 
     $response->assertStatus(200)
-        ->assertJsonPath('result.current_content', 'MCP Content')
+        ->assertJsonPath('result.content.0.text', function ($text) {
+             $data = json_decode($text, true);
+             return $data['current_content'] === 'MCP Content';
+        })
         ->assertJsonPath('id', 1);
 });
 
@@ -38,8 +41,8 @@ it('can read memory via MCP', function () {
     // Seed
     $service = app(\App\Services\MemoryService::class);
     $memory = $service->write([
-        'organization_id' => $this->repository->organization_id,
-        'repository_id' => $this->repository->id,
+        'organization' => $this->repository->organization_id,
+        'repository' => $this->repository->id,
         'scope_type' => 'repository',
         'memory_type' => 'business_rule',
         'created_by_type' => 'human',
@@ -48,23 +51,25 @@ it('can read memory via MCP', function () {
 
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory.read',
-        'params' => ['id' => $memory->id],
+        'method' => 'resources/read',
+        'params' => ['uri' => "memory://{$memory->id}"],
         'id' => 2,
     ];
 
     $this->actingAs($this->user)
-        ->postJson('/api/v1/mcp', $payload)
+        ->postJson('/api/v1/mcp/memory', $payload)
         ->assertStatus(200)
-        ->assertJsonPath('result.id', $memory->id)
-        ->assertJsonPath('result.current_content', 'Read Me');
+        ->assertJsonPath('result.contents.0.text', function ($text) use ($memory) {
+             $data = json_decode($text, true);
+             return $data['id'] === $memory->id && $data['current_content'] === 'Read Me';
+        });
 });
 
 it('can search memory via MCP', function () {
     $service = app(\App\Services\MemoryService::class);
     $service->write([
-        'organization_id' => $this->repository->organization_id,
-        'repository_id' => $this->repository->id,
+        'organization' => $this->repository->organization_id,
+        'repository' => $this->repository->id,
         'scope_type' => 'repository',
         'memory_type' => 'preference',
         'created_by_type' => 'human',
@@ -73,18 +78,21 @@ it('can search memory via MCP', function () {
 
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory.search',
+        'method' => 'memory-search',
         'params' => [
-            'repository_id' => $this->repository->id,
+            'repository' => $this->repository->id,
             'filters' => ['memory_type' => 'preference']
         ],
         'id' => 3,
     ];
 
     $this->actingAs($this->user)
-        ->postJson('/api/v1/mcp', $payload)
+        ->postJson('/api/v1/mcp/memory', $payload)
         ->assertStatus(200)
-        ->assertJsonPath('result.0.current_content', 'Searchable');
+        ->assertJsonPath('result.content.0.text', function ($text) {
+             $data = json_decode($text, true);
+             return $data[0]['current_content'] === 'Searchable';
+        });
 });
 
 it('returns error for unknown method', function () {
@@ -96,8 +104,8 @@ it('returns error for unknown method', function () {
     ];
 
     $this->actingAs($this->user)
-        ->postJson('/api/v1/mcp', $payload)
+        ->postJson('/api/v1/mcp/memory', $payload)
         ->assertStatus(200) // JSON-RPC errors return 200 usually, but with error object
         ->assertJsonPath('error.code', -32601)
-        ->assertJsonPath('error.message', 'Method not found');
+        ->assertJsonPath('error.message', 'The method [unknown.method] was not found.');
 });

@@ -20,7 +20,7 @@ beforeEach(function () {
 });
 
 it('requires authentication for MCP endpoint', function () {
-    $response = $this->postJson(route('api.v1.mcp'), [
+    $response = $this->postJson('/api/v1/mcp/memory', [
         'jsonrpc' => '2.0',
         'method' => 'memory.read',
         'params' => ['id' => '123'],
@@ -33,7 +33,7 @@ it('requires authentication for MCP endpoint', function () {
 it('forces authenticated user on write', function () {
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory.write',
+        'method' => 'memory-write',
         'params' => [
             'organization' => $this->orgId,
             'repository' => $this->repo->id,
@@ -45,12 +45,14 @@ it('forces authenticated user on write', function () {
         'id' => 1,
     ];
 
-    $response = $this->actingAs($this->user, 'sanctum')->postJson(route('api.v1.mcp'), $payload);
+    $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/v1/mcp/memory', $payload);
 
     $response->assertStatus(200);
 
-    $response->assertJsonPath('result.user', $this->user->id); // Should be User A
-    $response->assertJsonPath('result.user', fn($id) => $id !== $this->otherUser->id);
+    $response->assertJsonPath('result.content.0.text', function ($text) {
+        $data = json_decode($text, true);
+        return (string)$data['user_id'] === (string)$this->user->id && (string)$data['user_id'] !== (string)$this->otherUser->id;
+    });
 });
 
 it('forces authenticated user on search', function () {
@@ -81,7 +83,7 @@ it('forces authenticated user on search', function () {
     // User A tries to search for User B's memories
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory.search',
+        'method' => 'memory-search',
         'params' => [
             'repository' => $this->repo->id,
             'filters' => [
@@ -91,12 +93,13 @@ it('forces authenticated user on search', function () {
         'id' => 1,
     ];
 
-    $response = $this->actingAs($this->user, 'sanctum')->postJson(route('api.v1.mcp'), $payload);
+    $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/v1/mcp/memory', $payload);
 
     $response->assertStatus(200);
 
-    $content = collect($response->json('result'));
-    expect($content->pluck('current_content'))
-        ->toContain('User A Secret')
-        ->not->toContain('User B Secret');
+    $response->assertJsonPath('result.content.0.text', function ($text) {
+        $content = collect(json_decode($text, true));
+        return $content->pluck('current_content')->contains('User A Secret')
+            && !$content->pluck('current_content')->contains('User B Secret');
+    });
 });

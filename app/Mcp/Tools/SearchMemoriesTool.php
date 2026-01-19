@@ -14,7 +14,7 @@ class SearchMemoriesTool extends Tool
 {
     public function name(): string
     {
-        return 'memory.search';
+        return 'memory-search';
     }
 
     public function description(): string

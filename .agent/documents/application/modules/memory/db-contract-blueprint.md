@@ -84,8 +84,8 @@ Tabel-tabel berikut adalah struktur final yang wajib diimplementasikan. Pengguna
 
 | MCP Action      | Database Impact                                                                                |
 | :-------------- | :--------------------------------------------------------------------------------------------- |
-| `memory.write`  | Insert `memories` (draft), Insert `memory_versions` (v1), Insert `audit_logs` (event:created). |
-| `memory.search` | SELECT `memories` WHERE repository_id AND status IN (verified, locked).                        |
+| `memory-write`  | Insert `memories` (draft), Insert `memory_versions` (v1), Insert `audit_logs` (event:created). |
+| `memory-search` | SELECT `memories` WHERE repository_id AND status IN (verified, locked).                        |
 | `memory.read`   | SELECT `memories` JOIN `memory_versions` (latest).                                             |
 | `memory.lock`   | UPDATE `memories (status:locked)`, Insert `audit_logs` (event:locked).                         |
 

@@ -66,10 +66,10 @@ Implementasi wajib dipusatkan pada Service Layer untuk memastikan logika "Scope 
 
 Mapping antara alat (tool) MCP dan logika internal:
 
-- **`memory.write`** -> Memanggil `MemoryWriteService@store`. Validasi: `repository_id` wajib ada, tipe tidak boleh `business_rule`.
-- **`memory.search`** -> Memanggil `MemorySearchService@search`. Parameter: `query`, `repository_id`. Output: Konteks terformat untuk LLM.
+- **`memory-write`** -> Memanggil `MemoryWriteService@store`. Validasi: `repository_id` wajib ada, tipe tidak boleh `business_rule`.
+- **`memory-search`** -> Memanggil `MemorySearchService@search`. Parameter: `query`, `repository_id`. Output: Konteks terformat untuk LLM.
 - **`memory.read`** -> Mengambil detail memori tunggal. Validasi: Kepemilikan `repository_id`.
-- **`memory.delete`** -> Memanggil `MemoryWriteService@destroy`. Validasi: Hanya untuk status non-locked.
+- **`memory-delete`** -> Memanggil `MemoryWriteService@destroy`. Validasi: Hanya untuk status non-locked.
 
 ---
 
@@ -87,7 +87,7 @@ Mapping antara alat (tool) MCP dan logika internal:
 ## 6. AI Agent Interaction Flow
 
 1. **Context Initialization:** Agent mendeteksi `repository_id` aktif dari lingkungan kerja.
-2. **Knowledge Retrieval:** Agent memanggil `memory.search` dengan kueri masalah yang sedang dihadapi.
+2. **Knowledge Retrieval:** Agent memanggil `memory-search` dengan kueri masalah yang sedang dihadapi.
 3. **Internal Resolution:** 
    - Sistem mengambil memori spesifik repo tersebut.
    - Sistem mengambil aturan global organisasi.

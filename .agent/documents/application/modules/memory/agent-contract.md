@@ -74,7 +74,7 @@ AI Agent diizinkan menulis memori hanya jika informasi tersebut memenuhi syarat 
 
 Sebelum memberikan jawaban atau melakukan aksi kritikal, Agent wajib:
 
-1. Melakukan `memory.search` untuk memastikan tidak ada aturan yang dilanggar.
+1. Melakukan `memory-search` untuk memastikan tidak ada aturan yang dilanggar.
 2. Menghormati `locked memory` sebagai prioritas tertinggi yang tidak boleh dibantah.
 3. Memberitahu pengguna jika ditemukan konflik antara instruksi user dan memori sistem.
 

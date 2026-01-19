@@ -35,7 +35,7 @@ Struktur data harus mencerminkan isolasi scope dan manajemen siklus hidup memori
 
 ## 2. Memory Scope Resolution Flow (Naratif)
 
-Saat AI Agent melakukan pencarian konteks (`memory.search`), sistem harus meresolusi memori berdasarkan urutan prioritas berikut:
+Saat AI Agent melakukan pencarian konteks (`memory-search`), sistem harus meresolusi memori berdasarkan urutan prioritas berikut:
 
 1. **Langkah 1 (Targeted Scope):** Sistem mencari memori yang terikat langsung pada `repository_id` yang sedang aktif. Ini adalah informasi paling spesifik (contoh: spesifikasi teknis repo tersebut).
 2. **Langkah 2 (User Preference):** Mencari memori yang terikat pada `user_id` yang memicu aksi. Ini memberikan konteks gaya kerja atau preferensi personal user.

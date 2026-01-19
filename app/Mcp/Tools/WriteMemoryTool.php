@@ -15,7 +15,7 @@ class WriteMemoryTool extends Tool
 {
     public function name(): string
     {
-        return 'memory.write';
+        return 'memory-write';
     }
 
     public function description(): string

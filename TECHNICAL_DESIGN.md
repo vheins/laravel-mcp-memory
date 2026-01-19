@@ -73,14 +73,14 @@ sequenceDiagram
     participant DB as Database
 
     Note over Admin, DB: Phase 1: Creation & Consumption
-    AI->>MCP: memory.write(content, repo_id)
+    AI->>MCP: memory-write(content, repo_id)
     MCP->>Core: Validate Scope & Rules
     Core->>DB: Insert Memory (Status: Unverified)
 
     Admin->>Core: Review Unverified Memory (via Dashboard)
     Core->>DB: Update Status -> Verified/Locked
 
-    AI->>MCP: memory.search(query, repo_id)
+    AI->>MCP: memory-search(query, repo_id)
     MCP->>Core: Retrieve Context (Repo + Org + System)
     Core->>DB: Query with Hierarchy Priority
     DB-->>Core: Result Set
@@ -114,7 +114,7 @@ Fitur ini menggunakan **Repository Scope** sebagai fondasi isolasi data dan keam
 #### B. MCP Endpoint Specifications (Conceptual)
 Berikut adalah spesifikasi antarmuka MCP (JSON-RPC) yang wajib diimplementasikan.
 
-**1. `memory.write`**
+**1. `memory-write`**
 *   **Description:** Menyimpan unit memori baru.
 *   **Input:**
     *   `content` (string): Payload teks informasi.
@@ -124,7 +124,7 @@ Berikut adalah spesifikasi antarmuka MCP (JSON-RPC) yang wajib diimplementasikan
 *   **Output:** `memory_id`, `status` (`unverified`).
 *   **Validation:** AI **DILARANG** menulis tipe `business_rule` atau `system_constraint`.
 
-**2. `memory.search`**
+**2. `memory-search`**
 *   **Description:** Mengambil memori relevan (RAG).
 *   **Input:**
     *   `query` (string): Kata kunci pencarian.
@@ -133,13 +133,13 @@ Berikut adalah spesifikasi antarmuka MCP (JSON-RPC) yang wajib diimplementasikan
 *   **Output:** List of objects `{ content, type, scope_badge, reliability_score }`.
 *   **Filter Logic:** Hasil hanya mencakup memori milik `repository_id` tersebut ATAU memori global (Org/System). Memori milik repo lain dibuang.
 
-**3. `memory.read`**
+**3. `resources/read`**
 *   **Description:** Membaca detail satu memori.
-*   **Input:** `memory_id` (uuid).
+*   **Input:** `uri` (memory://{id}).
 *   **Output:** Full object memory termasuk metadata.
 *   **Validation:** Cek akses `repository_id`.
 
-**4. `memory.delete`**
+**4. `memory-delete`**
 *   **Description:** Soft-delete memori usang.
 *   **Input:** `memory_id` (uuid), `reason` (string).
 *   **Validation:** AI tidak bisa menghapus memori berstatus **Locked**.
@@ -218,24 +218,24 @@ erDiagram
 
 ### 6.1 Backend
 
-| Task ID     | Component  | Status | Description                           |
-| :---------- | :--------- | :----- | :------------------------------------ |
-| MEM-BE-01 | Migration  | Todo   | Create tables: `memories`, `repositories`, `audit_logs`. Index on `repository_id` & `type`. |
-| MEM-BE-02 | Model      | Todo   | Setup Model `Memory` with Scopes (`RepositoryScope`) & Relations. Implement `Auditable`. |
+| Task ID   | Component  | Status | Description                                                                                        |
+| :-------- | :--------- | :----- | :------------------------------------------------------------------------------------------------- |
+| MEM-BE-01 | Migration  | Todo   | Create tables: `memories`, `repositories`, `audit_logs`. Index on `repository_id` & `type`.        |
+| MEM-BE-02 | Model      | Todo   | Setup Model `Memory` with Scopes (`RepositoryScope`) & Relations. Implement `Auditable`.           |
 | MEM-BE-03 | Service    | Todo   | Implement `MemoryService`: Logic for hierarchy resolution, collision handling, and search ranking. |
-| MEM-BE-04 | MCP API    | Todo   | Implement JSON-RPC Controller for `memory.write`, `memory.read`, `memory.search`. |
-| MEM-BE-05 | Validation | Todo   | Implement Rules: `ImmutableTypeRule` (prevent AI editing locked types). |
-| MEM-BE-06 | Seeder     | Todo   | Seed default System Constraints and Demo Repository. |
-| MEM-BE-07 | Tests      | Todo   | Unit Test for Scope Hierarchy fallback. Feature Test for API isolation. |
+| MEM-BE-04 | MCP API    | Todo   | Implement JSON-RPC Controller for `memory-write`, `memory.read`, `memory-search`.                  |
+| MEM-BE-05 | Validation | Todo   | Implement Rules: `ImmutableTypeRule` (prevent AI editing locked types).                            |
+| MEM-BE-06 | Seeder     | Todo   | Seed default System Constraints and Demo Repository.                                               |
+| MEM-BE-07 | Tests      | Todo   | Unit Test for Scope Hierarchy fallback. Feature Test for API isolation.                            |
 
 ### 6.2 Frontend
 
-| Task ID     | Component   | Status | Description                        |
-| :---------- | :---------- | :----- | :--------------------------------- |
-| MEM-FE-01 | Resource    | Todo   | Create `MemoryResource`. Columns: Content (trunc), Type, Scope Badge, Status. |
-| MEM-FE-02 | Filters     | Todo   | Add Global Filter / Table Filter for `Repository`. |
-| MEM-FE-03 | Actions     | Todo   | Custom Actions: "Lock Memory", "Verify Memory". |
-| MEM-FE-04 | Widget      | Todo   | Memory Stats Widget (Total verified vs unverified per Repo). |
-| MEM-FE-05 | History UI  | Todo   | Integrate `activitylog` timeline view into ViewRecord page. |
+| Task ID   | Component  | Status | Description                                                                   |
+| :-------- | :--------- | :----- | :---------------------------------------------------------------------------- |
+| MEM-FE-01 | Resource   | Todo   | Create `MemoryResource`. Columns: Content (trunc), Type, Scope Badge, Status. |
+| MEM-FE-02 | Filters    | Todo   | Add Global Filter / Table Filter for `Repository`.                            |
+| MEM-FE-03 | Actions    | Todo   | Custom Actions: "Lock Memory", "Verify Memory".                               |
+| MEM-FE-04 | Widget     | Todo   | Memory Stats Widget (Total verified vs unverified per Repo).                  |
+| MEM-FE-05 | History UI | Todo   | Integrate `activitylog` timeline view into ViewRecord page.                   |
 
 ---

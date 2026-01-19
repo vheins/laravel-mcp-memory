@@ -11,9 +11,9 @@ Setiap tool MCP wajib dipetakan ke satu Dedicated Controller untuk menjaga prins
 
 | MCP Tool           | Target Controller           | Service Utama         |
 | :----------------- | :-------------------------- | :-------------------- |
-| `memory.write`     | `MemoryWriteController`     | `MemoryWriteService`  |
+| `memory-write`     | `MemoryWriteController`     | `MemoryWriteService`  |
 | `memory.read`      | `MemoryReadController`      | `MemoryReadService`   |
-| `memory.search`    | `MemorySearchController`    | `MemorySearchService` |
+| `memory-search`    | `MemorySearchController`    | `MemorySearchService` |
 | `memory.lock`      | `MemoryLockController`      | `MemoryLockService`   |
 | `memory.deprecate` | `MemoryDeprecateController` | `MemoryWriteService`  |
 
@@ -39,7 +39,7 @@ Controller wajib menegakkan validasi tingkat entri berikut sebelum memanggil Ser
    - `repository_id` harus berupa UUID valid.
    - `agent_id` tidak boleh kosong.
    - `organization_id` wajib ada dalam struktur context.
-2. **Intent Validation:** Memastikan `intent` pada request sesuai dengan fungsionalitas tool (misal: `memory.search` harus memiliki intent `read`).
+2. **Intent Validation:** Memastikan `intent` pada request sesuai dengan fungsionalitas tool (misal: `memory-search` harus memiliki intent `read`).
 3. **Type Validation:** Memastikan `memory_type` berada dalam list Enum yang diizinkan.
 
 ---

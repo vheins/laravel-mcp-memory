@@ -66,14 +66,14 @@ sequenceDiagram
     participant DB as Database
 
     Note over Admin, DB: Phase 1: Creation & Consumption
-    AI->>MCP: memory.write(content, repo_id)
+    AI->>MCP: memory-write(content, repo_id)
     MCP->>Core: Validate Scope & Rules
     Core->>DB: Insert Memory (Status: Unverified)
 
     Admin->>Core: Review Unverified Memory (via Dashboard)
     Core->>DB: Update Status -> Verified/Locked
 
-    AI->>MCP: memory.search(query, repo_id)
+    AI->>MCP: memory-search(query, repo_id)
     MCP->>Core: Retrieve Context (Repo + Org + System)
     Core->>DB: Query with Hierarchy Priority
     DB-->>Core: Result Set
@@ -132,7 +132,7 @@ erDiagram
 | **MEM-BE-01** | Migration  | Todo   | Create tables: `memories`, `repositories`, `audit_logs`. Index on `repository_id` & `type`.        |
 | **MEM-BE-02** | Model      | Todo   | Setup Model `Memory` with Scopes (`RepositoryScope`) & Relations. Implement `Auditable`.           |
 | **MEM-BE-03** | Service    | Todo   | Implement `MemoryService`: Logic for hierarchy resolution, collision handling, and search ranking. |
-| **MEM-BE-04** | MCP API    | Todo   | Implement JSON-RPC Controller for `memory.write`, `memory.read`, `memory.search`.                  |
+| **MEM-BE-04** | MCP API    | Todo   | Implement JSON-RPC Controller for `memory-write`, `memory.read`, `memory-search`.                  |
 | **MEM-BE-05** | Validation | Todo   | Implement Rules: `ImmutableTypeRule` (prevent AI editing locked types).                            |
 | **MEM-BE-06** | Seeder     | Todo   | Seed default System Constraints and Demo Repository.                                               |
 | **MEM-BE-07** | Tests      | Todo   | Unit Test for Scope Hierarchy fallback. Feature Test for API isolation.                            |

@@ -9,7 +9,7 @@
 
 ### Skenario: Cross-Repository Read Violation
 - **Given:** Memori faktual ("Aturan Pajak Proyek A") tersimpan eksklusif di `repository_id: REPO-A`.
-- **When:** AI Agent melakukan `memory.search` dengan parameter `repository_id: REPO-B`.
+- **When:** AI Agent melakukan `memory-search` dengan parameter `repository_id: REPO-B`.
 - **Then:** Sistem wajib mengembalikan hasil kosong (Empty Array) dan tidak membocorkan data dari REPO-A.
 
 ### Skenario: Cross-Organization Isolation
@@ -28,7 +28,7 @@
 
 ### Skenario: Locked Memory Protection
 - **Given:** Sebuah unit memori memiliki status `locked`.
-- **When:** AI Agent mengirim `memory.write` (update) atau `memory.delete` pada ID memori tersebut.
+- **When:** AI Agent mengirim `memory-write` (update) atau `memory-delete` pada ID memori tersebut.
 - **Then:** Sistem mengembalikan error `MEMORY_LOCKED` dan tidak melakukan modifikasi apapun pada database.
 
 ---
@@ -46,7 +46,7 @@
 
 ### Skenario: Scope Priority Resolution
 - **Given:** Terdapat konflik nilai antara `System Constraint` (Global) dan `Repository Preference` (Local).
-- **When:** AI Agent melakukan `memory.search`.
+- **When:** AI Agent melakukan `memory-search`.
 - **Then:** Sistem mengembalikan memori `System Constraint` sebagai prioritas yang tidak dapat diganggu gugat jika ditandai sebagai `Enforced`.
 
 ### Skenario: Missing Context Enforcement
@@ -60,7 +60,7 @@
 
 ### Skenario: Filter Inactive Memory
 - **Given:** Terdapat memori dengan status `deprecated` dan `archived`.
-- **When:** AI Agent melakukan `memory.search`.
+- **When:** AI Agent melakukan `memory-search`.
 - **Then:** Sistem secara otomatis memfilter (menyembunyikan) memori tersebut dari hasil pencarian agar agen tidak mendapatkan informasi usang.
 
 ---

@@ -87,7 +87,7 @@ Menyediakan transparansi perubahan:
 
 ## 8. Safety & Compliance UX Elements
 
-- **AI-Generated Badge:** Semua memori yang masuk via MCP `memory.write` wajib memiliki badge "Input by AI" untuk membedakannya dari input manual manusia.
+- **AI-Generated Badge:** Semua memori yang masuk via MCP `memory-write` wajib memiliki badge "Input by AI" untuk membedakannya dari input manual manusia.
 - **Warning Banner:** Tampil di bagian atas form edit jika memori tersebut sedang digunakan dalam referensi aktif di scope lain.
 - **Irreversible Indicator:** Ikon gembok merah pada memori berstatus `locked`.
 

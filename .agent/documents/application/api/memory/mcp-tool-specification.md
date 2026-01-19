@@ -19,7 +19,7 @@ Setiap request ke MCP Memory Server **WAJIB** menyertakan objek `context` beriku
 
 ## 2. Tool Specification
 
-### A. `memory.write`
+### A. `memory-write`
 - **Purpose**: Menyimpan fakta atau log keputusan baru.
 - **Allowed Caller**: AI Agent, Human Admin.
 - **Required Fields**: `content`, `type`.
@@ -28,7 +28,7 @@ Setiap request ke MCP Memory Server **WAJIB** menyertakan objek `context` beriku
 - **Response**: Mengembalikan `memory_id` dan status `unverified`.
 - **Audit**: Selalu memicu `created` audit record dan `v1` memory version.
 
-### B. `memory.search`
+### B. `memory-search`
 - **Purpose**: Pencarian memori relevan (RAG).
 - **Allowed Caller**: AI Agent, Human Admin.
 - **Required Fields**: `query`.
@@ -65,7 +65,7 @@ Setiap request ke MCP Memory Server **WAJIB** menyertakan objek `context` beriku
 
 ## 4. Result Limitation & Trimming
 
-- **Maximum Results**: `memory.search` dibatasi maksimal **10 record**.
+- **Maximum Results**: `memory-search` dibatasi maksimal **10 record**.
 - **Ordering Priority**: 
   1. Exact Match pada Repository Scope.
   2. Semantic Match pada Repository Scope.

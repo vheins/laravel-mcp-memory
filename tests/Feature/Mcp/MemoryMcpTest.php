@@ -20,9 +20,9 @@ it('can discover tools', function () {
         ]);
 
     $response->assertStatus(200)
-        ->assertJsonPath('result.tools.0.name', 'memory.write')
-        ->assertJsonPath('result.tools.1.name', 'memory.delete')
-        ->assertJsonPath('result.tools.2.name', 'memory.search');
+        ->assertJsonPath('result.tools.0.name', 'memory-write')
+        ->assertJsonPath('result.tools.1.name', 'memory-delete')
+        ->assertJsonPath('result.tools.2.name', 'memory-search');
 });
 
 it('can discover resource templates', function () {
@@ -45,7 +45,7 @@ it('can write a memory via tool', function () {
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [
-                'name' => 'memory.write',
+                'name' => 'memory-write',
                 'arguments' => [
                     'organization' => 'test-org',
                     'scope_type' => 'repository',
@@ -80,7 +80,7 @@ it('can search memories via tool (team context)', function () {
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [
-                'name' => 'memory.search',
+                'name' => 'memory-search',
                 'arguments' => [
                     'repository' => 'search-repo',
                     'query' => 'Team',
@@ -110,7 +110,7 @@ it('can delete a memory via tool', function () {
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [
-                'name' => 'memory.delete',
+                'name' => 'memory-delete',
                 'arguments' => [
                     'id' => $memory->id,
                 ],
@@ -172,7 +172,7 @@ it('can search memories with user hierarchy', function () {
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [
-                'name' => 'memory.search',
+                'name' => 'memory-search',
                 'arguments' => [
                     'repository' => 'hier-repo',
                     'filters' => [
@@ -207,7 +207,7 @@ it('cannot update locked memory via tool', function () {
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [
-                'name' => 'memory.write',
+                'name' => 'memory-write',
                 'arguments' => [
                     'id' => $memory->id,
                     'organization' => 'lock-org',
@@ -235,7 +235,7 @@ it('enforces immutable types for AI updates', function () {
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [
-                'name' => 'memory.write',
+                'name' => 'memory-write',
                 'arguments' => [
                     'organization' => 'rule-org',
                     'scope_type' => 'system',
