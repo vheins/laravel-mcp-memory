@@ -24,6 +24,8 @@ class MemoryMcpController extends Controller
 
         try {
             // Security: Enforce user context if authenticated
+            \Illuminate\Support\Facades\Log::info('Auth Check: ' . (Auth::check() ? 'true' : 'false'));
+            \Illuminate\Support\Facades\Log::info('Auth ID: ' . Auth::id());
             $userId = Auth::id();
             if ($userId) {
                 // For writes, force the user_id
