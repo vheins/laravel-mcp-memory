@@ -23,10 +23,6 @@ class McpServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        FilamentView::registerRenderHook(
-            'panels::auth.edit-profile.form.after',
-            fn (): string => Blade::render('<div class="mt-8">@livewire(\'profile.manage-mcp-tokens\')</div>'),
-            scopes: EditProfile::class,
-        );
+        // Use direct embedding in view instead of hooks for reliability
     }
 }
