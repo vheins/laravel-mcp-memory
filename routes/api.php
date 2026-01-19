@@ -20,6 +20,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     Route::apiResource('taxonomies', \App\Http\Controllers\Api\TaxonomyController::class)->only(['index', 'show']);
 
+    Route::get('configurations/fetch', [\App\Http\Controllers\Api\ConfigController::class, 'fetch'])->name('configurations.fetch');
+    Route::apiResource('configurations', \App\Http\Controllers\Api\ConfigController::class)->only(['index', 'show', 'update']);
+
     Route::middleware('auth:sanctum')->get('/users/{user}', function (Request $request, \App\Models\User $user) {
         // Placeholder for user details
         return response()->json([
