@@ -22,8 +22,13 @@ class EditProfile extends BaseEditProfile
 
     public function getExtraComponents(): array
     {
+        return [];
+    }
+
+    public function getRenderHookScopes(): array
+    {
         return [
-            \Illuminate\Support\Facades\Blade::render('@livewire(\'profile.manage-mcp-tokens\')'),
+            static::class,
         ];
     }
 }
