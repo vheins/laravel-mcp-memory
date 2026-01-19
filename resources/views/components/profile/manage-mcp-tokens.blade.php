@@ -13,11 +13,14 @@ use Filament\Forms\Components\CheckboxList;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 use Filament\Notifications\Notification;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 
-new class extends Component implements HasForms, HasTable
+new class extends Component implements HasForms, HasTable, HasActions
 {
     use InteractsWithForms;
     use InteractsWithTable;
+    use InteractsWithActions;
 
     public ?string $plainTextToken = null;
 
@@ -111,11 +114,8 @@ new class extends Component implements HasForms, HasTable
             <div class="flex items-center gap-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
                 <code class="flex-1 text-xs font-mono break-all">{{ $plainTextToken }}</code>
 
-                <x-filament::icon-button
-                    icon="heroicon-o-clipboard-document"
-                    color="gray"
-                    x-on:click="window.navigator.clipboard.writeText('{{ $plainTextToken }}'); $tooltip('Copied!', { timeout: 1500 })"
-                />
+                <x-filament::icon-button icon="heroicon-o-clipboard-document" color="gray"
+                    x-on:click="window.navigator.clipboard.writeText('{{ $plainTextToken }}'); $tooltip('Copied!', { timeout: 1500 })" />
             </div>
 
             <p class="text-xs text-danger-600 dark:text-danger-400 font-medium italic">
