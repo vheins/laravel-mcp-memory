@@ -8,6 +8,11 @@ use Filament\Schemas\Components\View as SchemaView;
 
 class EditProfile extends BaseEditProfile
 {
+    public function getLayout(): string
+    {
+        return 'filament-panels::components.layout.index';
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema

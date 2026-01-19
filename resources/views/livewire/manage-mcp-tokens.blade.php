@@ -31,7 +31,8 @@ new class extends Component implements HasForms, HasTable, HasActions
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->copyable(),
                 TextColumn::make('abilities')
                     ->badge()
                     ->label('Scopes'),
@@ -130,10 +131,12 @@ new class extends Component implements HasForms, HasTable, HasActions
         </x-slot>
     </x-filament::modal>
 
+    <x-filament-actions::modals />
+
     <script>
         document.addEventListener('livewire:init', () => {
             Livewire.on('token-generated', (event) => {
-                $dispatch('open-modal', { id: 'token-success-modal' });
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: { id: 'token-success-modal' } }));
             });
         });
     </script>

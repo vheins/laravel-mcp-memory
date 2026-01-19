@@ -2,9 +2,20 @@
 
 use App\Models\User;
 use Laravel\Sanctum\Sanctum;
+use Livewire\Volt\Volt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+test('mcp token management component can be rendered', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    Volt::test('manage-mcp-tokens')
+        ->assertStatus(200)
+        ->assertSee('MCP Access Tokens');
+});
 
 test('user can create an mcp token', function () {
     $user = User::factory()->create();

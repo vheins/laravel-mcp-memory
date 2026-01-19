@@ -28,7 +28,7 @@ class DashboardPanelProvider extends PanelProvider
             ->id('dashboard')
             ->path('dashboard')
             ->login()
-            ->profile(\App\Filament\Pages\Profile\EditProfile::class)
+            ->profile(\App\Filament\Pages\Profile\EditProfile::class, isSimple: false)
             ->colors([
                 'primary' => Color::Amber,
             ])
