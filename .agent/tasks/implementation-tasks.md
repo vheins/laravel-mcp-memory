@@ -29,3 +29,13 @@
 | **MEM-FE-05** | History UI | Todo   | Integrate `activitylog` timeline view into ViewRecord page.                   |
 
 ---
+
+## 3. IAM & Security (MCP Tokens)
+
+| Task ID       | Component      | Status      | Description                                                          |
+| :------------ | :------------- | :---------- | :------------------------------------------------------------------- |
+| **IAM-BE-01** | Sanctum Setup  | In Progress | Ensure User model and Sanctum are ready for MCP tokens (long-lived). |
+| **IAM-FE-01** | Profile Config | Todo        | Enable Profile in DashboardPanelProvider or register Custom Profile. |
+| **IAM-FE-02** | Token Manager  | Todo        | Livewire Component: ManageMcpTokens (List, Create, Revoke).          |
+| **IAM-FE-03** | Token Actions  | Todo        | Create Action (Modal, Abilities) & Revoke Action (Delete).           |
+| **IAM-FE-04** | Security/Audit | Todo        | Verify `last_used_at` updates and ensure tokens are not shown again. |

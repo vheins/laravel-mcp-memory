@@ -18,6 +18,8 @@ class TaxonomyResource extends Resource
 {
     protected static ?string $model = Taxonomy::class;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Knowledge Base';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
