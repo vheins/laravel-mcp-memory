@@ -101,3 +101,93 @@ it('prevents update when memory is locked', function () {
         ->toThrow(\Exception::class, 'Cannot update locked memory.');
 });
 
+it('can read a memory', function () {
+    $data = [
+        'organization_id' => $this->repository->organization_id,
+        'repository_id' => $this->repository->id,
+        'scope_type' => 'repository',
+        'memory_type' => 'business_rule',
+        'created_by_type' => 'human',
+        'current_content' => 'Content to read',
+    ];
+    $memory = $this->service->write($data, $this->user->id);
+
+    $readMemory = $this->service->read($memory->id);
+
+    expect($readMemory->id)->toBe($memory->id);
+    expect($readMemory->current_content)->toBe('Content to read');
+});
+
+it('can search memories', function () {
+    // Create queryable memories
+    $mem1 = $this->service->write([
+        'organization_id' => $this->repository->organization_id,
+        'repository_id' => $this->repository->id,
+        'scope_type' => 'repository',
+        'memory_type' => 'business_rule',
+        'created_by_type' => 'human',
+        'current_content' => 'Apple pie recipe',
+        'status' => 'verified',
+    ], $this->user->id);
+
+    $mem2 = $this->service->write([
+        'organization_id' => $this->repository->organization_id,
+        'repository_id' => $this->repository->id,
+        'scope_type' => 'repository',
+        'memory_type' => 'preference',
+        'created_by_type' => 'human',
+        'current_content' => 'Banana bread recipe',
+        'status' => 'draft',
+    ], $this->user->id);
+
+    // Search by content
+    $results = $this->service->search($this->repository->id, 'Apple');
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($mem1->id);
+
+    // Search by type
+    $results = $this->service->search($this->repository->id, null, ['memory_type' => 'preference']);
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($mem2->id);
+
+    // Search by status
+    $results = $this->service->search($this->repository->id, null, ['status' => 'verified']);
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($mem1->id);
+});
+
+it('prevents AI from creating restricted memory types', function () {
+    $data = [
+        'organization_id' => $this->repository->organization_id,
+        'repository_id' => $this->repository->id,
+        'scope_type' => 'repository',
+        'memory_type' => 'system_constraint', // Restricted
+        'created_by_type' => 'ai',
+        'current_content' => 'Restricted Content',
+    ];
+
+    expect(fn () => $this->service->write($data, 'agent-1', 'ai'))
+        ->toThrow(\Illuminate\Validation\ValidationException::class);
+});
+
+it('prevents AI from updating restricted memory types', function () {
+    // Created by human (allowed)
+    $memory = $this->service->write([
+        'organization_id' => $this->repository->organization_id,
+        'repository_id' => $this->repository->id,
+        'scope_type' => 'repository',
+        'memory_type' => 'business_rule', // Restricted
+        'created_by_type' => 'human',
+        'current_content' => 'Human Rule',
+    ], $this->user->id, 'human');
+
+    // AI tries to update
+    $updateData = [
+        'id' => $memory->id,
+        'current_content' => 'AI Hack',
+    ];
+
+    expect(fn () => $this->service->write($updateData, 'agent-1', 'ai'))
+        ->toThrow(\Illuminate\Validation\ValidationException::class);
+});
+

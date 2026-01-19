@@ -8,6 +8,9 @@ use App\Models\MemoryVersion;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
+use App\Rules\ImmutableTypeRule;
+use Illuminate\Support\Facades\Validator;
+
 class MemoryService
 {
     /**
@@ -20,6 +23,13 @@ class MemoryService
      */
     public function write(array $data, string $actorId, string $actorType = 'human'): Memory
     {
+        // Validate input type
+        if (isset($data['memory_type'])) {
+            Validator::make($data, [
+                'memory_type' => [new ImmutableTypeRule($actorType)],
+            ])->validate();
+        }
+
         return DB::transaction(function () use ($data, $actorId, $actorType) {
             $id = $data['id'] ?? null;
             $content = $data['current_content'];
@@ -28,6 +38,18 @@ class MemoryService
 
             if ($id) {
                 $memory = Memory::findOrFail($id);
+
+                // Validate existing type for updates
+                if ($actorType === 'ai') {
+                    $rule = new ImmutableTypeRule($actorType);
+                    $validator = Validator::make(['memory_type' => $memory->memory_type], [
+                        'memory_type' => [$rule],
+                    ]);
+                    if ($validator->fails()) {
+                         throw new \Illuminate\Validation\ValidationException($validator);
+                    }
+                }
+
                 $oldValue = $memory->toArray();
 
                 // Update
@@ -57,6 +79,90 @@ class MemoryService
 
             return $memory->fresh(['versions', 'auditLogs']);
         });
+    }
+
+    /**
+     * Read a memory by ID.
+     *
+     * @param string $id
+     * @return Memory
+     */
+    public function read(string $id): Memory
+    {
+        return Memory::with(['versions', 'auditLogs'])->findOrFail($id);
+    }
+
+
+    /**
+     * Search memories with hierarchy resolution.
+     * Hierarchy: System -> Organization -> Repository -> User
+     *
+     * @param string $repositoryId
+     * @param string|null $query
+     * @param array $filters
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function search(string $repositoryId, ?string $query = null, array $filters = [])
+    {
+        // 1. Resolve Hierarchy Context
+        $repository = \App\Models\Repository::find($repositoryId);
+        $orgId = $repository ? $repository->organization_id : null;
+        $userId = $filters['user_id'] ?? null;
+
+        $q = Memory::query();
+
+        $q->where(function ($group) use ($repositoryId, $orgId, $userId) {
+            // System Scope (Global)
+            $group->where(function ($sub) {
+                $sub->where('scope_type', 'system');
+            });
+
+            // Organization Scope
+            if ($orgId) {
+                $group->orWhere(function ($sub) use ($orgId) {
+                    $sub->where('scope_type', 'organization')
+                        ->where('organization_id', $orgId);
+                });
+            }
+
+            // Repository Scope
+            $group->orWhere(function ($sub) use ($repositoryId) {
+                $sub->where('scope_type', 'repository')
+                    ->where('repository_id', $repositoryId);
+            });
+
+            // User Scope
+            if ($userId) {
+                $group->orWhere(function ($sub) use ($userId, $repositoryId) {
+                    $sub->where('scope_type', 'user')
+                        ->where('user_id', $userId)
+                        // Ideally user memories are tied to repo OR global.
+                        // If tied to repo, we check repository_id.
+                        // Assuming user memories in this repo context:
+                        ->where(function($s) use ($repositoryId) {
+                            $s->where('repository_id', $repositoryId)
+                              ->orWhereNull('repository_id');
+                        });
+                });
+            }
+        });
+
+        if ($query) {
+            $q->where('current_content', 'like', "%{$query}%");
+        }
+
+        if (isset($filters['memory_type'])) {
+            $q->where('memory_type', $filters['memory_type']);
+        }
+
+        if (isset($filters['status'])) {
+            $q->where('status', $filters['status']);
+        }
+
+        // Order by priority (User > Repo > Org > System) or Recency which is simpler.
+        // Usually relevant memories are most specific.
+        // Let's order by created_at desc for now as requested by user initially.
+        return $q->orderByDesc('created_at')->get();
     }
 
     protected function createVersion(Memory $memory, string $content): void

@@ -16,6 +16,7 @@ class Memory extends Model
     protected $fillable = [
         'organization_id',
         'repository_id',
+        'user_id',
         'scope_type',
         'memory_type',
         'status',
