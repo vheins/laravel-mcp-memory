@@ -1,0 +1,3 @@
+<div class="mt-8 border-t pt-8 border-gray-200 dark:border-gray-700">
+    @livewire('profile.manage-mcp-tokens')
+</div>

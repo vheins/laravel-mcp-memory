@@ -3,32 +3,20 @@
 namespace App\Filament\Pages\Profile;
 
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\View as SchemaView;
 
 class EditProfile extends BaseEditProfile
 {
-    protected function getForms(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            'editProfileForm' => $this->makeForm()
-                ->schema([
-                    $this->getNameFormComponent(),
-                    $this->getEmailFormComponent(),
-                    $this->getPasswordFormComponent(),
-                    $this->getPasswordConfirmationFormComponent(),
-                ])
-                ->statePath('data'),
-        ];
-    }
-
-    public function getExtraComponents(): array
-    {
-        return [];
-    }
-
-    public function getRenderHookScopes(): array
-    {
-        return [
-            static::class,
-        ];
+        return $schema
+            ->components([
+                $this->getNameFormComponent(),
+                $this->getEmailFormComponent(),
+                $this->getPasswordFormComponent(),
+                $this->getPasswordConfirmationFormComponent(),
+                SchemaView::make('filament.pages.profile.mcp-tokens-wrapper'),
+            ]);
     }
 }
