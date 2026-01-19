@@ -7,8 +7,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\CreateAction;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\CheckboxList;
 use Illuminate\Support\Facades\Auth;
@@ -99,7 +98,7 @@ new class extends Component implements HasForms, HasTable
         {{ $this->table }}
     </x-filament::section>
 
-    <x-filament::modal id="token-success-modal" id="token-success-modal" alignment="center" width="xl" :display-if="$plainTextToken">
+    <x-filament::modal id="token-success-modal" alignment="center" width="xl" :display-if="$plainTextToken">
         <x-slot name="heading">
             Token Generated Successfully
         </x-slot>
