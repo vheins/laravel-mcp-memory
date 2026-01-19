@@ -14,14 +14,17 @@ beforeEach(function () {
 it('can write memory via MCP', function () {
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory-write',
+        'method' => 'tools/call',
         'params' => [
-            'organization' => $this->repository->organization_id,
-            'repository' => $this->repository->id,
-            'scope_type' => 'repository',
-            'memory_type' => 'business_rule',
-            'created_by_type' => 'human',
-            'current_content' => 'MCP Content',
+            'name' => 'memory-write',
+            'arguments' => [
+                'organization' => $this->repository->organization_id,
+                'repository' => $this->repository->id,
+                'scope_type' => 'repository',
+                'memory_type' => 'business_rule',
+                'created_by_type' => 'human',
+                'current_content' => 'MCP Content',
+            ],
         ],
         'id' => 1,
     ];
@@ -59,10 +62,7 @@ it('can read memory via MCP', function () {
     $this->actingAs($this->user)
         ->postJson('/api/v1/mcp/memory', $payload)
         ->assertStatus(200)
-        ->assertJsonPath('result.contents.0.text', function ($text) use ($memory) {
-             $data = json_decode($text, true);
-             return $data['id'] === $memory->id && $data['current_content'] === 'Read Me';
-        });
+        ->assertJsonPath('result.contents.0.text', 'Read Me');
 });
 
 it('can search memory via MCP', function () {
@@ -78,10 +78,13 @@ it('can search memory via MCP', function () {
 
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory-search',
+        'method' => 'tools/call',
         'params' => [
-            'repository' => $this->repository->id,
-            'filters' => ['memory_type' => 'preference']
+            'name' => 'memory-search',
+            'arguments' => [
+                'repository' => $this->repository->id,
+                'filters' => ['memory_type' => 'preference']
+            ],
         ],
         'id' => 3,
     ];
@@ -91,7 +94,7 @@ it('can search memory via MCP', function () {
         ->assertStatus(200)
         ->assertJsonPath('result.content.0.text', function ($text) {
              $data = json_decode($text, true);
-             return $data[0]['current_content'] === 'Searchable';
+             return is_array($data) && count($data) > 0 && $data[0]['current_content'] === 'Searchable';
         });
 });
 

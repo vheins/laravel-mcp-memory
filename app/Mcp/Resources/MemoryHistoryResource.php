@@ -15,7 +15,7 @@ class MemoryHistoryResource extends Resource implements HasUriTemplate
 {
     public function name(): string
     {
-        return 'memory_history';
+        return 'memory-history';
     }
 
     public function title(): string

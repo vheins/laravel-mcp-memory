@@ -36,7 +36,7 @@ it('can discover resource templates', function () {
 
     $response->assertStatus(200);
     $response->assertJsonFragment(['name' => 'memory']);
-    $response->assertJsonFragment(['name' => 'memory_history']);
+    $response->assertJsonFragment(['name' => 'memory-history']);
 });
 
 it('can write a memory via tool', function () {

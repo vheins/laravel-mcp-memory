@@ -33,14 +33,17 @@ it('requires authentication for MCP endpoint', function () {
 it('forces authenticated user on write', function () {
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory-write',
+        'method' => 'tools/call',
         'params' => [
-            'organization' => $this->orgId,
-            'repository' => $this->repo->id,
-            'scope_type' => 'user',
-            'memory_type' => 'preference',
-            'current_content' => 'My Preference',
-            'user' => $this->otherUser->id, // Attempt to spoof
+            'name' => 'memory-write',
+            'arguments' => [
+                'organization' => $this->orgId,
+                'repository' => $this->repo->id,
+                'scope_type' => 'user',
+                'memory_type' => 'preference',
+                'current_content' => 'My Preference',
+                'user' => $this->otherUser->id, // Attempt to spoof
+            ],
         ],
         'id' => 1,
     ];
@@ -61,7 +64,7 @@ it('forces authenticated user on search', function () {
         'id' => Str::uuid(),
         'organization' => $this->orgId,
         'repository' => $this->repo->id,
-        'user' => $this->user->id,
+        'user_id' => $this->user->id,
         'scope_type' => 'user',
         'memory_type' => 'preference',
         'created_by_type' => 'human',
@@ -73,7 +76,7 @@ it('forces authenticated user on search', function () {
         'id' => Str::uuid(),
         'organization' => $this->orgId,
         'repository' => $this->repo->id,
-        'user' => $this->otherUser->id,
+        'user_id' => $this->otherUser->id,
         'scope_type' => 'user',
         'memory_type' => 'preference',
         'created_by_type' => 'human',
@@ -83,11 +86,14 @@ it('forces authenticated user on search', function () {
     // User A tries to search for User B's memories
     $payload = [
         'jsonrpc' => '2.0',
-        'method' => 'memory-search',
+        'method' => 'tools/call',
         'params' => [
-            'repository' => $this->repo->id,
-            'filters' => [
-                'user' => $this->otherUser->id, // Attempt to spoof
+            'name' => 'memory-search',
+            'arguments' => [
+                'repository' => $this->repo->id,
+                'filters' => [
+                    'user' => $this->otherUser->id, // Attempt to spoof
+                ],
             ],
         ],
         'id' => 1,
@@ -98,8 +104,9 @@ it('forces authenticated user on search', function () {
     $response->assertStatus(200);
 
     $response->assertJsonPath('result.content.0.text', function ($text) {
-        $content = collect(json_decode($text, true));
-        return $content->pluck('current_content')->contains('User A Secret')
+        $content = collect(json_decode($text, true) ?? []);
+        return $content->count() > 0
+            && $content->pluck('current_content')->contains('User A Secret')
             && !$content->pluck('current_content')->contains('User B Secret');
     });
 });

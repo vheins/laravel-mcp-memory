@@ -113,6 +113,7 @@ Fitur ini menggunakan **Repository Scope** sebagai fondasi isolasi data dan keam
 
 #### B. MCP Endpoint Specifications (Conceptual)
 Berikut adalah spesifikasi antarmuka MCP (JSON-RPC) yang wajib diimplementasikan.
+**Note:** Endpoint ini adalah **Tools**. Pemanggilan harus menggunakan method `tools/call` dengan parameter `name` sesuai nama tool.
 
 **1. `memory-write`**
 *   **Description:** Menyimpan unit memori baru.
