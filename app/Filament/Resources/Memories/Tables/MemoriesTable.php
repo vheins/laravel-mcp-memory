@@ -21,7 +21,7 @@ class MemoriesTable
                 TextColumn::make('current_content')
                     ->limit(50)
                     ->searchable(),
-                TextColumn::make('repositoryRel.name')
+                TextColumn::make('repository')
                     ->label('Repository')
                     ->sortable()
                     ->searchable(),
@@ -52,7 +52,7 @@ class MemoriesTable
             ->filters([
                 \Filament\Tables\Filters\TrashedFilter::make(),
                 \Filament\Tables\Filters\SelectFilter::make('repository')
-                    ->relationship('repositoryRel', 'name')
+                    ->options(fn () => Memory::query()->whereNotNull('repository')->distinct()->pluck('repository', 'repository'))
                     ->searchable()
                     ->preload(),
                 \Filament\Tables\Filters\SelectFilter::make('status')

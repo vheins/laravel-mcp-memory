@@ -30,12 +30,12 @@ class MemoryMcpController extends Controller
             if ($userId) {
                 // For writes, force the user
                 if ($method === 'memory.write') {
-                    $params['user'] = $userId;
+                    $params['user_id'] = $userId;
                 }
 
                 // For searches, force the user filter
                 if ($method === 'memory.search') {
-                    $params['filters']['user'] = $userId;
+                    $params['filters']['user_id'] = $userId;
                 }
             }
 

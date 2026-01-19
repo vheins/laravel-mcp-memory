@@ -16,7 +16,7 @@ class Memory extends Model
     protected $fillable = [
         'organization',
         'repository',
-        'user',
+        'user_id',
         'scope_type',
         'memory_type',
         'status',
@@ -29,15 +29,10 @@ class Memory extends Model
         'metadata' => 'array',
     ];
 
-    public function repositoryRel(): BelongsTo
-    {
-        return $this->belongsTo(Repository::class, 'repository');
-    }
-
     // User relationship
     public function userRel(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function versions(): HasMany

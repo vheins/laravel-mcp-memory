@@ -69,9 +69,9 @@ class MemoryService
                 $isNew = true;
                 $memory = Memory::create([
                     'id' => $data['id'] ?? Str::uuid()->toString(),
-                    'organization' => $data['organization'], // expecting 'organization' (uuid string) now
-                    'repository' => $data['repository'] ?? null, // expecting 'repository' (uuid string)
-                    'user' => $data['user'] ?? null, // expecting 'user' (int id)
+                    'organization' => $data['organization'],
+                    'repository' => $data['repository'] ?? null,
+                    'user_id' => $data['user_id'] ?? $data['user'] ?? null,
                     'scope_type' => $data['scope_type'],
                     'memory_type' => $data['memory_type'],
                     'created_by_type' => $data['created_by_type'] ?? $actorType,
@@ -119,44 +119,35 @@ class MemoryService
      * @param array $filters
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function search(string $repositoryId, ?string $query = null, array $filters = [])
+    public function search(string $repository, ?string $query = null, array $filters = [])
     {
         // 1. Resolve Hierarchy Context
-        $repository = \App\Models\Repository::find($repositoryId);
-        $orgId = $repository ? $repository->organization_id : null;
-        $userId = $filters['user'] ?? null; // using 'user' filter key
+        // Since organization/repository are now strings, we match them directly.
+        // If we want to support hierarchy, we might need a way to link repo -> org as strings.
+        // For now, we assume the provided $repository string is the context.
+        $userId = $filters['user_id'] ?? $filters['user'] ?? null;
 
         $q = Memory::query();
 
-        $q->where(function ($group) use ($repositoryId, $orgId, $userId) {
+        $q->where(function ($group) use ($repository, $userId) {
             // System Scope (Global)
             $group->where(function ($sub) {
                 $sub->where('scope_type', 'system');
             });
 
-            // Organization Scope
-            if ($orgId) {
-                $group->orWhere(function ($sub) use ($orgId) {
-                    $sub->where('scope_type', 'organization')
-                        ->where('organization', $orgId); // Column name 'organization'
-                });
-            }
-
             // Repository Scope
-            $group->orWhere(function ($sub) use ($repositoryId) {
+            $group->orWhere(function ($sub) use ($repository) {
                 $sub->where('scope_type', 'repository')
-                    ->where('repository', $repositoryId); // Column name 'repository'
+                    ->where('repository', $repository);
             });
 
             // User Scope
             if ($userId) {
-                $group->orWhere(function ($sub) use ($userId, $repositoryId) {
+                $group->orWhere(function ($sub) use ($userId, $repository) {
                     $sub->where('scope_type', 'user')
-                        ->where('user', $userId) // Column name 'user'
-                        // Ideally user memories are tied to repo OR global.
-                        // If tied to repo, we check repository column.
-                        ->where(function($s) use ($repositoryId) {
-                            $s->where('repository', $repositoryId)
+                        ->where('user_id', $userId)
+                        ->where(function($s) use ($repository) {
+                            $s->where('repository', $repository)
                               ->orWhereNull('repository');
                         });
                 });

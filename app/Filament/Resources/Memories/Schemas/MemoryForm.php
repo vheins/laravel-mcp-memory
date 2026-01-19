@@ -14,13 +14,11 @@ class MemoryForm
             ->components([
                 \Filament\Schemas\Components\Section::make('Context')
                     ->schema([
-                        \Filament\Forms\Components\Select::make('repository')
+                        \Filament\Forms\Components\TextInput::make('repository')
                             ->label('Repository')
-                            ->relationship('repositoryRel', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                        \Filament\Forms\Components\Select::make('user')
+                            ->placeholder('e.g. owner/repo')
+                            ->helperText('Free text repository identifier (e.g. vheins/laravel-mcp-memory)'),
+                        \Filament\Forms\Components\Select::make('user_id')
                             ->label('User')
                             ->relationship('userRel', 'name')
                             ->searchable()
@@ -42,6 +40,7 @@ class MemoryForm
                                         'preference' => 'Preference',
                                         'system_constraint' => 'System Constraint',
                                         'documentation_ref' => 'Documentation Ref',
+                                        'tech_stack' => 'Tech Stack',
                                     ])
                                     ->required(),
                                 \Filament\Forms\Components\Select::make('status')
@@ -50,6 +49,7 @@ class MemoryForm
                                         'verified' => 'Verified',
                                         'locked' => 'Locked',
                                         'deprecated' => 'Deprecated',
+                                        'active' => 'Active',
                                     ])
                                     ->required()
                                     ->default('draft'),
@@ -65,25 +65,10 @@ class MemoryForm
                         \Filament\Forms\Components\KeyValue::make('metadata')
                             ->columnSpanFull(),
                     ]),
-                \Filament\Forms\Components\Hidden::make('created_by_type')
-                    ->default('human'),
-                \Filament\Forms\Components\Hidden::make('organization')
-                     // Logic to auto-fill organization needed? Or nullable?
-                     // Migration says organization_id is UUID, required (not nullable).
-                     // Ideally, we get organization from repository relation or user context.
-                     // For now, let's make it visible/required if not inferred.
-                     // Actually, let's make it a hidden field defaulted or handled by Observer/Service.
-                     // But Standard Filament create checks validation.
-                     // Let's add it to form for now as a Select or hidden if we can infer it.
-                     // Given MCP architecture, manual creation implies human admin.
-                     // Let's make it a Select for now to be safe, or just infer from Repository if possible.
-                     // Simplest: Select Organization.
-                     // temporary default
-                     ->required(),
                 \Filament\Forms\Components\TextInput::make('organization')
-                    ->required()
-                    ->default('d2b7dcdf-1c54-45ff-b907-c181e5a829ea')
-                    ->hidden(),
+                    ->label('Organization')
+                    ->placeholder('e.g. vheins')
+                    ->required(),
 
             ]);
     }
