@@ -14,9 +14,9 @@ class Memory extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $fillable = [
-        'organization_id',
-        'repository_id',
-        'user_id',
+        'organization',
+        'repository',
+        'user',
         'scope_type',
         'memory_type',
         'status',
@@ -29,9 +29,15 @@ class Memory extends Model
         'metadata' => 'array',
     ];
 
-    public function repository(): BelongsTo
+    public function repositoryRel(): BelongsTo
     {
-        return $this->belongsTo(Repository::class);
+        return $this->belongsTo(Repository::class, 'repository');
+    }
+
+    // User relationship
+    public function userRel(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user');
     }
 
     public function versions(): HasMany

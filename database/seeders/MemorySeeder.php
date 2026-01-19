@@ -21,37 +21,42 @@ class MemorySeeder extends Seeder
         // Create Demo Repository
         $repo = Repository::create([
             'organization_id' => $orgId,
+            'organization_id' => $organizationId,
             'name' => 'Demo Repository',
             'slug' => 'demo-repo',
             'description' => 'A repository for demonstration purposes.',
             'is_active' => true,
         ]);
 
-        // 1. System Constraint (System Scope)
+        // Seed System Constraints (Global)
         $service->write([
-            'organization_id' => $orgId,
-            'repository_id' => null,
+            'id' => Str::uuid()->toString(),
+            'organization' => $organizationId, // new key 'organization'
+            'repository' => null, // new key 'repository'
+            'user' => null, // new key 'user'
             'scope_type' => 'system',
             'memory_type' => 'system_constraint',
-            'created_by_type' => 'human',
+            'created_by_type' => 'system',
             'status' => 'locked',
-            'current_content' => 'AI Agents must ensure regression safety by running tests before finalizing changes.',
-        ], 'system-bootstrapper', 'human');
+            'current_content' => 'System Constraint: Adhere to ethical AI guidelines.',
+        ], 'system', 'system');
 
-        // 2. Business Rule (Repository Scope)
+        // Seed Default Repo Memory
         $service->write([
-            'organization_id' => $orgId,
-            'repository_id' => $repo->id,
+            'id' => Str::uuid()->toString(),
+            'organization' => $organizationId,
+            'repository' => $repo->id,
+            'user' => null,
             'scope_type' => 'repository',
             'memory_type' => 'business_rule',
             'created_by_type' => 'human',
-            'status' => 'verified',
-            'current_content' => 'All features must follow the TDD workflow.',
-        ], 'project-manager', 'human');
+            'status' => 'active',
+            'current_content' => 'Repo Rule: All commits must be signed.',
+        ], 'admin', 'human');
 
         // 3. User Preference (Repository Scope - just generic example)
         $service->write([
-            'organization_id' => $orgId,
+            'organization_id' => $organizationId,
             'repository_id' => $repo->id,
             'scope_type' => 'user',
             'memory_type' => 'preference',

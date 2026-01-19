@@ -28,14 +28,14 @@ class MemoryMcpController extends Controller
             \Illuminate\Support\Facades\Log::info('Auth ID: ' . Auth::id());
             $userId = Auth::id();
             if ($userId) {
-                // For writes, force the user_id
+                // For writes, force the user
                 if ($method === 'memory.write') {
-                    $params['user_id'] = $userId;
+                    $params['user'] = $userId;
                 }
 
-                // For searches, force the user_id filter
+                // For searches, force the user filter
                 if ($method === 'memory.search') {
-                    $params['filters']['user_id'] = $userId;
+                    $params['filters']['user'] = $userId;
                 }
             }
 
@@ -43,7 +43,7 @@ class MemoryMcpController extends Controller
                 'memory.write' => $this->handleWrite($service, $params),
                 'memory.read' => $service->read($params['id']),
                 'memory.search' => $service->search(
-                    $params['repository_id'],
+                    $params['repository'],
                     $params['query'] ?? null,
                     $params['filters'] ?? []
                 ),

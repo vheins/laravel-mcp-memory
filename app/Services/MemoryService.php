@@ -6,6 +6,7 @@ use App\Models\Memory;
 use App\Models\MemoryAuditLog;
 use App\Models\MemoryVersion;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 use App\Rules\ImmutableTypeRule;
@@ -52,41 +53,57 @@ class MemoryService
 
                 $oldValue = $memory->toArray();
 
-                // Update
-                $memory->fill(Arr::except($data, ['id']));
-
-                // Observer will handle locked check, but we can double check here if needed
-                if ($memory->isDirty('current_content')) {
-                    $memory->save();
-                    $this->createVersion($memory, $content);
-                    $this->createAuditLog($memory, $actorId, $actorType, 'updated', $oldValue, $memory->toArray());
-                } else {
-                    $memory->save(); // Save other fields if any
-                    // If no content change, maybe just 'updated' event without version?
-                    // Review says: "Setiap perubahan pada current_content ... wajib menciptakan record baru di memory_versions"
-                    // If content not changed, no new version.
-                    if ($memory->wasChanged()) {
-                        $this->createAuditLog($memory, $actorId, $actorType, 'updated', $oldValue, $memory->toArray());
-                    }
+                // Check if locked
+                if ($memory->status === 'locked' && $memory->current_content !== $content) {
+                    throw new \Exception('Cannot update locked memory.');
                 }
+
+                $memory->update([
+                    'current_content' => $content,
+                    'status' => $data['status'] ?? $memory->status,
+                    'metadata' => $data['metadata'] ?? $memory->metadata,
+                    // We typically don't update structural keys like organization/repo/user, but if needed:
+                    // 'organization' => $data['organization'] ?? $memory->organization, etc.
+                ]);
             } else {
                 $isNew = true;
-                // Create
-                $memory = Memory::create($data);
-                $this->createVersion($memory, $content);
-                $this->createAuditLog($memory, $actorId, $actorType, 'created', null, $memory->toArray());
+                $memory = Memory::create([
+                    'id' => $data['id'] ?? Str::uuid()->toString(),
+                    'organization' => $data['organization'], // expecting 'organization' (uuid string) now
+                    'repository' => $data['repository'] ?? null, // expecting 'repository' (uuid string)
+                    'user' => $data['user'] ?? null, // expecting 'user' (int id)
+                    'scope_type' => $data['scope_type'],
+                    'memory_type' => $data['memory_type'],
+                    'created_by_type' => $data['created_by_type'] ?? $actorType,
+                    'status' => $data['status'] ?? 'draft',
+                    'current_content' => $content,
+                    'metadata' => $data['metadata'] ?? null,
+                ]);
             }
 
-            return $memory->fresh(['versions', 'auditLogs']);
+            // Create Version
+            MemoryVersion::create([
+                'memory_id' => $memory->id,
+                'version_number' => $memory->versions()->max('version_number') + 1,
+                'content' => $content,
+                'created_by' => $actorId,
+                'input_source' => $actorType,
+            ]);
+
+            // Audit Log
+            MemoryAuditLog::create([
+                'memory_id' => $memory->id,
+                'actor_id' => $actorId,
+                'actor_type' => $actorType,
+                'event' => $isNew ? 'create' : 'update',
+                'old_value' => $isNew ? null : $oldValue,
+                'new_value' => $memory->fresh()->toArray(),
+            ]);
+
+            return $memory;
         });
     }
 
-    /**
-     * Read a memory by ID.
-     *
-     * @param string $id
-     * @return Memory
-     */
     public function read(string $id): Memory
     {
         return Memory::with(['versions', 'auditLogs'])->findOrFail($id);
@@ -97,7 +114,7 @@ class MemoryService
      * Search memories with hierarchy resolution.
      * Hierarchy: System -> Organization -> Repository -> User
      *
-     * @param string $repositoryId
+     * @param string $repositoryId (UUID of repository)
      * @param string|null $query
      * @param array $filters
      * @return \Illuminate\Database\Eloquent\Collection
@@ -107,7 +124,7 @@ class MemoryService
         // 1. Resolve Hierarchy Context
         $repository = \App\Models\Repository::find($repositoryId);
         $orgId = $repository ? $repository->organization_id : null;
-        $userId = $filters['user_id'] ?? null;
+        $userId = $filters['user'] ?? null; // using 'user' filter key
 
         $q = Memory::query();
 
@@ -121,27 +138,26 @@ class MemoryService
             if ($orgId) {
                 $group->orWhere(function ($sub) use ($orgId) {
                     $sub->where('scope_type', 'organization')
-                        ->where('organization_id', $orgId);
+                        ->where('organization', $orgId); // Column name 'organization'
                 });
             }
 
             // Repository Scope
             $group->orWhere(function ($sub) use ($repositoryId) {
                 $sub->where('scope_type', 'repository')
-                    ->where('repository_id', $repositoryId);
+                    ->where('repository', $repositoryId); // Column name 'repository'
             });
 
             // User Scope
             if ($userId) {
                 $group->orWhere(function ($sub) use ($userId, $repositoryId) {
                     $sub->where('scope_type', 'user')
-                        ->where('user_id', $userId)
+                        ->where('user', $userId) // Column name 'user'
                         // Ideally user memories are tied to repo OR global.
-                        // If tied to repo, we check repository_id.
-                        // Assuming user memories in this repo context:
+                        // If tied to repo, we check repository column.
                         ->where(function($s) use ($repositoryId) {
-                            $s->where('repository_id', $repositoryId)
-                              ->orWhereNull('repository_id');
+                            $s->where('repository', $repositoryId)
+                              ->orWhereNull('repository');
                         });
                 });
             }
