@@ -303,12 +303,13 @@ class MemoryService
 
         if ($query) {
             $q->where(function ($sub) use ($query) {
-                $sub->where('current_content', 'like', "%{$query}%")
-                    ->orWhere('repository', 'like', "%{$query}%")
-                    ->orWhere('user_id', 'like', "%{$query}%")
-                    ->orWhere('memory_type', 'like', "%{$query}%")
-                    ->orWhere('scope_type', 'like', "%{$query}%")
-                    ->orWhere('status', 'like', "%{$query}%");
+                $term = Str::lower($query);
+                $sub->whereRaw('LOWER(current_content) like ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(repository) like ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(user_id) like ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(memory_type) like ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(scope_type) like ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(status) like ?', ["%{$term}%"]);
             });
         }
 
