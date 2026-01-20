@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
 use App\Models\Memory;
 use App\Models\MemoryAccessLog;
 use App\Models\MemoryAuditLog;
@@ -19,12 +21,25 @@ class MemoryService
      */
     public function write(array $data, string $actorId, string $actorType = 'human'): Memory
     {
-        // Validate input type
-        if (isset($data['memory_type'])) {
-            Validator::make($data, [
-                'memory_type' => [new ImmutableTypeRule($actorType)],
-            ])->validate();
-        }
+        // Validate input type and enums
+        Validator::make($data, [
+            'memory_type' => [
+                'sometimes',
+                'required',
+                new \Illuminate\Validation\Rules\Enum(MemoryType::class),
+                new ImmutableTypeRule($actorType),
+            ],
+            'status' => [
+                'sometimes',
+                'required',
+                new \Illuminate\Validation\Rules\Enum(MemoryStatus::class),
+            ],
+            'scope_type' => [
+                'sometimes',
+                'required',
+                new \Illuminate\Validation\Rules\Enum(MemoryScope::class),
+            ],
+        ])->validate();
 
         return DB::transaction(function () use ($data, $actorId, $actorType) {
             $id = $data['id'] ?? null;
@@ -278,23 +293,55 @@ class MemoryService
         }
 
         if ($query) {
-            $q->where(function ($sub) use ($query) {
-                $term = $query;
-                $sub->where('current_content', 'like', "%{$term}%")
-                    ->orWhereLike('repository', "%{$term}%")
-                    ->orWhereLike('user_id', "%{$term}%")
-                    ->orWhereLike('memory_type', "%{$term}%")
-                    ->orWhereLike('scope_type', "%{$term}%")
-                    ->orWhereLike('status', "%{$term}%");
-            });
+            $isMysql = DB::connection()->getDriverName() === 'mysql';
+
+            if ($isMysql) {
+                // MySQL Full-Text search with relevance scoring
+                // We use a sub-query or direct MATCH against the filtered set for performance
+                $q->whereFullText(['title', 'current_content'], $query)
+                    ->select('*')
+                    ->selectRaw('MATCH(title, current_content) AGAINST(? IN NATURAL LANGUAGE MODE) as relevance', [$query])
+                    ->orderByDesc('relevance');
+            } else {
+                // SQLite fallback using existing LIKE search
+                $q->where(function ($sub) use ($query) {
+                    $term = "%{$query}%";
+                    $sub->whereLike('title', $term)
+                        ->orWhereLike('current_content', $term)
+                        ->orWhereLike('repository', $term)
+                        ->orWhereLike('memory_type', $term)
+                        ->orWhereLike('scope_type', $term)
+                        ->orWhereLike('metadata', $term);
+                });
+            }
         }
 
+        // 3. Apply Specific Filters (Post-Query but Pre-Execution)
         if (isset($filters['memory_type'])) {
             $q->where('memory_type', $filters['memory_type']);
         }
 
         if (isset($filters['status'])) {
             $q->where('status', $filters['status']);
+        }
+
+        // Handle repository filter from both $repository param and $filters array
+        $finalRepo = $repository ?? $filters['repository'] ?? null;
+        if ($finalRepo) {
+            $q->where('repository', $finalRepo);
+        }
+
+        if (isset($filters['scope_type'])) {
+            $q->where('scope_type', $filters['scope_type']);
+        }
+
+        if (isset($filters['metadata']) && is_array($filters['metadata'])) {
+            foreach ($filters['metadata'] as $key => $value) {
+                if (is_null($value)) {
+                    continue;
+                }
+                $q->where('metadata->'.$key, $value);
+            }
         }
 
         // Order by Importance (desc) then Recency (desc)

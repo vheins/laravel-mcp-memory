@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Memories\Schemas;
 
-use Filament\Schemas\Schema;
+use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
-use App\Enums\MemoryScope;
+use Filament\Schemas\Schema;
 
 class MemoryForm
 {
@@ -42,7 +42,7 @@ class MemoryForm
                                 \Filament\Forms\Components\Select::make('status')
                                     ->options(MemoryStatus::class)
                                     ->required()
-                                    ->default('draft'),
+                                    ->default(MemoryStatus::Draft),
                                 \Filament\Forms\Components\Slider::make('importance')
                                     ->label('Importance Score')
                                     ->minValue(1)

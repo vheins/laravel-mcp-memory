@@ -21,9 +21,9 @@ class Memory extends Model
         'repository', // specific repository slug (e.g. owner/repo)
         'title', // short summary or title
         'user_id', // specific user identifier
-        'scope_type', // system, organization, repository, user
-        'memory_type', // fact, preference, business_rule, system_constraint
-        'status', // draft, published, locked
+        'scope_type', // App\Enums\MemoryScope: system, organization, repository, user
+        'memory_type', // App\Enums\MemoryType: business_rule, decision_log, preference, system_constraint, documentation, tech_stack, fact, task, architecture, user_context, convention, risk
+        'status', // App\Enums\MemoryStatus: draft, verified, locked, deprecated, active
         'importance', // integer weight for ranking
         'embedding', // vector representation for semantic search
         'created_by_type', // human or ai

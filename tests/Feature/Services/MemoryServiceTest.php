@@ -161,6 +161,26 @@ it('can search memories', function () {
     expect($results->first()->id)->toBe($mem1->id);
 });
 
+it('can search by metadata', function () {
+    $memory = $this->service->write([
+        'organization' => 'test-org',
+        'repository' => 'test-repo',
+        'scope_type' => MemoryScope::Repository,
+        'memory_type' => MemoryType::Fact,
+        'current_content' => 'Tech Info',
+        'metadata' => ['language' => 'PHP', 'version' => '8.3'],
+        'status' => MemoryStatus::Active,
+    ], $this->user->id);
+
+    $results = $this->service->search('test-repo', 'PHP');
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($memory->id);
+
+    $results = $this->service->search('test-repo', '8.3');
+    expect($results)->toHaveCount(1);
+    expect($results->first()->id)->toBe($memory->id);
+});
+
 it('prevents AI from creating restricted memory types', function () {
     $data = [
         'organization' => 'test-org',
