@@ -26,6 +26,7 @@ class EditMemory extends EditRecord
                             'optimize_code' => 'Optimize Code & Logic',
                             'add_documentation' => 'Add Documentation & Comments',
                             'refactor_clean' => 'Refactor for Readability',
+                            'summarize_concise' => 'Summarize & Make Concise', // New option
                             'redact_secrets' => 'Redact Sensitive Data',
                             'generate_examples' => 'Generate Usage Examples',
                             'explain_code' => 'Explain Code Flow',
@@ -37,6 +38,7 @@ class EditMemory extends EditRecord
                                 'optimize_code' => 'Analyze the code in the content and suggest optimizations for performance and readability.',
                                 'add_documentation' => 'Add comprehensive DocBlocks, inline comments, and description to the code snippets.',
                                 'refactor_clean' => 'Refactor the code to improve readability and maintainability (Clean Code).',
+                                'summarize_concise' => 'Summarize the content to be more concise and to-the-point, removing unnecessary fluff while retaining key information.', // New instruction
                                 'redact_secrets' => 'Identify and redact keys, tokens, passwords, IPs, or PII from the content.',
                                 'generate_examples' => 'Generate practical usage examples and scenarios for the code or concept.',
                                 'explain_code' => 'Explain the logic and flow of the code step-by-step in plain English.',
