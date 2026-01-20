@@ -15,148 +15,385 @@
 ### 2.1 `memory-write`
 **Purpose**: Create a new memory entry. Supports facts, preferences, and business rules.
 
-| Argument          | Type            | Required | Description                                                | Constraints                                                      |
-| :---------------- | :-------------- | :------- | :--------------------------------------------------------- | :--------------------------------------------------------------- |
-| `id`              | `string` (UUID) | No       | UUID of the memory to update. Leave empty for new entries. | Must be valid UUID.                                              |
-| `organization`    | `string`        | **Yes**  | The organization slug to which this memory belongs.        | e.g., "my-org"                                                   |
-| `repository`      | `string`        | No       | The specific repository slug if project-specific.          | e.g., "frontend-repo"                                            |
-| `title`           | `string`        | No       | A concise summary of the memory content.                   | Max 12 words, no explanation.                                    |
-| `scope_type`      | `string` (Enum) | **Yes**  | Visibility scope.                                          | `system`, `organization`, `user`                                 |
-| `memory_type`     | `string` (Enum) | **Yes**  | Category of the memory.                                    | `business_rule`, `preference`, `fact`, `system_constraint`, etc. |
-| `current_content` | `string`        | **Yes**  | The actual content of the memory.                          | Precise and concise.                                             |
-| `status`          | `string` (Enum) | No       | Lifecycle status.                                          | `draft` (default), `active`, `archived`                          |
-| `importance`      | `number`        | No       | Priority level.                                            | Min: 1, Max: 10. Default: 1.                                     |
-| `metadata`        | `object`        | No       | Arbitrary JSON key-value pairs.                            | Max 5 keys, flat key-values only.                                |
+#### Request Schema
+```json
+{
+  "name": "memory-write",
+  "arguments": {
+    "organization": "string (required)",
+    "scope_type": "string (enum, required)",
+    "memory_type": "string (enum, required)",
+    "current_content": "string (required)",
+    "id": "string (UUID, optional)",
+    "repository": "string (optional)",
+    "title": "string (optional)",
+    "status": "string (enum, optional, default: draft)",
+    "importance": "integer (1-10, optional, default: 1)",
+    "metadata": "object (optional)"
+  }
+}
+```
+
+#### JSON-RPC Example
+**Request:**
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "memory-write",
+    "arguments": {
+      "organization": "acme-corp",
+      "scope_type": "organization",
+      "memory_type": "business_rule",
+      "current_content": "All deployments must pass acceptance tests.",
+      "title": "Deployment Policy",
+      "importance": 10
+    }
+  },
+  "id": 1
+}
+```
+
+**Response:**
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"550e8400-e29b-41d4-a716-446655440000\",\"organization\":\"acme-corp\",\"scope_type\":\"organization\",\"memory_type\":\"business_rule\",\"current_content\":\"All deployments must pass acceptance tests.\",\"title\":\"Deployment Policy\",\"status\":\"draft\",\"importance\":10,\"created_at\":\"...\"}"
+      }
+    ]
+  },
+  "id": 1
+}
+```
+
+#### Response Schema
+The tool returns the created memory object as a JSON string.
+```json
+{
+  "id": "uuid",
+  "organization": "string",
+  "repository": "string|null",
+  "scope_type": "string",
+  "memory_type": "string",
+  "title": "string",
+  "current_content": "string",
+  "status": "string",
+  "importance": "integer",
+  "metadata": "object|array",
+  "created_at": "ISO8601",
+  "updated_at": "ISO8601"
+}
+```
+
+#### Idempotency & Rules
+- **Create**: If `id` is omitted, the server generates a new UUID. **NOT Idempotent**.
+- **Upsert**: If `id` is provided, it acts as an update (if exists) or create (if not). **Idempotent** (updates same resource).
+
+---
 
 ### 2.2 `memory-update`
 **Purpose**: Update an existing memory entry by its UUID.
 
-| Argument          | Type            | Required | Description                                    | Constraints                                 |
-| :---------------- | :-------------- | :------- | :--------------------------------------------- | :------------------------------------------ |
-| `id`              | `string` (UUID) | **Yes**  | The unique UUID of the memory entry to update. | Must exist.                                 |
-| `title`           | `string`        | No       | A new summary title.                           | Max 12 words.                               |
-| `current_content` | `string`        | No       | The new text content.                          | Replaces entire content.                    |
-| `status`          | `string` (Enum) | No       | Update the status.                             | `draft`, `active`, `archived`               |
-| `scope_type`      | `string` (Enum) | No       | Change the visibility scope.                   | `system`, `organization`, `user`            |
-| `memory_type`     | `string` (Enum) | No       | Reclassify the memory type.                    | `business_rule`, `preference`, `fact`, etc. |
-| `importance`      | `number`        | No       | Adjust the priority level.                     | Min: 1, Max: 10.                            |
-| `metadata`        | `object`        | No       | Merge or replace metadata keys.                | Max 5 keys, flat.                           |
+#### Request Schema
+```json
+{
+  "name": "memory-update",
+  "arguments": {
+    "id": "string (UUID, required)",
+    "title": "string (optional)",
+    "current_content": "string (optional)",
+    "status": "string (enum, optional)",
+    "scope_type": "string (enum, optional)",
+    "memory_type": "string (enum, optional)",
+    "importance": "integer (optional)",
+    "metadata": "object (optional)"
+  }
+}
+```
+
+#### JSON-RPC Example
+**Request:**
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "memory-update",
+    "arguments": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "status": "active"
+    }
+  },
+  "id": 2
+}
+```
+
+**Response:**
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"550e8400-...\",\"status\":\"active\", ...}"
+      }
+    ]
+  },
+  "id": 2
+}
+```
+
+#### Idempotency & Rules
+- **Idempotent**: Yes. Calling multiple times with same data results in same state.
+- **Partial Update**: Only provided fields are updated.
+
+---
 
 ### 2.3 `memory-delete`
-**Purpose**: Soft-delete a memory entry by its UUID.
+**Purpose**: Soft-delete a memory entry.
 
-| Argument | Type            | Required | Description                                  |
-| :------- | :-------------- | :------- | :------------------------------------------- |
-| `id`     | `string` (UUID) | **Yes**  | The UUID of the memory entry to soft-delete. |
+#### Request Schema
+```json
+{
+  "name": "memory-delete",
+  "arguments": {
+    "id": "string (UUID, required)"
+  }
+}
+```
+
+#### Response Schema
+Returns a plain text confirmation message.
+```text
+Memory 550e8400-e29b-41d4-a716-446655440000 has been soft-deleted.
+```
+
+#### Idempotency & Rules
+- **Idempotent**: Side-effect is idempotent (resource is deleted).
+- **Behavior**: If called on already deleted/non-existent ID, returns 404 Error (at JSON-RPC level).
+
+---
 
 ### 2.4 `memory-search`
-**Purpose**: Search for memories with hierarchical resolution and filtering.
+**Purpose**: Search/Filtering.
 
-| Argument  | Type     | Required | Description              |
-| :-------- | :------- | :------- | :----------------------- |
-| `query`   | `string` | No       | The search query string. |
-| `filters` | `object` | No       | Structured filters.      |
+#### Request Schema
+```json
+{
+  "name": "memory-search",
+  "arguments": {
+    "query": "string (optional)",
+    "filters": {
+      "repository": "string (optional)",
+      "memory_type": "string (enum, optional)",
+      "status": "string (enum, optional)",
+      "scope_type": "string (enum, optional)",
+      "metadata": "object (optional)"
+    }
+  }
+}
+```
 
-**Filters Schema**:
-- `repository` (string): Limit to specific repository.
-- `memory_type` (enum): Filter by category.
-- `status` (enum): Filter by status.
-- `scope_type` (enum): Filter by scope.
-- `metadata` (object): Strict key-value match.
+#### JSON-RPC Example
+**Request:**
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "memory-search",
+    "arguments": {
+      "query": "deploy",
+      "filters": {
+        "memory_type": "business_rule"
+      }
+    }
+  },
+  "id": 3
+}
+```
 
-### 2.5 `memory-bulk-write`
-**Purpose**: Create or update multiple memory entries in a single batch.
+#### Response Schema
+Returns a JSON array of complete memory objects.
+```json
+[
+  {
+    "id": "...",
+    "title": "...",
+    "current_content": "...",
+    "relevance": 4.5
+  }
+]
+```
 
-| Argument | Type    | Required | Description                        |
-| :------- | :------ | :------- | :--------------------------------- |
-| `items`  | `array` | **Yes**  | List of memory objects to process. |
+#### Search Behavior (Pagination & Limits)
+- **Pagination**: **NOT SUPPORTED**.
+- **Limit**: **UNBOUNDED**. The server returns ALL matching records.
+- **Sorting**: Matches are sorted by Relevance (if query provided) -> Importance (Desc) -> Created At (Desc).
 
-**Item Schema**:
-Same as `memory-write` arguments, but `id` is optional (for creation) or required (for update).
+---
 
-### 2.6 `memory-link`
-**Purpose**: Create a relationship between two existing memories (Knowledge Graph).
+### 2.5 `memory-link`
+**Purpose**: Create relationships.
 
-| Argument        | Type            | Required | Description                     | Values                                       |
-| :-------------- | :-------------- | :------- | :------------------------------ | :------------------------------------------- |
-| `source_id`     | `string` (UUID) | **Yes**  | Starting point of relationship. |                                              |
-| `target_id`     | `string` (UUID) | **Yes**  | Endpoint of relationship.       |                                              |
-| `relation_type` | `string` (Enum) | No       | Nature of the relationship.     | `related` (default), `conflicts`, `supports` |
+#### Request Schema
+```json
+{
+  "name": "memory-link",
+  "arguments": {
+    "source_id": "uuid (required)",
+    "target_id": "uuid (required)",
+    "relation_type": "string (default: 'related')"
+  }
+}
+```
 
-### 2.7 `memory-vector-search`
-**Purpose**: Semantic search using vector embeddings.
+#### Response Schema
+Returns text confirmation.
+```text
+Memories linked successfully as 'related'.
+```
 
-| Argument     | Type             | Required | Description                                    |
-| :----------- | :--------------- | :------- | :--------------------------------------------- |
-| `vector`     | `array` (floats) | **Yes**  | 1536-dimensional embedding vector.             |
-| `repository` | `string`         | No       | Limit search to specific repository.           |
-| `threshold`  | `number`         | No       | Similarity threshold (0.0 - 1.0). Default 0.5. |
-| `filters`    | `object`         | No       | Structured filters (same as memory-search).    |
+#### Idempotency
+- **Idempotent**: Yes (`syncWithoutDetaching`). Linking A to B multiple times has no extra effect.
 
 ---
 
 ## 3. Resources Contract
 
-### 3.1 Static Resources
+### 3.1 `memory://index`
+**Description**: Discovery endpoint.
+**Payload**: JSON Array of **lightweight** objects.
+**Excluded Fields**: `current_content` is ALWAYS excluded.
 
-| URI               | Name           | Description                                                                                                 |
-| :---------------- | :------------- | :---------------------------------------------------------------------------------------------------------- |
-| `memory://index`  | `memory-index` | Discovery endpoint listing recent memories. Returns JSON array of lightweight objects (NO current_content). |
-| `schema://schema` | `schema`       | JSON schema defining valid types, statuses, and scopes.                                                     |
-
-### 3.2 Dynamic Resources (Templates)
-
-| URI Template            | Name             | Description                           | Details                                                                 |
-| :---------------------- | :--------------- | :------------------------------------ | :---------------------------------------------------------------------- |
-| `memory://{id}`         | `memory`         | Read a specific memory entry.         | Returns raw text content. Meta: type, status, org, repo.                |
-| `memory://{id}/history` | `memory-history` | Retrieve all versions and audit logs. | Returns JSON with `versions` and `audit_logs`.                          |
-| `docs://{slug}`         | `docs`           | Documentation pages.                  | Slugs: `mcp-overview`, `tools-guide`, `behavior-rules`, `memory-rules`. |
+```json
+[
+  {
+    "id": "uuid",
+    "title": "Short title",
+    "scope_type": "system",
+    "memory_type": "fact",
+    "importance": 1,
+    "status": "draft",
+    "repository": "slug",
+    "organization": "slug",
+    "updated_at": "ISO8601",
+    "metadata": {}
+  }
+]
+```
+**Limit**: Hardcoded to 50 most recent items.
 
 ---
 
-## 4. Prompts Contract
+## 4. Prompts Contract (Full Text)
 
 ### 4.1 `memory-agent-core`
-**Description**: The core behavioral contract for all agents interacting with the Memory MCP.
-**Usage**: Should be loaded at the start of a session to establish rules.
+```text
+You are an AI agent connected to the Memory MCP Server.
+You MUST adhere to the following core behavioral contract:
+
+1. ATOMIC MEMORY
+   - You must store one concept per memory entry.
+   - You must never merge unrelated facts into a single memory.
+   - You must never store raw chat logs or user conversations.
+   - You must never store ephemeral debugging data.
+
+2. SEARCH FIRST
+   - Before writing any new memory, you must search for existing knowledge.
+   - Duplicate memories corrupt the knowledge graph.
+   - You must use `memory-search` effectively before `memory-write`.
+
+3. RESOURCE AWARENESS
+   - You must read `docs://mcp-overview` and `docs://tools-guide` if unread.
+   - You must consult `docs://memory-rules` before creating content.
+   - You must respect `memory://index` as a discovery tool, not a knowledge source.
+
+4. SCOPE CORRECTNESS
+   - Use `system` scope for global truths.
+   - Use `organization` scope for team knowledge.
+   - Use `user` scope for personal preferences.
+
+Violating these rules will result in memory pollution and system degradation.
+```
 
 ### 4.2 `memory-index-policy`
-**Description**: Enforces strict policy regarding memory index usage (discovery only) and content limits (no payload).
+```text
+MEMORY INDEX POLICY (CRITICAL)
+
+The memory index is a compact discovery tool, NOT a mirror of content.
+
+1. CONTENT LIMITS
+   - The index NEVER contains full memory content.
+   - The index includes ONLY: id, title, scope, type, importance, status, tags.
+   - Index entries must be lightweight.
+
+2. TITLE RULES
+   - Titles must be one short sentence (max 12 words).
+   - No explanations.
+   - No punctuation-heavy formatting.
+
+3. METADATA RULES
+   - Max 5 keys per entry.
+   - Flat key-value pairs only.
+   - No nested objects or long text.
+
+4. USAGE
+   - Use the index to discover WHAT knowledge exists.
+   - Do NOT use the index to learn HOW things work.
+   - Always use `memory-search` to retrieve the full `current_content` if reasoning is needed.
+
+5. INDEX GENERATION
+   - When writing memory, you must ensure the metadata and title fit these constraints.
+   - The system automatically actively excludes `current_content` from the index.
+```
 
 ### 4.3 `tool-usage-guidelines`
-**Description**: Strict guidelines on when to use (and when NOT to use) each tool.
+```text
+TOOL USAGE GUIDELINES
+
+1. memory-write
+   - USE WHEN: A completely new fact/rule is discovered.
+   - DO NOT USE: To update existing memories. To store chat logs.
+   - REQUIREMENT: Must read `docs://memory-rules` first.
+
+2. memory-update
+   - USE WHEN: Refining existing knowledge or fixing errors.
+   - DO NOT USE: If ID is unknown.
+   - REQUIREMENT: Must preserve the atomic nature of the memory.
+
+3. memory-search
+   - USE WHEN: You need to answer a question or check for duplicates.
+   - DO NOT USE: As a way to "browse" indiscriminately (use `memory://index` for that).
+   - REQUIREMENT: Use specific keywords to limit noise.
+
+4. memory-delete
+   - USE WHEN: Information is strictly invalid or completely obsolete.
+   - CAUTION: Destructive action.
+
+5. memory-batch-write
+   - USE WHEN: Importing multiple distinct atomic facts from a single session.
+   - REQUIREMENT: All entries must follow atomic validation separately.
+
+6. memory-link
+   - USE WHEN: Explicit logical connection exists (e.g., dependency).
+
+7. memory-vector-search
+   - USE WHEN: Exact keywords fail, or looking for conceptual similarity.
+```
 
 ---
 
-## 5. Memory Policy & Usage Rules
+## 5. Enum Definitions
 
-**CRITICAL**: All agents must strictly adhere to these rules.
-
-1.  **Atomic Memories**:
-    *   Store ONE distinct concept per memory.
-    *   Never merge unrelated facts.
-    *   **Bad**: "User likes dark mode and lives in NYC."
-    *   **Good**: Two separate memories.
-
-2.  **No Chat Logs**:
-    *   Never store raw chat transcripts.
-    *   Synthesize knowledge into facts/rules.
-
-3.  **Search Before Write**:
-    *   **Mandatory**: Use `memory-search` before creating new memories to prevent duplicates.
-    *   Read `memory://index` for discovery, but do not rely on it for deep reasoning.
-
-4.  **Title Constraints**:
-    *   Max 12 words.
-    *   No explanations.
-    *   One short sentence.
-
-5.  **Metadata Limits**:
-    *   Max 5 keys.
-    *   Flat key-value pairs only (no nested objects).
-    *   No long text.
-
-6.  **Scope definitions**:
-    *   `system`: Global truths.
-    *   `organization`: Team-wide knowledge.
-    *   `user`: Private preferences.
+| Type       | Values                                                                                                                                                                  |
+| :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Scope**  | `system`, `organization`, `repository`, `user`                                                                                                                          |
+| **Status** | `draft`, `verified`, `locked`, `deprecated`, `active`                                                                                                                   |
+| **Type**   | `business_rule`, `decision_log`, `preference`, `system_constraint`, `documentation`, `tech_stack`, `fact`, `task`, `architecture`, `user_context`, `convention`, `risk` |
