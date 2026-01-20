@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Mcp\Prompts;
 
 use Laravel\Mcp\Request;
-use Laravel\Mcp\Server\Content\Text;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Prompt;
 
 class ToolUsagePrompt extends Prompt
@@ -20,9 +20,9 @@ class ToolUsagePrompt extends Prompt
         return 'Strict guidelines on when to use (and when NOT to use) each MCP tool.';
     }
 
-    public function handle(Request $request): Text
+    public function handle(Request $request): Response
     {
-        return new Text(<<<'TEXT'
+        return Response::text(<<<'TEXT'
 TOOL USAGE GUIDELINES
 
 1. memory-write

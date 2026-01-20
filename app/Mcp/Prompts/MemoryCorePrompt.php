@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Mcp\Prompts;
 
 use Laravel\Mcp\Request;
-use Laravel\Mcp\Server\Content\Text;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Prompt;
 
 class MemoryCorePrompt extends Prompt
@@ -20,9 +20,9 @@ class MemoryCorePrompt extends Prompt
         return 'The core behavioral contract for all agents interacting with the Memory MCP.';
     }
 
-    public function handle(Request $request): Text
+    public function handle(Request $request): Response
     {
-        return new Text(<<<'TEXT'
+        return Response::text(<<<'TEXT'
 You are an AI agent connected to the Memory MCP Server.
 You MUST adhere to the following core behavioral contract:
 

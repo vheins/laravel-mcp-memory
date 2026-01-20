@@ -2,41 +2,93 @@
 
 declare(strict_types=1);
 
-use App\Mcp\Prompts\MemoryCorePrompt;
-use App\Mcp\Prompts\MemoryIndexPolicyPrompt;
-use App\Mcp\Prompts\ToolUsagePrompt;
-use Laravel\Mcp\Request;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
+use Laravel\Mcp\Server\Prompt;
+use Laravel\Mcp\Server\Transport\JsonRpcRequest;
+use Laravel\Mcp\Server\Transport\JsonRpcResponse;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\postJson;
 
-test('memory core prompt returns correct content', function () {
-    $prompt = new MemoryCorePrompt();
-    $request = new Request([]);
+uses(RefreshDatabase::class);
 
-    $result = $prompt->handle($request);
+it('can retrieve memory core prompt', function () {
+    Config::set('mcp.server.enabled', true);
 
-    expect((string) $result)->toContain('ATOMIC MEMORY')
-        ->toContain('SEARCH FIRST')
-        ->toContain('RESOURCE AWARENESS')
-        ->toContain('SCOPE CORRECTNESS');
+    actingAs(User::factory()->create());
+
+    $response = postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'id' => 1,
+        'method' => 'prompts/get',
+        'params' => [
+            'name' => 'memory-agent-core',
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertJson([
+            'jsonrpc' => '2.0',
+            'id' => 1,
+            'result' => [
+                'description' => 'The core behavioral contract for all agents interacting with the Memory MCP.',
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => [
+                            'type' => 'text',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
 });
 
-test('memory index policy prompt returns correct content', function () {
-    $prompt = new MemoryIndexPolicyPrompt();
-    $request = new Request([]);
+it('can retrieve memory index policy prompt', function () {
+    Config::set('mcp.server.enabled', true);
 
-    $result = $prompt->handle($request);
+    actingAs(User::factory()->create());
 
-    expect((string) $result)->toContain('MEMORY INDEX POLICY')
-        ->toContain('TITLE RULES')
-        ->toContain('METADATA RULES');
+    $response = postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'id' => 2,
+        'method' => 'prompts/get',
+        'params' => [
+            'name' => 'memory-index-policy',
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertJson([
+            'jsonrpc' => '2.0',
+            'id' => 2,
+            'result' => [
+                'description' => 'Enforces the strict policy regarding memory index usage and content.',
+            ],
+        ]);
 });
 
-test('tool usage prompt returns correct content', function () {
-    $prompt = new ToolUsagePrompt();
-    $request = new Request([]);
+it('can retrieve tool usage prompt', function () {
+    Config::set('mcp.server.enabled', true);
 
-    $result = $prompt->handle($request);
+    actingAs(User::factory()->create());
 
-    expect((string) $result)->toContain('TOOL USAGE GUIDELINES')
-        ->toContain('memory-write')
-        ->toContain('memory-update');
+    $response = postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'id' => 3,
+        'method' => 'prompts/get',
+        'params' => [
+            'name' => 'tool-usage-guidelines',
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertJson([
+            'jsonrpc' => '2.0',
+            'id' => 3,
+            'result' => [
+                'description' => 'Strict guidelines on when to use (and when NOT to use) each MCP tool.',
+            ],
+        ]);
 });

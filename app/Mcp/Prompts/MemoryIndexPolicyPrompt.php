@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Mcp\Prompts;
 
 use Laravel\Mcp\Request;
-use Laravel\Mcp\Server\Content\Text;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Prompt;
 
 class MemoryIndexPolicyPrompt extends Prompt
@@ -20,9 +20,9 @@ class MemoryIndexPolicyPrompt extends Prompt
         return 'Enforces the strict policy regarding memory index usage and content.';
     }
 
-    public function handle(Request $request): Text
+    public function handle(Request $request): Response
     {
-        return new Text(<<<'TEXT'
+        return Response::text(<<<'TEXT'
 MEMORY INDEX POLICY (CRITICAL)
 
 The memory index is a compact discovery tool, NOT a mirror of content.
