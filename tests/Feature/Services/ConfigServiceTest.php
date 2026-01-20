@@ -12,10 +12,10 @@ it('caches configuration calculation', function () {
 
     Cache::shouldReceive('rememberForever')
         ->once()
-        ->with("config_foo", Closure::class)
+        ->with('config_foo', Closure::class)
         ->andReturn('bar');
 
-    $service = new ConfigService();
+    $service = new ConfigService;
     $value = $service->get('foo');
 
     expect($value)->toBe('bar');
@@ -25,7 +25,7 @@ it('invalidates cache on update', function () {
     $config = Configuration::create(['key' => 'foo', 'value' => 'bar']);
 
     // Seed cache
-    $service = new ConfigService();
+    $service = new ConfigService;
     $service->get('foo');
 
     expect(Cache::has('config_foo'))->toBeTrue();

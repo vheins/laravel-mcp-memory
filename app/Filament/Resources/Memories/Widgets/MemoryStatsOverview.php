@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Memories\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class MemoryStatsOverview extends StatsOverviewWidget
 {

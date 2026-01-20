@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Http\Resources\MediaResource;
 use App\Models\Media;
 use App\Services\MediaService;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class MediaController extends Controller

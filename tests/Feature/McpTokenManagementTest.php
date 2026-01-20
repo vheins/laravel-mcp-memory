@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Livewire\Volt\Volt;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -49,18 +49,18 @@ test('user can revoke an mcp token', function () {
     expect($user->fresh()->tokens)->toHaveCount(0);
 });
 
-test('tokens are long lived by default unless configured otherwise', function() {
-     // Sanctum tokens by default have expires_at as null unless configured.
-     // We want to ensure that for our use case, we can create tokens that do not expire.
-     // Using createToken with no expiration argument (which relies on config or default).
-     // Note: createToken's 3rd arg is expiresAt.
+test('tokens are long lived by default unless configured otherwise', function () {
+    // Sanctum tokens by default have expires_at as null unless configured.
+    // We want to ensure that for our use case, we can create tokens that do not expire.
+    // Using createToken with no expiration argument (which relies on config or default).
+    // Note: createToken's 3rd arg is expiresAt.
 
-     $user = User::factory()->create();
-     // Explicitly passing null for expiresAt if the method signature supports it,
-     // or relying on default. The standard createToken signature in HasApiTokens is:
-     // createToken(string $name, array $abilities = ['*'], DateTimeInterface|null $expiresAt = null)
+    $user = User::factory()->create();
+    // Explicitly passing null for expiresAt if the method signature supports it,
+    // or relying on default. The standard createToken signature in HasApiTokens is:
+    // createToken(string $name, array $abilities = ['*'], DateTimeInterface|null $expiresAt = null)
 
-     $token = $user->createToken('long-lived', ['*'], null);
+    $token = $user->createToken('long-lived', ['*'], null);
 
-     expect($token->accessToken->expires_at)->toBeNull();
+    expect($token->accessToken->expires_at)->toBeNull();
 });

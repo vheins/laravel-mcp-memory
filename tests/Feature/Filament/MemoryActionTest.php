@@ -1,11 +1,9 @@
 <?php
 
-use App\Filament\Resources\Memories\MemoryResource;
 use App\Filament\Resources\Memories\Pages\ListMemories;
 use App\Models\Memory;
 use App\Models\Repository;
 use App\Models\User;
-use Filament\Tables\Actions\Action;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 

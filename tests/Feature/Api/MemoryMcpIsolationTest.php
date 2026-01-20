@@ -54,7 +54,8 @@ it('forces authenticated user on write', function () {
 
     $response->assertJsonPath('result.content.0.text', function ($text) {
         $data = json_decode($text, true);
-        return (string)$data['user_id'] === (string)$this->user->id && (string)$data['user_id'] !== (string)$this->otherUser->id;
+
+        return (string) $data['user_id'] === (string) $this->user->id && (string) $data['user_id'] !== (string) $this->otherUser->id;
     });
 });
 
@@ -105,8 +106,9 @@ it('forces authenticated user on search', function () {
 
     $response->assertJsonPath('result.content.0.text', function ($text) {
         $content = collect(json_decode($text, true) ?? []);
+
         return $content->count() > 0
             && $content->pluck('current_content')->contains('User A Secret')
-            && !$content->pluck('current_content')->contains('User B Secret');
+            && ! $content->pluck('current_content')->contains('User B Secret');
     });
 });

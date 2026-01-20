@@ -13,7 +13,7 @@ class MediaService
     {
         $filename = Str::uuid()->toString();
         $extension = $file->getClientOriginalExtension();
-        $fullFilename = $filename . '.' . $extension;
+        $fullFilename = $filename.'.'.$extension;
 
         // Store physical file
         $path = $file->storeAs($directory, $fullFilename, $disk);
@@ -36,8 +36,8 @@ class MediaService
     public function delete(Media $media): bool
     {
         // Delete physical file
-        if (Storage::disk($media->disk)->exists($media->directory . '/' . $media->filename . '.' . $media->extension)) {
-            Storage::disk($media->disk)->delete($media->directory . '/' . $media->filename . '.' . $media->extension);
+        if (Storage::disk($media->disk)->exists($media->directory.'/'.$media->filename.'.'.$media->extension)) {
+            Storage::disk($media->disk)->delete($media->directory.'/'.$media->filename.'.'.$media->extension);
         }
 
         // Delete record

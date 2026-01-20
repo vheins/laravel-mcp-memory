@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use App\Filament\Pages\Profile\EditProfile;
-use Filament\Support\Facades\FilamentView;
-use Filament\View\PanelsRenderHook;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class McpServiceProvider extends ServiceProvider

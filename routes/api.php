@@ -29,7 +29,6 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::delete('{media}', [\App\Http\Controllers\Api\MediaController::class, 'destroy'])->name('destroy');
     });
 
-
     Route::middleware('auth:sanctum')->get('/users/{user}', function (Request $request, \App\Models\User $user) {
         // Placeholder for user details
         return response()->json([

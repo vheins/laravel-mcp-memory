@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources\Media\Schemas;
 
-use Filament\Schemas\Schema;
-
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 
 class MediaForm
 {

@@ -57,7 +57,7 @@ class ConfigurationsTable
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                     ->hidden(fn (Configuration $record) => $record->is_system),
+                    ->hidden(fn (Configuration $record) => $record->is_system),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -3,8 +3,8 @@
 namespace App\Filament\Pages\Profile;
 
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\View as SchemaView;
+use Filament\Schemas\Schema;
 
 class EditProfile extends BaseEditProfile
 {

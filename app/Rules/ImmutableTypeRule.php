@@ -9,9 +9,7 @@ class ImmutableTypeRule implements ValidationRule
 {
     protected array $restrictedTypes = ['system_constraint', 'business_rule'];
 
-    public function __construct(protected string $actorType = 'human')
-    {
-    }
+    public function __construct(protected string $actorType = 'human') {}
 
     /**
      * Run the validation rule.
@@ -21,7 +19,7 @@ class ImmutableTypeRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->actorType === 'ai' && in_array($value, $this->restrictedTypes)) {
-            $fail('AI agents cannot create or modify memories of type: ' . $value);
+            $fail('AI agents cannot create or modify memories of type: '.$value);
         }
     }
 }

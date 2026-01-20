@@ -2,10 +2,7 @@
 
 namespace App\Filament\Resources\Media\Pages;
 
-
-
 use App\Filament\Resources\Media\MediaResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -42,7 +39,7 @@ class CreateMedia extends CreateRecord
         $data['aggregate_type'] = $aggregateType;
         $data['size'] = $size;
         $data['metadata'] = [
-            'original_filename' => $data['original_filename'] ?? $filename . '.' . $extension,
+            'original_filename' => $data['original_filename'] ?? $filename.'.'.$extension,
         ];
 
         // Clean up temporary fields

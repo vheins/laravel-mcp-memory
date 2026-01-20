@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-
 use App\Models\Repository;
 use App\Services\MemoryService;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class MemorySeeder extends Seeder

@@ -195,6 +195,7 @@ it('can search memories with user hierarchy', function () {
     $response->assertJsonPath('result.content.0.text', function (string $text) {
         $data = json_decode($text, true);
         $contents = collect($data)->pluck('current_content')->toArray();
+
         return in_array('User Fact', $contents) && in_array('Repo Fact', $contents);
     });
 });
@@ -291,6 +292,7 @@ it('can search memories without repository argument', function () {
     $response->assertJsonPath('result.content.0.text', function (string $text) {
         $data = json_decode($text, true);
         $contents = collect($data)->pluck('current_content')->toArray();
+
         return count($contents) >= 2;
     });
 });

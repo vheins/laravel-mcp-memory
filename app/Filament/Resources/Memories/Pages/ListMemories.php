@@ -15,6 +15,7 @@ class ListMemories extends ListRecords
         return [
             CreateAction::make(),
         ];
+
         return [
             CreateAction::make(),
         ];

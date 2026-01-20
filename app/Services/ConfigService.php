@@ -9,10 +9,6 @@ class ConfigService
 {
     /**
      * Get a configuration value by key.
-     *
-     * @param  string  $key
-     * @param  mixed  $default
-     * @return mixed
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -27,10 +23,6 @@ class ConfigService
 
     /**
      * Set a configuration value.
-     *
-     * @param  string  $key
-     * @param  mixed  $value
-     * @return Configuration
      */
     public function set(string $key, mixed $value): Configuration
     {

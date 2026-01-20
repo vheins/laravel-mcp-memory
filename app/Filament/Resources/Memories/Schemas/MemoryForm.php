@@ -83,7 +83,7 @@ class MemoryForm
                         \Filament\Forms\Components\Select::make('relatedMemories')
                             ->label('Related Memories (Knowledge Graph)')
                             ->relationship('relatedMemories', 'title')
-                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->title ?? substr($record->current_content, 0, 50) . '...')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->title ?? substr($record->current_content, 0, 50).'...')
                             ->multiple()
                             ->searchable()
                             ->preload()

@@ -1,6 +1,5 @@
 <?php
 
-use App\Filament\Resources\Configurations\ConfigurationResource;
 use App\Filament\Resources\Configurations\Pages\CreateConfiguration;
 use App\Filament\Resources\Configurations\Pages\EditConfiguration;
 use App\Filament\Resources\Configurations\Pages\ListConfigurations;

@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Configuration;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -58,7 +57,7 @@ it('casts values correctly', function () {
     $jsonConfig = Configuration::create([
         'key' => 'settings',
         'value' => ['theme' => 'dark'],
-        'type' => 'json'
+        'type' => 'json',
     ]);
 
     expect($jsonConfig->value)->toBe(['theme' => 'dark']);

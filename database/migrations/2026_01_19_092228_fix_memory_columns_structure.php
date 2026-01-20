@@ -17,8 +17,9 @@ return new class extends Migration
                 // Try dropping index first (generic name or specific)
                 // In SQLite, dropping index might be needed
                 try {
-                     $table->dropIndex(['user_id']);
-                } catch (\Exception $e) {}
+                    $table->dropIndex(['user_id']);
+                } catch (\Exception $e) {
+                }
 
                 $table->dropColumn('user_id');
             }

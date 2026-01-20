@@ -38,7 +38,7 @@ it('can upload a file', function () {
     expect($media)->not->toBeNull();
     expect($media->mime_type)->toBe('image/jpeg');
 
-    Storage::disk('public')->assertExists('uploads/' . $media->filename . '.jpg');
+    Storage::disk('public')->assertExists('uploads/'.$media->filename.'.jpg');
 });
 
 it('can fetch media details', function () {

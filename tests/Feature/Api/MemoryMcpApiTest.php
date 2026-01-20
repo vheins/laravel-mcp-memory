@@ -34,8 +34,9 @@ it('can write memory via MCP', function () {
 
     $response->assertStatus(200)
         ->assertJsonPath('result.content.0.text', function ($text) {
-             $data = json_decode($text, true);
-             return $data['current_content'] === 'MCP Content';
+            $data = json_decode($text, true);
+
+            return $data['current_content'] === 'MCP Content';
         })
         ->assertJsonPath('id', 1);
 });
@@ -83,7 +84,7 @@ it('can search memory via MCP', function () {
             'name' => 'memory-search',
             'arguments' => [
                 'repository' => $this->repository->id,
-                'filters' => ['memory_type' => 'preference']
+                'filters' => ['memory_type' => 'preference'],
             ],
         ],
         'id' => 3,
@@ -93,8 +94,9 @@ it('can search memory via MCP', function () {
         ->postJson('/api/v1/mcp/memory', $payload)
         ->assertStatus(200)
         ->assertJsonPath('result.content.0.text', function ($text) {
-             $data = json_decode($text, true);
-             return is_array($data) && count($data) > 0 && $data[0]['current_content'] === 'Searchable';
+            $data = json_decode($text, true);
+
+            return is_array($data) && count($data) > 0 && $data[0]['current_content'] === 'Searchable';
         });
 });
 

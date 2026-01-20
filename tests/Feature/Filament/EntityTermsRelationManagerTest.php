@@ -4,8 +4,6 @@ use App\Filament\RelationManagers\EntityTermsRelationManager;
 use App\Models\Taxonomy;
 use App\Models\Term;
 use App\Models\User;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -24,8 +22,8 @@ it('can list terms attached to a user', function () {
         'ownerRecord' => $this->user,
         'pageClass' => \App\Filament\Resources\Users\Pages\EditUser::class,
     ])
-    ->assertSuccessful()
-    ->assertCanSeeTableRecords([$this->term]);
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$this->term]);
 });
 
 it('can attach a term', function () {
@@ -33,10 +31,10 @@ it('can attach a term', function () {
         'ownerRecord' => $this->user,
         'pageClass' => \App\Filament\Resources\Users\Pages\EditUser::class,
     ])
-    ->callTableAction('attach', data: [
-        'recordId' => $this->term->getKey(),
-    ])
-    ->assertHasNoActionErrors();
+        ->callTableAction('attach', data: [
+            'recordId' => $this->term->getKey(),
+        ])
+        ->assertHasNoActionErrors();
 
     expect($this->user->fresh()->terms)->toHaveCount(1);
 });
@@ -48,8 +46,8 @@ it('can detach a term', function () {
         'ownerRecord' => $this->user, // @phpstan-ignore-line
         'pageClass' => \App\Filament\Resources\Users\Pages\EditUser::class,
     ])
-    ->callTableAction('detach', $this->term)
-    ->assertHasNoActionErrors();
+        ->callTableAction('detach', $this->term)
+        ->assertHasNoActionErrors();
 
     expect($this->user->fresh()->terms)->toHaveCount(0);
 });

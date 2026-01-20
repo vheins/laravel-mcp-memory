@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->service = new MemoryService();
+    $this->service = new MemoryService;
     $this->orgId = Str::uuid()->toString();
     $this->repo = Repository::create([
         'organization_id' => $this->orgId, // Repository model map to organization_id column
@@ -62,7 +62,7 @@ it('resolves hierarchy correctly', function () {
         'memory_type' => 'preference',
         'created_by_type' => 'human',
         'current_content' => 'User Content',
-    ], (string)$this->userId, 'human');
+    ], (string) $this->userId, 'human');
 
     // 5. Another User Memory (should NOT be seen)
     $otherUser = User::factory()->create();
@@ -74,7 +74,7 @@ it('resolves hierarchy correctly', function () {
         'memory_type' => 'preference',
         'created_by_type' => 'human',
         'current_content' => 'Other User Content',
-    ], (string)$otherUser->id, 'human');
+    ], (string) $otherUser->id, 'human');
 
     // Search WITHOUT user context -> Expect System, Org, Repo (3 items)
     $resultsNoUser = $this->service->search($this->repo->id);

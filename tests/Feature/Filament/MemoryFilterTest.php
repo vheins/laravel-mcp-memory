@@ -1,6 +1,5 @@
 <?php
 
-use App\Filament\Resources\Memories\MemoryResource;
 use App\Filament\Resources\Memories\Pages\ListMemories;
 use App\Models\Memory;
 use App\Models\Repository;

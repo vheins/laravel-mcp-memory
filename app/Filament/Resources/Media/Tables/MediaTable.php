@@ -39,7 +39,7 @@ class MediaTable
                 TextColumn::make('aggregate_type')
                     ->sortable(),
                 TextColumn::make('size')
-                    ->formatStateUsing(fn (int $state): string => number_format($state / 1024, 2) . ' KB')
+                    ->formatStateUsing(fn (int $state): string => number_format($state / 1024, 2).' KB')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
