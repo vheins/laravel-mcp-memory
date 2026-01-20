@@ -16,6 +16,10 @@ class MemoriesTable
     {
         return $table
             ->columns([
+                TextColumn::make('title')
+                    ->label('Title')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('current_content')
                     ->limit(50)
                     ->searchable(),
