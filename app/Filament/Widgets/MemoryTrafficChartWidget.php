@@ -8,7 +8,12 @@ class MemoryTrafficChartWidget extends ChartWidget
 {
     protected static ?int $sort = -2;
 
-    protected ?string $heading = 'Memory Traffic Chart Widget';
+    protected ?string $heading = 'Memory Traffic';
+
+    public function getDescription(): ?string
+    {
+        return 'Total memory interactions over the last 30 days.';
+    }
 
     protected function getData(): array
     {

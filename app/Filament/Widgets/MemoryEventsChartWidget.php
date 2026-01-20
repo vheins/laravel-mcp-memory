@@ -8,7 +8,12 @@ class MemoryEventsChartWidget extends ChartWidget
 {
     protected static ?int $sort = -1;
 
-    protected ?string $heading = 'Memory Events Chart Widget';
+    protected ?string $heading = 'Memory Events Breakdown';
+
+    public function getDescription(): ?string
+    {
+        return 'Distribution of event types in the last 30 days.';
+    }
 
     protected function getData(): array
     {

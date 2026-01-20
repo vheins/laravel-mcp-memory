@@ -10,10 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class MemoryTopAccessedTableWidget extends TableWidget
 {
-    protected static ?int $sort = 1;
-
-    // protected int|string|array $columnSpan = 'full';
-
     public function table(Table $table): Table
     {
         return $table
@@ -24,6 +20,8 @@ class MemoryTopAccessedTableWidget extends TableWidget
                     ->orderByDesc('access_logs_count')
                     ->limit(10)
             )
+            ->heading('Top Accessed Memories')
+            ->description('Most frequently accessed memories in the last 30 days.')
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('title')
                     ->label('Memory Title')

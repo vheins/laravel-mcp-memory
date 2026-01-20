@@ -8,6 +8,13 @@ class MemoryUserUsageChartWidget extends ChartWidget
 {
     protected static ?int $sort = 0;
 
+    protected ?string $heading = 'User Usage';
+
+    public function getDescription(): ?string
+    {
+        return 'Top users by interaction count in the last 30 days.';
+    }
+
     protected function getData(): array
     {
         $data = \App\Models\MemoryAccessLog::selectRaw('actor_id, count(*) as count')
