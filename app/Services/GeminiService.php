@@ -23,7 +23,7 @@ class GeminiService
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post($url, [
+            ])->timeout(600)->post($url, [
                 'contents' => [
                     [
                         'parts' => [
@@ -105,7 +105,7 @@ EOT;
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post($url, [
+            ])->timeout(600)->post($url, [
                 'contents' => [
                     [
                         'parts' => [

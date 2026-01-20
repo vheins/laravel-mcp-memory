@@ -50,7 +50,7 @@ class CreateMemory extends CreateRecord
                             ->danger()
                             ->send();
                     }
-                }),
+            }),
         ];
     }
 
