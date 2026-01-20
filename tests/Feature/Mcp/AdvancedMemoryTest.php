@@ -87,16 +87,19 @@ class AdvancedMemoryTest extends TestCase
             'title' => 'Apple',
             'embedding' => [1.0, 0.0, 0.0],
             'importance' => 1,
+            'status' => \App\Enums\MemoryStatus::Active,
         ]);
         Memory::factory()->create([
             'title' => 'Banana',
             'embedding' => [0.0, 1.0, 0.0],
             'importance' => 1,
+            'status' => \App\Enums\MemoryStatus::Active,
         ]);
         Memory::factory()->create([
             'title' => 'Important Apple',
             'embedding' => [1.0, 0.1, 0.0],
             'importance' => 10,
+            'status' => \App\Enums\MemoryStatus::Active,
         ]);
 
         $response = $this->postJson('/memory-mcp', [

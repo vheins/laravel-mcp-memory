@@ -2,12 +2,16 @@
 
 namespace App\Rules;
 
+use App\Enums\MemoryType;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class ImmutableTypeRule implements ValidationRule
 {
-    protected array $restrictedTypes = ['system_constraint', 'business_rule'];
+    protected array $restrictedTypes = [
+        MemoryType::SystemConstraint->value,
+        MemoryType::BusinessRule->value,
+    ];
 
     public function __construct(protected string $actorType = 'human') {}
 
@@ -18,8 +22,10 @@ class ImmutableTypeRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->actorType === 'ai' && in_array($value, $this->restrictedTypes)) {
-            $fail('AI agents cannot create or modify memories of type: '.$value);
+        $typeValue = $value instanceof \BackedEnum ? $value->value : $value;
+
+        if ($this->actorType === 'ai' && in_array($typeValue, $this->restrictedTypes)) {
+            $fail('AI agents cannot create or modify memories of type: '.$typeValue);
         }
     }
 }

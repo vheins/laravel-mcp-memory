@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
+use App\Enums\MemoryScope;
 use App\Models\Memory;
 use App\Models\Repository;
 use App\Models\User;
@@ -34,7 +37,7 @@ it('can create a new memory', function () {
         ->id->not->toBeNull()
         ->title->toBe('Test Title')
         ->current_content->toBe('Initial content')
-        ->status->toBe('draft');
+        ->status->toBe(MemoryStatus::Draft);
 
     // Verify Version
     expect($memory->versions)->toHaveCount(1);
@@ -49,8 +52,8 @@ it('creates a new version when content updates', function () {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
-        'scope_type' => 'repository',
-        'memory_type' => 'business_rule',
+        'scope_type' => MemoryScope::Repository,
+        'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
         'current_content' => 'Initial content',
     ];
@@ -77,11 +80,11 @@ it('prevents update when memory is locked', function () {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
-        'scope_type' => 'repository',
-        'memory_type' => 'business_rule',
+        'scope_type' => MemoryScope::Repository,
+        'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
         'current_content' => 'Content',
-        'status' => 'locked',
+        'status' => MemoryStatus::Locked,
     ];
 
     // Force create a locked memory directly via model to bypass service check if any
@@ -94,8 +97,8 @@ it('prevents update when memory is locked', function () {
         'organization' => 'test-org',
         'repository' => 'test-repo',
         // ... other required fields
-        'scope_type' => 'repository',
-        'memory_type' => 'business_rule',
+        'scope_type' => MemoryScope::Repository,
+        'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
     ];
 
@@ -107,8 +110,8 @@ it('can read a memory', function () {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
-        'scope_type' => 'repository',
-        'memory_type' => 'business_rule',
+        'scope_type' => MemoryScope::Repository,
+        'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
         'current_content' => 'Content to read',
     ];
@@ -125,21 +128,21 @@ it('can search memories', function () {
     $mem1 = $this->service->write([
         'organization' => 'test-org',
         'repository' => 'test-repo',
-        'scope_type' => 'repository',
-        'memory_type' => 'business_rule',
+        'scope_type' => MemoryScope::Repository,
+        'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
         'current_content' => 'Apple pie recipe',
-        'status' => 'verified',
+        'status' => MemoryStatus::Verified,
     ], $this->user->id);
 
     $mem2 = $this->service->write([
         'organization' => 'test-org',
         'repository' => 'test-repo',
-        'scope_type' => 'repository',
-        'memory_type' => 'preference',
+        'scope_type' => MemoryScope::Repository,
+        'memory_type' => MemoryType::Preference,
         'created_by_type' => 'human',
         'current_content' => 'Banana bread recipe',
-        'status' => 'draft',
+        'status' => MemoryStatus::Draft,
     ], $this->user->id);
 
     // Search by content
@@ -148,12 +151,12 @@ it('can search memories', function () {
     expect($results->first()->id)->toBe($mem1->id);
 
     // Search by type
-    $results = $this->service->search('test-repo', null, ['memory_type' => 'preference']);
+    $results = $this->service->search('test-repo', null, ['memory_type' => MemoryType::Preference]);
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($mem2->id);
 
     // Search by status
-    $results = $this->service->search('test-repo', null, ['status' => 'verified']);
+    $results = $this->service->search('test-repo', null, ['status' => MemoryStatus::Verified]);
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($mem1->id);
 });
@@ -163,7 +166,7 @@ it('prevents AI from creating restricted memory types', function () {
         'organization' => 'test-org',
         'repository' => 'test-repo',
         'scope_type' => 'repository',
-        'memory_type' => 'system_constraint', // Restricted
+        'memory_type' => MemoryType::SystemConstraint, // Restricted
         'created_by_type' => 'ai',
         'current_content' => 'Restricted Content',
     ];
@@ -178,7 +181,7 @@ it('prevents AI from updating restricted memory types', function () {
         'organization' => 'test-org',
         'repository' => 'test-repo',
         'scope_type' => 'repository',
-        'memory_type' => 'business_rule', // Restricted
+        'memory_type' => MemoryType::BusinessRule, // Restricted
         'created_by_type' => 'human',
         'current_content' => 'Human Rule',
     ], $this->user->id, 'human');

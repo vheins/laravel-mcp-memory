@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\MemoryScope;
+use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,24 +17,27 @@ class Memory extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $fillable = [
-        'organization',
-        'repository',
-        'title',
-        'user_id',
-        'scope_type',
-        'memory_type',
-        'status',
-        'importance',
-        'embedding',
-        'created_by_type',
-        'current_content',
-        'metadata',
+        'organization', // github organization / user (repository owner)
+        'repository', // specific repository slug (e.g. owner/repo)
+        'title', // short summary or title
+        'user_id', // specific user identifier
+        'scope_type', // system, organization, repository, user
+        'memory_type', // fact, preference, business_rule, system_constraint
+        'status', // draft, published, locked
+        'importance', // integer weight for ranking
+        'embedding', // vector representation for semantic search
+        'created_by_type', // human or ai
+        'current_content', // the actual memory content
+        'metadata', // additional structured data
     ];
 
     protected $casts = [
         'metadata' => 'array',
         'embedding' => 'array',
         'importance' => 'integer',
+        'status' => MemoryStatus::class,
+        'memory_type' => MemoryType::class,
+        'scope_type' => MemoryScope::class,
     ];
 
     // User relationship
@@ -74,7 +80,7 @@ class Memory extends Model
         });
 
         static::updating(function (Memory $memory) {
-            if ($memory->original['status'] === 'locked' && $memory->isDirty('current_content')) {
+            if ($memory->getOriginal('status') === MemoryStatus::Locked && $memory->isDirty('current_content')) {
                 throw new \Exception('Cannot update locked memory.');
             }
         });

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Mcp\Tools;
 
 use App\Services\MemoryService;
+use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -29,8 +31,8 @@ class SearchMemoriesTool extends Tool
             'query' => $schema->string()->description('Text query to match against content.'),
             'filters' => $schema->object([
                 'user_id' => $schema->string()->description('Optional filter for a specific user ID.'),
-                'memory_type' => $schema->string()->enum(['fact', 'preference', 'business_rule', 'system_constraint']),
-                'status' => $schema->string()->enum(['draft', 'published', 'locked']),
+                'memory_type' => $schema->string()->enum(array_column(MemoryType::cases(), 'value')),
+                'status' => $schema->string()->enum(array_column(MemoryStatus::cases(), 'value')),
             ]),
         ];
     }
@@ -38,10 +40,6 @@ class SearchMemoriesTool extends Tool
     public function handle(Request $request, MemoryService $service)
     {
         $filters = $request->get('filters', []);
-
-        if ($user = $request->user()) {
-            $filters['user_id'] = $user->getAuthIdentifier();
-        }
 
         $results = $service->search(
             $request->get('repository'),

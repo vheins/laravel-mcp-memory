@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Memories\Schemas;
 
 use Filament\Schemas\Schema;
+use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
+use App\Enums\MemoryScope;
 
 class MemoryForm
 {
@@ -28,34 +31,16 @@ class MemoryForm
                         \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
                                 \Filament\Forms\Components\Select::make('scope_type')
-                                    ->options([
-                                        'system' => 'System',
-                                        'organization' => 'Organization',
-                                        'repository' => 'Repository',
-                                        'user' => 'User',
-                                    ])
+                                    ->options(MemoryScope::class)
                                     ->required(),
                                 \Filament\Forms\Components\Select::make('memory_type')
-                                    ->options([
-                                        'business_rule' => 'Business Rule',
-                                        'decision_log' => 'Decision Log',
-                                        'preference' => 'Preference',
-                                        'system_constraint' => 'System Constraint',
-                                        'documentation_ref' => 'Documentation Ref',
-                                        'tech_stack' => 'Tech Stack',
-                                    ])
+                                    ->options(MemoryType::class)
                                     ->required(),
                             ]),
                         \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
                                 \Filament\Forms\Components\Select::make('status')
-                                    ->options([
-                                        'draft' => 'Draft',
-                                        'verified' => 'Verified',
-                                        'locked' => 'Locked',
-                                        'deprecated' => 'Deprecated',
-                                        'active' => 'Active',
-                                    ])
+                                    ->options(MemoryStatus::class)
                                     ->required()
                                     ->default('draft'),
                                 \Filament\Forms\Components\Slider::make('importance')

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\MemoryStatus;
 use App\Models\Memory;
 use App\Models\MemoryAccessLog;
 use App\Models\MemoryAuditLog;
@@ -37,7 +38,7 @@ class MemoryService
                 // Validate existing type for updates
                 if ($actorType === 'ai') {
                     $rule = new ImmutableTypeRule($actorType);
-                    $validator = Validator::make(['memory_type' => $memory->memory_type], [
+                    $validator = Validator::make(['memory_type' => $memory->memory_type->value], [
                         'memory_type' => [$rule],
                     ]);
                     if ($validator->fails()) {
@@ -48,7 +49,7 @@ class MemoryService
                 $oldValue = $memory->toArray();
 
                 // Check if locked
-                if ($memory->status === 'locked' && $memory->current_content !== $content) {
+                if ($memory->status === MemoryStatus::Locked && $memory->current_content !== $content) {
                     throw new \Exception('Cannot update locked memory.');
                 }
 
@@ -73,7 +74,7 @@ class MemoryService
                     'scope_type' => $data['scope_type'],
                     'memory_type' => $data['memory_type'],
                     'created_by_type' => $data['created_by_type'] ?? $actorType,
-                    'status' => $data['status'] ?? 'draft',
+                    'status' => $data['status'] ?? ($actorType === 'ai' ? MemoryStatus::Active : MemoryStatus::Draft),
                     'importance' => $data['importance'] ?? 1,
                     'embedding' => $data['embedding'] ?? null,
                     'current_content' => $content,
@@ -255,61 +256,36 @@ class MemoryService
 
         $userId = $filters['user_id'] ?? $filters['user'] ?? null;
 
-        $q = Memory::query();
+        $q = Memory::query()
+            ->when(! ($repository || $userId || $orgId), function ($query) {
+                $query->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified]);
+            }, function ($query) {
+                $query->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified, MemoryStatus::Draft]);
+            });
 
         // 2. Apply Scope Isolation only if context is provided
         if ($repository || $userId || $orgId) {
             $q->where(function ($group) use ($repository, $userId, $orgId) {
-                // System Scope (Global)
-                $group->where(function ($sub) {
-                    $sub->where('scope_type', 'system');
-                });
-
-                // Organization Scope
-                if ($orgId) {
-                    $group->orWhere(function ($sub) use ($orgId) {
-                        $sub->where('scope_type', 'organization')
-                            ->where('organization', $orgId);
-                    });
-                }
-
-                // Repository Scope
-                if ($repository) {
-                    $group->orWhere(function ($sub) use ($repository) {
-                        $sub->where('scope_type', 'repository')
-                            ->where('repository', $repository);
-                    });
-                } else {
-                    // If no repository specified, still include repository-scoped memories that are visible
-                    $group->orWhere('scope_type', 'repository');
-                }
-
-                // User Scope
-                if ($userId) {
-                    $group->orWhere(function ($sub) use ($userId, $repository) {
-                        $sub->where('scope_type', 'user')
-                            ->where('user_id', $userId);
-
-                        if ($repository) {
-                            $sub->where(function ($s) use ($repository) {
-                                $s->where('repository', $repository)
-                                    ->orWhereNull('repository');
-                            });
-                        }
-                    });
-                }
+                $group->where('scope_type', 'system')
+                    ->when($orgId, fn ($q) => $q->orWhere(fn ($sub) => $sub->where('scope_type', 'organization')->where('organization', $orgId)))
+                    ->when($repository, fn ($q) => $q->orWhere(fn ($sub) => $sub->where('scope_type', 'repository')->where('repository', $repository)))
+                    ->unless($repository, fn ($q) => $q->orWhere('scope_type', 'repository'))
+                    ->when($userId, fn ($q) => $q->orWhere(fn ($sub) => $sub->where('scope_type', 'user')
+                        ->where('user_id', $userId)
+                        ->when($repository, fn ($deep) => $deep->where(fn ($d) => $d->where('repository', $repository)->orWhereNull('repository')))
+                    ));
             });
         }
 
         if ($query) {
             $q->where(function ($sub) use ($query) {
-                $term = Str::lower($query);
-                $sub->whereRaw('LOWER(current_content) like ?', ["%{$term}%"])
-                    ->orWhereRaw('LOWER(repository) like ?', ["%{$term}%"])
-                    ->orWhereRaw('LOWER(user_id) like ?', ["%{$term}%"])
-                    ->orWhereRaw('LOWER(memory_type) like ?', ["%{$term}%"])
-                    ->orWhereRaw('LOWER(scope_type) like ?', ["%{$term}%"])
-                    ->orWhereRaw('LOWER(status) like ?', ["%{$term}%"]);
+                $term = $query;
+                $sub->where('current_content', 'like', "%{$term}%")
+                    ->orWhereLike('repository', "%{$term}%")
+                    ->orWhereLike('user_id', "%{$term}%")
+                    ->orWhereLike('memory_type', "%{$term}%")
+                    ->orWhereLike('scope_type', "%{$term}%")
+                    ->orWhereLike('status', "%{$term}%");
             });
         }
 
