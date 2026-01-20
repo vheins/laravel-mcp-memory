@@ -44,9 +44,8 @@ class BatchWriteMemoryTool extends Tool
     public function handle(Request $request, MemoryService $service)
     {
         $items = $request->get('items');
-        $user = $request->user();
-        $actorId = (string) ($user ? $user->getAuthIdentifier() : 'system');
-        $actorType = $user ? 'human' : 'ai';
+        $actorId = (string) (auth()->id() ?? 'system');
+        $actorType = request()->is('api/*') ? 'ai' : 'human';
 
         try {
             $memories = $service->bulkWrite($items, $actorId, $actorType);

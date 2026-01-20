@@ -85,7 +85,7 @@ class MemoryService
                     'organization' => $data['organization'],
                     'repository' => $data['repository'] ?? null,
                     'title' => $data['title'] ?? null,
-                    'user_id' => $data['user_id'] ?? $data['user'] ?? null,
+                    'user_id' => auth()->id(),
                     'scope_type' => $data['scope_type'],
                     'memory_type' => $data['memory_type'],
                     'created_by_type' => $data['created_by_type'] ?? $actorType,
@@ -269,26 +269,25 @@ class MemoryService
         }
 
 
-        $userId = $filters['user_id'] ?? $filters['user'] ?? null;
 
         $q = Memory::query()
-            ->when(! ($repository || $userId || $orgId), function ($query) {
+            ->when(! ($repository || auth()->id() || $orgId), function ($query) {
                 $query->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified]);
             }, function ($query) {
                 $query->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified, MemoryStatus::Draft]);
             });
 
         // 2. Apply Scope Isolation only if context is provided
-        if ($repository || $userId || $orgId) {
-            $q->where(function ($group) use ($repository, $userId, $orgId) {
+        if ($repository || auth()->id() || $orgId) {
+            $q->where(function ($group) use ($repository, $orgId) {
                 $group->where('scope_type', 'system')
                     ->when($orgId, fn ($q) => $q->orWhere(fn ($sub) => $sub->where('scope_type', 'organization')->where('organization', $orgId)))
                     ->when($repository, fn ($q) => $q->orWhere(fn ($sub) => $sub->where('scope_type', 'repository')->where('repository', $repository)))
                     ->unless($repository, fn ($q) => $q->orWhere('scope_type', 'repository'))
-                    ->when($userId, fn ($q) => $q->orWhere(fn ($sub) => $sub->where('scope_type', 'user')
-                        ->where('user_id', $userId)
+                    ->orWhere(fn ($sub) => $sub->where('scope_type', 'user')
+                        ->where('user_id', auth()->id())
                         ->when($repository, fn ($deep) => $deep->where(fn ($d) => $d->where('repository', $repository)->orWhereNull('repository')))
-                    ));
+                    );
             });
         }
 

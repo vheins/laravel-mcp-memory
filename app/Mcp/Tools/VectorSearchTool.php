@@ -27,7 +27,7 @@ class VectorSearchTool extends Tool
             'vector' => $schema->array()->items($schema->number())->description('Input embedding vector.')->required(),
             'repository' => $schema->string()->description('Optional repository context.'),
             'threshold' => $schema->number()->default(0.5)->description('Similarity threshold (0-1).'),
-            'filters' => $schema->object()->description('Optional filters (organization, user_id, status, etc.).'),
+            'filters' => $schema->object()->description('Optional filters (organization, status, etc.).'),
         ];
     }
 

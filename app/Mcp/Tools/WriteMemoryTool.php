@@ -41,14 +41,10 @@ class WriteMemoryTool extends Tool
     public function handle(Request $request, MemoryService $service)
     {
         $arguments = $request->all();
-        $user = $request->user();
+        $arguments['user_id'] = auth()->id();
 
-        if ($user) {
-            $arguments['user_id'] = $user->getAuthIdentifier();
-        }
-
-        $actorId = (string) ($user ? $user->getAuthIdentifier() : 'system');
-        $actorType = $user ? 'human' : 'ai';
+        $actorId = (string) (auth()->id() ?? 'system');
+        $actorType = request()->is('api/*') ? 'ai' : 'human';
 
         try {
             $memory = $service->write($arguments, $actorId, $actorType);
