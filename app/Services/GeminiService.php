@@ -44,7 +44,7 @@ class GeminiService
 
             if ($response->failed()) {
                 Log::error('Gemini API Error', $response->json());
-                throw new \Exception('Failed to communicate with Gemini API: ' . $response->body());
+                throw new \Exception('Failed to communicate with Gemini API: '.$response->body());
             }
 
             $data = $response->json();
@@ -88,6 +88,7 @@ For 'scope_type' and 'memory_type', ONLY use the allowed values listed above.
 For 'metadata': Extract relevant key-value pairs derived directly from the generated content (e.g., specific versions, main concepts, configuration keys, or parameters). Do not nest objects.
 EOT;
     }
+
     public function enhanceMemory(array $currentData, string $instruction): array
     {
         $apiKey = config('services.gemini.api_key');
@@ -126,7 +127,7 @@ EOT;
 
             if ($response->failed()) {
                 Log::error('Gemini API Error', $response->json());
-                throw new \Exception('Failed to communicate with Gemini API: ' . $response->body());
+                throw new \Exception('Failed to communicate with Gemini API: '.$response->body());
             }
 
             $data = $response->json();

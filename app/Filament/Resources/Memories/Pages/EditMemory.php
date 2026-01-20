@@ -60,15 +60,15 @@ class EditMemory extends EditRecord
                         ->dehydrated(false),
                 ])
                 ->action(function (array $data, \App\Models\Memory $record) {
-                     $geminiService = app(\App\Services\GeminiService::class);
+                    $geminiService = app(\App\Services\GeminiService::class);
 
-                     \Filament\Notifications\Notification::make()
+                    \Filament\Notifications\Notification::make()
                         ->title('Enhancing Memory...')
                         ->body('Please wait while the AI enhances the content.')
                         ->info()
                         ->send();
 
-                     try {
+                    try {
                         // Use fresh data
                         $currentData = $record->toArray();
                         $enhancedData = $geminiService->enhanceMemory($currentData, $data['instruction']);
@@ -81,19 +81,17 @@ class EditMemory extends EditRecord
                             ->success()
                             ->send();
 
-                     } catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         \Filament\Notifications\Notification::make()
                             ->title('Enhancement Failed')
                             ->body($e->getMessage())
                             ->danger()
                             ->send();
-                     }
+                    }
                 }),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),
         ];
     }
-
-
 }

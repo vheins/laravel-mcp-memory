@@ -11,29 +11,62 @@ class MemoryUsageStatsWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        return [
+            Stat::make('Total Requests (30d)', $this->getCount())
+                ->description('All memory interactions')
+                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->chart($this->getChartData())
+                ->color('success'),
+            Stat::make('Total Searches (30d)', $this->getCount('search'))
+                ->description('Search queries processed')
+                ->color('info')
+                ->chart($this->getChartData('search')),
+            Stat::make('Write Operations (30d)', $this->getCount('write'))
+                ->description('Memories created or updated')
+                ->color('warning')
+                ->chart($this->getChartData('write')),
+        ];
+    }
+
+    protected function getCount(?string $type = null): int
+    {
+        $query = \App\Models\MemoryAccessLog::query()
+            ->where('created_at', '>=', now()->subDays(30));
+
+        if ($type === 'search') {
+            $query->where('action', 'search');
+        } elseif ($type === 'write') {
+            $query->whereIn('action', ['create', 'update', 'write']);
+        }
+
+        return $query->count();
+    }
+
+    protected function getChartData(?string $type = null): array
+    {
         $now = now();
         $start = $now->copy()->subDays(30);
 
-        $totalRequests = \App\Models\MemoryAccessLog::whereBetween('created_at', [$start, $now])->count();
-        $totalSearches = \App\Models\MemoryAccessLog::where('action', 'search')
-            ->whereBetween('created_at', [$start, $now])
-            ->count();
-        $totalWrites = \App\Models\MemoryAccessLog::whereIn('action', ['create', 'update', 'write'])
-            ->whereBetween('created_at', [$start, $now])
-            ->count();
+        $query = \App\Models\MemoryAccessLog::query()
+            ->whereBetween('created_at', [$start, $now]);
 
-        return [
-            Stat::make('Total Requests (30d)', $totalRequests)
-                ->description('All memory interactions')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->chart([7, 2, 10, 3, 15, 4, 17]) // Placeholder chart, real one would need more query
-                ->color('success'),
-            Stat::make('Total Searches (30d)', $totalSearches)
-                ->description('Search queries processed')
-                ->color('info'),
-            Stat::make('Write Operations (30d)', $totalWrites)
-                ->description('Memories created or updated')
-                ->color('warning'),
-        ];
+        if ($type === 'search') {
+            $query->where('action', 'search');
+        } elseif ($type === 'write') {
+            $query->whereIn('action', ['create', 'update', 'write']);
+        }
+
+        $data = $query->selectRaw('DATE(created_at) as date, count(*) as count')
+            ->groupBy('date')
+            ->pluck('count', 'date')
+            ->toArray();
+
+        $chart = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i)->format('Y-m-d');
+            $chart[] = $data[$date] ?? 0;
+        }
+
+        return $chart;
     }
 }

@@ -4,11 +4,11 @@ namespace App\Filament\Resources\Memories\Pages;
 
 use App\Filament\Resources\Memories\MemoryResource;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\Log;
 
 class CreateMemory extends CreateRecord
 {
     protected static string $resource = MemoryResource::class;
+
     protected function getHeaderActions(): array
     {
         return [
@@ -54,8 +54,7 @@ class CreateMemory extends CreateRecord
                             ->danger()
                             ->send();
                     }
-            }),
+                }),
         ];
     }
-
 }

@@ -69,13 +69,13 @@ test('top accessed memories widget displays popular memories', function () {
         'actor_id' => 'user',
         'action' => 'read',
         'resource_id' => $memoryA->id,
-        'created_at' => now()
+        'created_at' => now(),
     ]);
     MemoryAccessLog::create([
         'actor_id' => 'user',
         'action' => 'read',
         'resource_id' => $memoryA->id,
-        'created_at' => now()
+        'created_at' => now(),
     ]);
 
     // Access Memory B once
@@ -83,7 +83,7 @@ test('top accessed memories widget displays popular memories', function () {
         'actor_id' => 'user',
         'action' => 'read',
         'resource_id' => $memoryB->id,
-        'created_at' => now()
+        'created_at' => now(),
     ]);
 
     Livewire::test(\App\Filament\Widgets\MemoryTopAccessedTableWidget::class)
