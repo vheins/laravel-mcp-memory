@@ -73,9 +73,22 @@ class MemoryForm
                             ->placeholder('Brief summary of the memory')
                             ->required()
                             ->columnSpanFull(),
-                        \Filament\Forms\Components\Textarea::make('current_content')
+                        \Filament\Forms\Components\MarkdownEditor::make('current_content')
                             ->label('Content')
-                            ->rows(5)
+                            ->toolbarButtons([
+                                'attachFiles',
+                                'bold',
+                                'bulletList',
+                                'codeBlock',
+                                'heading',
+                                'italic',
+                                'link',
+                                'orderedList',
+                                'redo',
+                                'strike',
+                                'table',
+                                'undo',
+                            ])
                             ->required()
                             ->columnSpanFull(),
                         \Filament\Forms\Components\KeyValue::make('metadata')

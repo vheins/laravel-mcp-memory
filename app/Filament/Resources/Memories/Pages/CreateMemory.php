@@ -26,7 +26,6 @@ class CreateMemory extends CreateRecord
                 ->action(function (array $data, \App\Services\GeminiService $geminiService) {
                     try {
                         $generatedData = $geminiService->generateMemoryFromPrompt($data['prompt']);
-                        Log::info('Generated Memory', $generatedData);
 
                         // Auto-fill user and defaults
                         $generatedData['user_id'] = auth()->id();
