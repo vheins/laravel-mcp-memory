@@ -41,5 +41,7 @@ class MemoryMcpServer extends Server
         MemoryResource::class,
         MemoryHistoryResource::class,
         SchemaResource::class,
+        Resources\DocsResource::class,
+        Resources\MemoryIndexResource::class,
     ];
 }
