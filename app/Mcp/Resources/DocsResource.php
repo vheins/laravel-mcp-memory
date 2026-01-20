@@ -125,10 +125,16 @@ All agents interacting with this MCP server MUST follow these rules:
     - Before creating a new memory, ALWAYS search (`memory-search`) to ensure it doesn't already exist.
     - Duplicate memories cause confusion and inconsistencies.
 
-3. **Read the Rules**:
+3. **Check the Index**:
+    - Before creating a new memory, read `memory://index`.
+    - Compare titles and metadata to see if a similar topic exists.
+    - If it exists, use `memory-update` instead of `memory-write`.
+    - NEVER rely on the index content for reasoning; it is for discovery only. Use `memory-search` to retrieve full content.
+
+4. **Read the Rules**:
     - You MUST read `docs://memory-rules` before writing any memory to ensure compliance with data quality standards.
 
-4. **Context Awareness**:
+5. **Context Awareness**:
     - Use `memory-search` to load relevant context into your conversation before answering complex user queries.
 MARKDOWN;
 
@@ -158,11 +164,18 @@ To maintain a high-quality knowledge base, adhere to the following rules when wr
 - **Rule**: Do not store temporary debugging info, session IDs, or scratchpad thoughts.
 - **Why**: Memory is for long-term persistence.
 
-### 4. Descriptive Titles
-- **Rule**: Titles should be searchable and summarize the content.
-- **Why**: Helps in quick identification during search results.
+### 4. Descriptive & Concise Titles
+- **Rule**: Title must describe the memory in one short sentence. Maximum 12 words. No explanation.
+- **Why**: Helps in quick identification during search results and index scanning.
+- **Good**: "Livewire SPA undefined uri error"
+- **Bad**: "Detailed explanation about how to fix Livewire error with steps"
 
-### 5. Proper Scoping
+### 5. Metadata Restrictions
+- **Rule**: Metadata must be optional, flat key-value pairs, contain only identifiers or tags, and never exceed 5 keys.
+- **Allowed**: `{"framework": "livewire", "type": "bugfix"}`
+- **Forbidden**: Summaries, reasoning, nested objects, or large arrays.
+
+### 6. Proper Scoping
 - **Rule**: Use the correct `scope_type`.
 - **System**: Global truths (e.g., "The app uses Laravel").
 - **Organization**: Team-specific knowledge.

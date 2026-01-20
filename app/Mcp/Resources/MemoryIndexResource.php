@@ -28,30 +28,59 @@ class MemoryIndexResource extends Resource
 
     public function description(): string
     {
-        return 'Discovery endpoint listing recent memories to help agents explore the knowledge base.';
+        return 'Discovery endpoint listing recent memories. Returns a JSON array of lightweight objects for topic discovery and de-duplication. NEVER contains full content.';
     }
 
     public function handle(Request $request): Response
     {
-        // Fetch recent memories to give the agent a "glance" at what's in the system
-        // Limit to 20 to avoid overwhelming the context window
-        $recentMemories = Memory::query()
+        // Strict field selection based on Memory Index Policy
+        // forbidden: current_content
+        $memories = Memory::query()
             ->latest()
-            ->limit(20)
+            ->limit(50) // Expanded limit for better discovery since payload is lighter
             ->get()
-            ->map(fn (Memory $memory) => sprintf(
-                "- [%s] %s (Type: %s, Scope: %s, ID: %s)",
-                $memory->created_at->format('Y-m-d'),
-                $memory->title,
-                $memory->memory_type->value,
-                $memory->scope_type->value,
-                $memory->id
-            ))
-            ->implode("\n");
+            ->map(fn (Memory $memory) => [
+                'id' => $memory->id,
+                'title' => $memory->title,
+                'scope_type' => $memory->scope_type->value,
+                'memory_type' => $memory->memory_type->value,
+                'importance' => (int) $memory->importance,
+                'status' => $memory->status->value,
+                'repository' => $memory->repository,
+                'organization' => $memory->organization,
+                'updated_at' => $memory->updated_at->toIso8601String(),
+                'metadata' => $this->filterMetadata($memory->metadata ?? []),
+            ])
+            ->values()
+            ->toArray();
 
-        $content = "Here are the most recent memories stored in the system (up to 20):\n\n" .
-                   ($recentMemories ?: "No memories found.");
+        // Return structured JSON data
+        return Response::json($memories)
+            ->withMeta(['type' => 'index', 'count' => count($memories)]);
+    }
 
-        return Response::text($content)->withMeta(['type' => 'index']);
+    protected function filterMetadata(array $metadata): array
+    {
+        // Metadata Rules: short, flat key-value, max 5 keys
+        $filtered = [];
+        $count = 0;
+
+        foreach ($metadata as $key => $value) {
+            if ($count >= 5) {
+                break;
+            }
+
+            // Only allow scalar values (string, int, bool)
+            if (is_scalar($value)) {
+                // Truncate long strings just in case
+                if (is_string($value) && strlen($value) > 50) {
+                    $value = substr($value, 0, 47) . '...';
+                }
+                $filtered[$key] = $value;
+                $count++;
+            }
+        }
+
+        return $filtered;
     }
 }

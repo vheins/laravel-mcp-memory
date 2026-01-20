@@ -29,7 +29,7 @@ class WriteMemoryTool extends Tool
             'id' => $schema->string()->format('uuid')->description('UUID of the memory to update. Leave this field empty if you are creating a NEW memory entry.'),
             'organization' => $schema->string()->description('The organization slug to which this memory belongs (e.g., "my-org"). Required for validation.')->required(),
             'repository' => $schema->string()->description('The specific repository slug (e.g., "frontend-repo") if this memory is project-specific.'),
-            'title' => $schema->string()->description('A concise summary of the memory content, used for quick identification.'),
+            'title' => $schema->string()->description('A concise summary of the memory content. Rule: Max 12 words, no explanation, no proper sentences.'),
             'scope_type' => $schema->string()
                 ->enum(array_column(\App\Enums\MemoryScope::cases(), 'value'))
                 ->description('The visibility scope: "system" for global rules, "organization" for team-wide knowledge, or "user" for private context.')
@@ -44,7 +44,7 @@ class WriteMemoryTool extends Tool
                 ->default(\App\Enums\MemoryStatus::Draft->value)
                 ->description('The lifecycle status: "draft" (default), "active" (verified), or "archived".'),
             'importance' => $schema->number()->min(1)->max(10)->description('Set the priority level (1-10). Default is 1. Higher values are returned first in searches.'),
-            'metadata' => $schema->object()->description('Arbitrary JSON key-value pairs for additional context or tagging (e.g., {"tags": ["ui", "v2"]}).'),
+            'metadata' => $schema->object()->description('Arbitrary JSON key-value pairs. Rule: Max 5 keys, flat key-values only, no nested objects, no long text.'),
         ];
     }
 

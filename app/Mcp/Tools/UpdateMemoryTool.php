@@ -27,7 +27,7 @@ class UpdateMemoryTool extends Tool
     {
         return [
             'id' => $schema->string()->format('uuid')->description('The unique UUID of the memory entry you wish to update.')->required(),
-            'title' => $schema->string()->description('A new summary title for the memory. optional.'),
+            'title' => $schema->string()->description('A new summary title. Rule: Max 12 words, no explanation.'),
             'current_content' => $schema->string()->description('The new text content. Replaces the existing content entirely.'),
             'status' => $schema->string()
                 ->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))
@@ -39,7 +39,7 @@ class UpdateMemoryTool extends Tool
                 ->enum(array_column(\App\Enums\MemoryType::cases(), 'value'))
                 ->description('Reclassify the memory type (e.g., from "fact" to "business_rule").'),
             'importance' => $schema->number()->min(1)->max(10)->description('Adjust the priority level (1-10). Higher importance boosts vector search ranking.'),
-            'metadata' => $schema->object()->description('Merge or replace metadata keys. Provide the complete object if replacing.'),
+            'metadata' => $schema->object()->description('Merge or replace metadata keys. Rule: Max 5 keys, flat key-values only, no nested objects.'),
         ];
     }
 

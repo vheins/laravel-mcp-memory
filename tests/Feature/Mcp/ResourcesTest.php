@@ -64,7 +64,9 @@ test('memory index resource returns recent memories', function () {
         'current_content' => 'Content A',
         'organization' => 'test-org',
         'scope_type' => 'system',
-        'memory_type' => 'fact'
+        'memory_type' => 'fact',
+        'importance' => 5,
+        'metadata' => ['key1' => 'val1', 'key2' => 'val2', 'long' => str_repeat('a', 100)]
     ]);
 
     $resource = new MemoryIndexResource();
@@ -72,8 +74,17 @@ test('memory index resource returns recent memories', function () {
 
     $response = $resource->handle($request);
 
-    expect((string) $response->content())->toContain('Test Memory A')
-        ->and($response->content()->toArray()['_meta']['type'])->toBe('index');
+    // Verify JSON response
+    $data = json_decode((string) $response->content(), true);
+
+    expect($data)->toBeArray()
+        ->and($data[0]['title'])->toBe('Test Memory A')
+        ->and($data[0]['importance'])->toBe(5)
+        ->and($data[0]['metadata'])->toHaveCount(3)
+        ->and(strlen($data[0]['metadata']['long']))->toBeLessThan(55) // 47 + ...
+        ->and($data[0])->not->toHaveKey('current_content') // Content forbidden
+        ->and($response->content()->toArray()['_meta']['type'])->toBe('index')
+        ->and($response->content()->toArray()['_meta']['count'])->toBe(1);
 });
 
 test('memory index handles empty state', function () {
@@ -82,5 +93,6 @@ test('memory index handles empty state', function () {
 
     $response = $resource->handle($request);
 
-    expect((string) $response->content())->toContain('No memories found');
+    $data = json_decode((string) $response->content(), true);
+    expect($data)->toBeArray()->toBeEmpty();
 });
