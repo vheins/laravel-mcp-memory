@@ -44,6 +44,6 @@ it('can read the schema resource', function () {
     $response->assertJsonPath('result.contents.0.text', function ($text) {
         if (is_null($text)) return false;
         $data = json_decode((string)$text, true);
-        return isset($data['memory_types']) && isset($data['memory_statuses']);
+        return isset($data['enums']['MemoryType']) && isset($data['attributes']);
     });
 });
