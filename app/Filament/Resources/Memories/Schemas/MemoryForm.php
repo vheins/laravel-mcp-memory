@@ -71,6 +71,7 @@ class MemoryForm
                         \Filament\Forms\Components\TextInput::make('title')
                             ->label('Title')
                             ->placeholder('Brief summary of the memory')
+                            ->required()
                             ->columnSpanFull(),
                         \Filament\Forms\Components\Textarea::make('current_content')
                             ->label('Content')
@@ -82,6 +83,7 @@ class MemoryForm
                         \Filament\Forms\Components\Select::make('relatedMemories')
                             ->label('Related Memories (Knowledge Graph)')
                             ->relationship('relatedMemories', 'title')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->title ?? substr($record->current_content, 0, 50) . '...')
                             ->multiple()
                             ->searchable()
                             ->preload()
