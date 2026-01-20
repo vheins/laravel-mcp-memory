@@ -22,6 +22,10 @@ class CreateMemory extends CreateRecord
                         ->required()
                         ->rows(4)
                         ->placeholder('e.g., Create a documentation for the Auth authentication flow...'),
+                    \Filament\Forms\Components\ViewField::make('ai_loader')
+                        ->view('filament.resources.memories.components.ai-loader')
+                        ->hiddenLabel()
+                        ->dehydrated(false),
                 ])
                 ->action(function (array $data, \App\Services\GeminiService $geminiService) {
                     try {

@@ -54,6 +54,10 @@ class EditMemory extends EditRecord
                         ->required()
                         ->default('Improve grammar and clarity.')
                         ->rows(4),
+                    \Filament\Forms\Components\ViewField::make('ai_loader')
+                        ->view('filament.resources.memories.components.ai-loader')
+                        ->hiddenLabel()
+                        ->dehydrated(false),
                 ])
                 ->action(function (array $data, \App\Models\Memory $record) {
                      $geminiService = app(\App\Services\GeminiService::class);
