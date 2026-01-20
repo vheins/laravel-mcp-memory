@@ -5,11 +5,9 @@ namespace App\Filament\Resources\Memories\Tables;
 use App\Models\Memory;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class MemoriesTable
@@ -40,6 +38,15 @@ class MemoriesTable
                     }),
                 TextColumn::make('scope_type')
                     ->badge(),
+                TextColumn::make('importance')
+                    ->badge()
+                    ->numeric()
+                    ->sortable()
+                    ->color(fn (int $state): string => match (true) {
+                        $state >= 8 => 'danger',
+                        $state >= 5 => 'warning',
+                        default => 'info',
+                    }),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

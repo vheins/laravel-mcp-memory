@@ -55,6 +55,8 @@ class MemoryService
                     'current_content' => $content,
                     'title' => $data['title'] ?? $memory->title,
                     'status' => $data['status'] ?? $memory->status,
+                    'importance' => $data['importance'] ?? $memory->importance,
+                    'embedding' => $data['embedding'] ?? $memory->embedding,
                     'metadata' => $data['metadata'] ?? $memory->metadata,
                     // We typically don't update structural keys like organization/repo/user, but if needed:
                     // 'organization' => $data['organization'] ?? $memory->organization, etc.
@@ -71,6 +73,8 @@ class MemoryService
                     'memory_type' => $data['memory_type'],
                     'created_by_type' => $data['created_by_type'] ?? $actorType,
                     'status' => $data['status'] ?? 'draft',
+                    'importance' => $data['importance'] ?? 1,
+                    'embedding' => $data['embedding'] ?? null,
                     'current_content' => $content,
                     'metadata' => $data['metadata'] ?? null,
                 ]);
@@ -97,6 +101,96 @@ class MemoryService
 
             return $memory;
         });
+    }
+
+    /**
+     * Bulk create or update memories.
+     */
+    public function bulkWrite(array $items, string $actorId, string $actorType = 'human'): array
+    {
+        return DB::transaction(function () use ($items, $actorId, $actorType) {
+            $results = [];
+            foreach ($items as $item) {
+                $results[] = $this->write($item, $actorId, $actorType);
+            }
+
+            return $results;
+        });
+    }
+
+    /**
+     * Link two memories.
+     */
+    public function linkMemories(string $sourceId, string $targetId, string $type = 'related'): void
+    {
+        $source = Memory::findOrFail($sourceId);
+        $target = Memory::findOrFail($targetId);
+
+        $source->relatedMemories()->syncWithoutDetaching([
+            $targetId => ['relation_type' => $type],
+        ]);
+
+        // Bi-directional link for 'related' type
+        if ($type === 'related') {
+            $target->relatedMemories()->syncWithoutDetaching([
+                $sourceId => ['relation_type' => $type],
+            ]);
+        }
+    }
+
+    /**
+     * Perform vector search by calculating cosine similarity on the server.
+     */
+    public function vectorSearch(array $inputEmbedding, ?string $repository = null, array $filters = [], float $threshold = 0.5): \Illuminate\Support\Collection
+    {
+        // 1. Get base search results (to apply scope isolation)
+        $candidates = $this->search($repository, null, $filters);
+
+        // 2. Calculate similarity and rank
+        return $candidates->map(function (Memory $memory) use ($inputEmbedding) {
+            if (! $memory->embedding) {
+                $memory->similarity = 0;
+                $memory->rank_score = 0;
+
+                return $memory;
+            }
+
+            $memory->similarity = $this->cosineSimilarity($inputEmbedding, $memory->embedding);
+
+            // Calculate a weighted rank score:
+            // 60% similarity, 30% importance (scaled 0-1), 10% recency
+            $importanceFactor = $memory->importance / 10;
+
+            // Recency factor: 1.0 for now, 0.5 as it gets older (linear decay over 30 days)
+            $ageInDays = $memory->created_at->diffInDays(now());
+            $recencyFactor = max(0.5, 1 - ($ageInDays / 60));
+
+            $memory->rank_score = ($memory->similarity * 0.6) + ($importanceFactor * 0.3) + ($recencyFactor * 0.1);
+
+            return $memory;
+        })
+            ->filter(fn ($m) => $m->similarity >= $threshold)
+            ->sortByDesc('rank_score')
+            ->values();
+    }
+
+    protected function cosineSimilarity(array $vec1, array $vec2): float
+    {
+        $dotProduct = 0;
+        $norm1 = 0;
+        $norm2 = 0;
+
+        foreach ($vec1 as $i => $val) {
+            $dotProduct += $val * ($vec2[$i] ?? 0);
+            $norm1 += $val * $val;
+            $norm2 += ($vec2[$i] ?? 0) * ($vec2[$i] ?? 0);
+        }
+
+        if ($norm1 == 0 || $norm2 == 0) {
+            return 0;
+        }
+
+        return $dotProduct / (sqrt($norm1) * sqrt($norm2));
     }
 
     public function read(string $id): Memory
@@ -196,10 +290,10 @@ class MemoryService
             $q->where('status', $filters['status']);
         }
 
-        // Order by priority (User > Repo > Org > System) or Recency which is simpler.
-        // Usually relevant memories are most specific.
-        // Let's order by created_at desc for now as requested by user initially.
-        $results = $q->orderByDesc('created_at')->get();
+        // Order by Importance (desc) then Recency (desc)
+        $results = $q->orderByDesc('importance')
+            ->orderByDesc('created_at')
+            ->get();
 
         return $results;
     }

@@ -21,7 +21,11 @@ class MemoryForm
                             ->relationship('userRel', 'name')
                             ->searchable()
                             ->preload(),
-                        \Filament\Schemas\Components\Grid::make(3)
+                        \Filament\Forms\Components\TextInput::make('organization')
+                            ->label('Organization')
+                            ->placeholder('e.g. vheins')
+                            ->required(),
+                        \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
                                 \Filament\Forms\Components\Select::make('scope_type')
                                     ->options([
@@ -41,6 +45,9 @@ class MemoryForm
                                         'tech_stack' => 'Tech Stack',
                                     ])
                                     ->required(),
+                            ]),
+                        \Filament\Schemas\Components\Grid::make(2)
+                            ->schema([
                                 \Filament\Forms\Components\Select::make('status')
                                     ->options([
                                         'draft' => 'Draft',
@@ -51,6 +58,12 @@ class MemoryForm
                                     ])
                                     ->required()
                                     ->default('draft'),
+                                \Filament\Forms\Components\Slider::make('importance')
+                                    ->label('Importance Score')
+                                    ->min(1)
+                                    ->max(10)
+                                    ->step(1)
+                                    ->default(1),
                             ]),
                     ]),
                 \Filament\Schemas\Components\Section::make('Content')
@@ -66,11 +79,14 @@ class MemoryForm
                             ->columnSpanFull(),
                         \Filament\Forms\Components\KeyValue::make('metadata')
                             ->columnSpanFull(),
+                        \Filament\Forms\Components\Select::make('relatedMemories')
+                            ->label('Related Memories (Knowledge Graph)')
+                            ->relationship('relatedMemories', 'title')
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->columnSpanFull(),
                     ]),
-                \Filament\Forms\Components\TextInput::make('organization')
-                    ->label('Organization')
-                    ->placeholder('e.g. vheins')
-                    ->required(),
 
             ]);
     }

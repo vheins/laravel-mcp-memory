@@ -21,6 +21,8 @@ class Memory extends Model
         'scope_type',
         'memory_type',
         'status',
+        'importance',
+        'embedding',
         'created_by_type',
         'current_content',
         'metadata',
@@ -28,6 +30,8 @@ class Memory extends Model
 
     protected $casts = [
         'metadata' => 'array',
+        'embedding' => 'array',
+        'importance' => 'integer',
     ];
 
     // User relationship
@@ -44,6 +48,16 @@ class Memory extends Model
     public function auditLogs(): HasMany
     {
         return $this->hasMany(MemoryAuditLog::class);
+    }
+
+    public function relatedMemories(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            Memory::class,
+            'memory_relations',
+            'source_id',
+            'target_id'
+        )->withPivot('relation_type')->withTimestamps();
     }
 
     protected static function booted(): void

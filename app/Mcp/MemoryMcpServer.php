@@ -6,9 +6,12 @@ namespace App\Mcp;
 
 use App\Mcp\Resources\MemoryHistoryResource;
 use App\Mcp\Resources\MemoryResource;
+use App\Mcp\Tools\BatchWriteMemoryTool;
 use App\Mcp\Tools\DeleteMemoryTool;
+use App\Mcp\Tools\LinkMemoriesTool;
 use App\Mcp\Tools\SearchMemoriesTool;
 use App\Mcp\Tools\UpdateMemoryTool;
+use App\Mcp\Tools\VectorSearchTool;
 use App\Mcp\Tools\WriteMemoryTool;
 use Laravel\Mcp\Server;
 
@@ -28,6 +31,9 @@ class MemoryMcpServer extends Server
         UpdateMemoryTool::class,
         DeleteMemoryTool::class,
         SearchMemoriesTool::class,
+        BatchWriteMemoryTool::class,
+        LinkMemoriesTool::class,
+        VectorSearchTool::class,
     ];
 
     protected array $resources = [
