@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Memory;
+use App\Models\MemoryAccessLog;
 use App\Models\MemoryAuditLog;
 use App\Models\MemoryVersion;
 use App\Rules\ImmutableTypeRule;
@@ -99,6 +100,15 @@ class MemoryService
                 'new_value' => $memory->fresh()->toArray(),
             ]);
 
+            // Access Log
+            $this->logAccess(
+                $isNew ? 'create' : 'update',
+                $actorId,
+                $actorType,
+                $memory->id,
+                ['title' => $memory->title]
+            );
+
             return $memory;
         });
     }
@@ -145,6 +155,16 @@ class MemoryService
     {
         // 1. Get base search results (to apply scope isolation)
         $candidates = $this->search($repository, null, $filters);
+
+        // Access Log for Vector Search
+        // We log it here because search() is called internally but we want to capture the vector aspect
+        // Note: search() will also log a 'search' event, which might be double logging.
+        // To avoid double logging, we could add a flag to search() or just accept it.
+        // For now, logging specific vector search is useful.
+        $this->logAccess('vector_search', 'system', 'ai', null, [
+            'repository' => $repository,
+            'filters' => $filters,
+        ]);
 
         // 2. Calculate similarity and rank
         return $candidates->map(function (Memory $memory) use ($inputEmbedding) {
@@ -193,9 +213,13 @@ class MemoryService
         return $dotProduct / (sqrt($norm1) * sqrt($norm2));
     }
 
-    public function read(string $id): Memory
+    public function read(string $id, ?string $actorId = null, ?string $actorType = null): Memory
     {
-        return Memory::with(['versions', 'auditLogs'])->findOrFail($id);
+        $memory = Memory::with(['versions', 'auditLogs'])->findOrFail($id);
+
+        $this->logAccess('read', $actorId, $actorType, $memory->id, ['title' => $memory->title]);
+
+        return $memory;
     }
 
     /**
@@ -205,8 +229,14 @@ class MemoryService
      * @param  string  $repositoryId  (UUID of repository)
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function search(?string $repository, ?string $query = null, array $filters = [])
+    public function search(?string $repository, ?string $query = null, array $filters = [], ?string $actorId = null, ?string $actorType = null)
     {
+        $this->logAccess('search', $actorId, $actorType, null, [
+            'repository' => $repository,
+            'query' => $query,
+            'filters' => $filters,
+        ]);
+
         // 1. Resolve Hierarchy Context
         $orgId = $filters['organization'] ?? null;
         if (! $orgId && $repository) {
@@ -318,6 +348,22 @@ class MemoryService
             'old_value' => $oldValue,
             'new_value' => $newValue,
         ]);
+    }
+
+    protected function logAccess(string $action, ?string $actorId = null, ?string $actorType = null, ?string $resourceId = null, ?array $metadata = null): void
+    {
+        try {
+            MemoryAccessLog::create([
+                'actor_id' => $actorId,
+                'actor_type' => $actorType,
+                'action' => $action,
+                'resource_id' => $resourceId,
+                'metadata' => $metadata,
+            ]);
+        } catch (\Exception $e) {
+            // Fail silently to not disrupt the main flow
+            // Log::error('Failed to log memory access: ' . $e->getMessage());
+        }
     }
 
     /**

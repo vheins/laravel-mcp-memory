@@ -11,7 +11,6 @@ use App\Models\Taxonomy;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class TaxonomyResource extends Resource
@@ -20,7 +19,7 @@ class TaxonomyResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Knowledge Base';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
     public static function form(Schema $schema): Schema
     {
