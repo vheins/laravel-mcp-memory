@@ -32,6 +32,13 @@ class UpdateMemoryTool extends Tool
             'status' => $schema->string()
                 ->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))
                 ->description('Update the status (e.g., promote "draft" to "active" after verification).'),
+            'scope_type' => $schema->string()
+                ->enum(array_column(\App\Enums\MemoryScope::cases(), 'value'))
+                ->description('Change the visibility scope (e.g., move from "user" to "organization" for shared knowledge).'),
+            'memory_type' => $schema->string()
+                ->enum(array_column(\App\Enums\MemoryType::cases(), 'value'))
+                ->description('Reclassify the memory type (e.g., from "fact" to "business_rule").'),
+            'importance' => $schema->number()->min(1)->max(10)->description('Adjust the priority level (1-10). Higher importance boosts vector search ranking.'),
             'metadata' => $schema->object()->description('Merge or replace metadata keys. Provide the complete object if replacing.'),
         ];
     }

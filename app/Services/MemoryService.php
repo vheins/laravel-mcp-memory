@@ -73,6 +73,8 @@ class MemoryService
                     'title' => $data['title'] ?? $memory->title,
                     'status' => $data['status'] ?? $memory->status,
                     'importance' => $data['importance'] ?? $memory->importance,
+                    'scope_type' => $data['scope_type'] ?? $memory->scope_type,
+                    'memory_type' => $data['memory_type'] ?? $memory->memory_type,
                     'embedding' => $data['embedding'] ?? $memory->embedding,
                     'metadata' => $data['metadata'] ?? $memory->metadata,
                     // We typically don't update structural keys like organization/repo/user, but if needed:

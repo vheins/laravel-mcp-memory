@@ -43,6 +43,7 @@ class WriteMemoryTool extends Tool
                 ->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))
                 ->default(\App\Enums\MemoryStatus::Draft->value)
                 ->description('The lifecycle status: "draft" (default), "active" (verified), or "archived".'),
+            'importance' => $schema->number()->min(1)->max(10)->description('Set the priority level (1-10). Default is 1. Higher values are returned first in searches.'),
             'metadata' => $schema->object()->description('Arbitrary JSON key-value pairs for additional context or tagging (e.g., {"tags": ["ui", "v2"]}).'),
         ];
     }
