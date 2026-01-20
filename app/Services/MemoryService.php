@@ -5,22 +5,15 @@ namespace App\Services;
 use App\Models\Memory;
 use App\Models\MemoryAuditLog;
 use App\Models\MemoryVersion;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
-
 use App\Rules\ImmutableTypeRule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class MemoryService
 {
     /**
      * Create or update a memory.
-     *
-     * @param array $data
-     * @param string $actorId
-     * @param string $actorType
-     * @return Memory
      */
     public function write(array $data, string $actorId, string $actorType = 'human'): Memory
     {
@@ -47,7 +40,7 @@ class MemoryService
                         'memory_type' => [$rule],
                     ]);
                     if ($validator->fails()) {
-                         throw new \Illuminate\Validation\ValidationException($validator);
+                        throw new \Illuminate\Validation\ValidationException($validator);
                     }
                 }
 
@@ -60,6 +53,7 @@ class MemoryService
 
                 $memory->update([
                     'current_content' => $content,
+                    'title' => $data['title'] ?? $memory->title,
                     'status' => $data['status'] ?? $memory->status,
                     'metadata' => $data['metadata'] ?? $memory->metadata,
                     // We typically don't update structural keys like organization/repo/user, but if needed:
@@ -71,6 +65,7 @@ class MemoryService
                     'id' => $data['id'] ?? Str::uuid()->toString(),
                     'organization' => $data['organization'],
                     'repository' => $data['repository'] ?? null,
+                    'title' => $data['title'] ?? null,
                     'user_id' => $data['user_id'] ?? $data['user'] ?? null,
                     'scope_type' => $data['scope_type'],
                     'memory_type' => $data['memory_type'],
@@ -109,34 +104,50 @@ class MemoryService
         return Memory::with(['versions', 'auditLogs'])->findOrFail($id);
     }
 
-
     /**
      * Search memories with hierarchy resolution.
      * Hierarchy: System -> Organization -> Repository -> User
      *
-     * @param string $repositoryId (UUID of repository)
-     * @param string|null $query
-     * @param array $filters
+     * @param  string  $repositoryId  (UUID of repository)
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function search(?string $repository, ?string $query = null, array $filters = [])
     {
         // 1. Resolve Hierarchy Context
-        // Since organization/repository are now strings, we match them directly.
-        // If we want to support hierarchy, we might need a way to link repo -> org as strings.
-        // For now, we assume the provided $repository string is the context.
+        $orgId = $filters['organization'] ?? null;
+        if (! $orgId && $repository) {
+            // Try to find the repository model to get its organization
+            $repoModel = \App\Models\Repository::where('id', $repository)
+                ->orWhere('slug', $repository)
+                ->first();
+
+            if ($repoModel) {
+                $orgId = $repoModel->organization_id;
+            } elseif (str_contains($repository, '/')) {
+                // Infer organization from owner/repo slug
+                $orgId = explode('/', $repository)[0];
+            }
+        }
+
         $userId = $filters['user_id'] ?? $filters['user'] ?? null;
 
         $q = Memory::query();
 
         // 2. Apply Scope Isolation only if context is provided
-        // If no repository or user is specified, we perform a "Full Search" as requested.
-        if ($repository || $userId) {
-            $q->where(function ($group) use ($repository, $userId) {
+        if ($repository || $userId || $orgId) {
+            $q->where(function ($group) use ($repository, $userId, $orgId) {
                 // System Scope (Global)
                 $group->where(function ($sub) {
                     $sub->where('scope_type', 'system');
                 });
+
+                // Organization Scope
+                if ($orgId) {
+                    $group->orWhere(function ($sub) use ($orgId) {
+                        $sub->where('scope_type', 'organization')
+                            ->where('organization', $orgId);
+                    });
+                }
 
                 // Repository Scope
                 if ($repository) {
@@ -156,9 +167,9 @@ class MemoryService
                             ->where('user_id', $userId);
 
                         if ($repository) {
-                            $sub->where(function($s) use ($repository) {
+                            $sub->where(function ($s) use ($repository) {
                                 $s->where('repository', $repository)
-                                  ->orWhereNull('repository');
+                                    ->orWhereNull('repository');
                             });
                         }
                     });
@@ -189,6 +200,7 @@ class MemoryService
         // Usually relevant memories are most specific.
         // Let's order by created_at desc for now as requested by user initially.
         $results = $q->orderByDesc('created_at')->get();
+
         return $results;
     }
 
@@ -213,6 +225,7 @@ class MemoryService
             'new_value' => $newValue,
         ]);
     }
+
     /**
      * Create a new class instance.
      */

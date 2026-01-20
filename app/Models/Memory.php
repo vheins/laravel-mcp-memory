@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,6 +16,7 @@ class Memory extends Model
     protected $fillable = [
         'organization',
         'repository',
+        'title',
         'user_id',
         'scope_type',
         'memory_type',
@@ -47,6 +48,12 @@ class Memory extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (Memory $memory) {
+            if (! $memory->created_by_type) {
+                $memory->created_by_type = 'human';
+            }
+        });
+
         static::updating(function (Memory $memory) {
             if ($memory->original['status'] === 'locked' && $memory->isDirty('current_content')) {
                 throw new \Exception('Cannot update locked memory.');

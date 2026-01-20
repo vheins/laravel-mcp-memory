@@ -11,29 +11,25 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Exceptions\JsonRpcException;
 use Laravel\Mcp\Server\Tool;
 
-class WriteMemoryTool extends Tool
+class UpdateMemoryTool extends Tool
 {
     public function name(): string
     {
-        return 'memory-write';
+        return 'memory-update';
     }
 
     public function description(): string
     {
-        return 'Create a new memory entry. Supports facts, preferences, and business rules.';
+        return 'Update an existing memory entry by its UUID.';
     }
 
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id' => $schema->string()->format('uuid')->description('UUID of the memory to update (leave empty for new entry).'),
-            'organization' => $schema->string()->description('Organization name/slug.')->required(),
-            'repository' => $schema->string()->description('Repository name/slug.'),
-            'title' => $schema->string()->description('Brief summary of the memory.'),
-            'scope_type' => $schema->string()->enum(['system', 'repository', 'user'])->description('Visibility scope of the memory.')->required(),
-            'memory_type' => $schema->string()->enum(['fact', 'preference', 'business_rule', 'system_constraint'])->description('Categorization of the memory.')->required(),
-            'current_content' => $schema->string()->description('The text content to store.')->required(),
-            'status' => $schema->string()->enum(['draft', 'published', 'locked'])->default('draft'),
+            'id' => $schema->string()->format('uuid')->description('UUID of the memory to update.')->required(),
+            'title' => $schema->string()->description('Updated brief summary of the memory.'),
+            'current_content' => $schema->string()->description('Updated text content.'),
+            'status' => $schema->string()->enum(['draft', 'published', 'locked']),
             'metadata' => $schema->object()->description('Additional key-value pairs.'),
         ];
     }

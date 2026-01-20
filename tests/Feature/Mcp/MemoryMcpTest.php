@@ -21,8 +21,9 @@ it('can discover tools', function () {
 
     $response->assertStatus(200)
         ->assertJsonPath('result.tools.0.name', 'memory-write')
-        ->assertJsonPath('result.tools.1.name', 'memory-delete')
-        ->assertJsonPath('result.tools.2.name', 'memory-search');
+        ->assertJsonPath('result.tools.1.name', 'memory-update')
+        ->assertJsonPath('result.tools.2.name', 'memory-delete')
+        ->assertJsonPath('result.tools.3.name', 'memory-search');
 });
 
 it('can discover resource templates', function () {

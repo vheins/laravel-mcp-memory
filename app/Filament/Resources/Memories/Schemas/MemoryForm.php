@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Memories\Schemas;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 
 class MemoryForm
@@ -57,6 +55,10 @@ class MemoryForm
                     ]),
                 \Filament\Schemas\Components\Section::make('Content')
                     ->schema([
+                        \Filament\Forms\Components\TextInput::make('title')
+                            ->label('Title')
+                            ->placeholder('Brief summary of the memory')
+                            ->columnSpanFull(),
                         \Filament\Forms\Components\Textarea::make('current_content')
                             ->label('Content')
                             ->rows(5)

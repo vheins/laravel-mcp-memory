@@ -59,12 +59,13 @@ it('can create a memory', function () {
 
     Livewire::test(CreateMemory::class)
         ->fillForm([
+            'organization' => $orgId,
             'repository' => $repository->id,
             'scope_type' => 'repository',
             'memory_type' => 'business_rule',
             'status' => 'draft',
             'current_content' => 'New Content',
-            'user' => $user->id,
+            'user_id' => $user->id,
         ])
         ->call('create')
         ->assertHasNoFormErrors();

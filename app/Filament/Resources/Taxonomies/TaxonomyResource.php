@@ -29,7 +29,8 @@ class TaxonomyResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return TaxonomiesTable::configure($table);
+        return TaxonomiesTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

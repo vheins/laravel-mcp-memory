@@ -8,6 +8,7 @@ use App\Mcp\Resources\MemoryHistoryResource;
 use App\Mcp\Resources\MemoryResource;
 use App\Mcp\Tools\DeleteMemoryTool;
 use App\Mcp\Tools\SearchMemoriesTool;
+use App\Mcp\Tools\UpdateMemoryTool;
 use App\Mcp\Tools\WriteMemoryTool;
 use Laravel\Mcp\Server;
 
@@ -24,6 +25,7 @@ class MemoryMcpServer extends Server
 
     protected array $tools = [
         WriteMemoryTool::class,
+        UpdateMemoryTool::class,
         DeleteMemoryTool::class,
         SearchMemoriesTool::class,
     ];

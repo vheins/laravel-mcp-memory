@@ -29,7 +29,8 @@ class ConfigurationResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return ConfigurationsTable::configure($table);
+        return ConfigurationsTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

@@ -29,7 +29,8 @@ class PermissionResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return PermissionsTable::configure($table);
+        return PermissionsTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

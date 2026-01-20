@@ -29,7 +29,8 @@ class MediaResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return MediaTable::configure($table);
+        return MediaTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

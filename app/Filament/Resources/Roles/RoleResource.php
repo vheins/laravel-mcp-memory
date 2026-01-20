@@ -29,7 +29,8 @@ class RoleResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return RolesTable::configure($table);
+        return RolesTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

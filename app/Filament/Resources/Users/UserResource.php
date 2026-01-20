@@ -29,7 +29,8 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return UsersTable::configure($table);
+        return UsersTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array
