@@ -25,7 +25,7 @@ class DeleteMemoryTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id' => $schema->string()->format('uuid')->description('UUID of the memory to delete.')->required(),
+            'id' => $schema->string()->format('uuid')->description('The UUID of the memory entry to perform a soft-delete on.')->required(),
         ];
     }
 

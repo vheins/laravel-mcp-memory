@@ -26,11 +26,13 @@ class UpdateMemoryTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id' => $schema->string()->format('uuid')->description('UUID of the memory to update.')->required(),
-            'title' => $schema->string()->description('Updated brief summary of the memory.'),
-            'current_content' => $schema->string()->description('Updated text content.'),
-            'status' => $schema->string()->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value')),
-            'metadata' => $schema->object()->description('Additional key-value pairs.'),
+            'id' => $schema->string()->format('uuid')->description('The unique UUID of the memory entry you wish to update.')->required(),
+            'title' => $schema->string()->description('A new summary title for the memory. optional.'),
+            'current_content' => $schema->string()->description('The new text content. Replaces the existing content entirely.'),
+            'status' => $schema->string()
+                ->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))
+                ->description('Update the status (e.g., promote "draft" to "active" after verification).'),
+            'metadata' => $schema->object()->description('Merge or replace metadata keys. Provide the complete object if replacing.'),
         ];
     }
 

@@ -253,8 +253,10 @@ it('enforces immutable types for AI updates', function () {
         'id' => 1,
     ]);
 
+    // Expect an error because AI cannot write system_constraints
     $response->assertStatus(200);
-    $this->assertDatabaseHas('memories', ['memory_type' => 'system_constraint']);
+    $response->assertJson(['error' => ['code' => -32000]]); // JSON-RPC error code
+    $this->assertDatabaseMissing('memories', ['memory_type' => 'system_constraint']);
 });
 
 it('can search memories without repository argument', function () {

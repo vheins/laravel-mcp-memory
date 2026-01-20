@@ -24,9 +24,12 @@ class LinkMemoriesTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'source_id' => $schema->string()->format('uuid')->description('Source memory UUID.')->required(),
-            'target_id' => $schema->string()->format('uuid')->description('Target memory UUID.')->required(),
-            'relation_type' => $schema->string()->enum(['related', 'conflicts', 'supports'])->default('related'),
+            'source_id' => $schema->string()->format('uuid')->description('The UUID of the source memory (the starting point of the relationship).')->required(),
+            'target_id' => $schema->string()->format('uuid')->description('The UUID of the target memory (the endpoint of the relationship).')->required(),
+            'relation_type' => $schema->string()
+                ->enum(['related', 'conflicts', 'supports'])
+                ->default('related')
+                ->description('The nature of the relationship: "related" (neutral connection), "conflicts" (contradictory info), or "supports" (strengthens validation).'),
         ];
     }
 

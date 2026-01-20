@@ -24,10 +24,10 @@ class VectorSearchTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'vector' => $schema->array()->items($schema->number())->description('Input embedding vector.')->required(),
-            'repository' => $schema->string()->description('Optional repository context.'),
-            'threshold' => $schema->number()->default(0.5)->description('Similarity threshold (0-1).'),
-            'filters' => $schema->object()->description('Optional filters (organization, status, etc.).'),
+            'vector' => $schema->array()->items($schema->number())->description('The 1536-dimensional embedding vector representing the search query.')->required(),
+            'repository' => $schema->string()->description('Limit search to a specific repository slug for context isolation.'),
+            'threshold' => $schema->number()->default(0.5)->description('Similarity threshold (0.0 to 1.0). Higher values return closer matches but fewer results.'),
+            'filters' => $schema->object()->description('Structured filters to refine results (e.g., {"status": "active"}).'),
         ];
     }
 

@@ -26,18 +26,24 @@ class BatchWriteMemoryTool extends Tool
         return [
             'items' => $schema->array()->items(
                 $schema->object([
-                    'id' => $schema->string()->format('uuid')->description('Optional UUID for update.'),
-                    'organization' => $schema->string()->description('Organization ID (required for new).'),
-                    'repository' => $schema->string()->description('Optional repository context.'),
-                    'scope_type' => $schema->string()->enum(array_column(\App\Enums\MemoryScope::cases(), 'value')),
-                    'memory_type' => $schema->string()->enum(array_column(\App\Enums\MemoryType::cases(), 'value')),
-                    'title' => $schema->string(),
-                    'current_content' => $schema->string()->required(),
-                    'status' => $schema->string()->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value')),
-                    'importance' => $schema->number()->min(1)->max(10),
-                    'metadata' => $schema->object(),
-                ])
-            )->required(),
+                    'id' => $schema->string()->format('uuid')->description('UUID for updating an existing memory. Omit for creating a new one.'),
+                    'organization' => $schema->string()->description('The organization slug (required for new memories).'),
+                    'repository' => $schema->string()->description('The repository slug to associate with the memory.'),
+                    'scope_type' => $schema->string()
+                        ->enum(array_column(\App\Enums\MemoryScope::cases(), 'value'))
+                        ->description('Visibility: "system", "organization", or "user".'),
+                    'memory_type' => $schema->string()
+                        ->enum(array_column(\App\Enums\MemoryType::cases(), 'value'))
+                        ->description('Type: "business_rule", "fact", "preference", etc.'),
+                    'title' => $schema->string()->description('A short, descriptive title.'),
+                    'current_content' => $schema->string()->description('The main content of the memory.')->required(),
+                    'status' => $schema->string()
+                        ->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))
+                        ->description('Status: "draft", "active", "archived".'),
+                    'importance' => $schema->number()->min(1)->max(10)->description('Priority level (1-10).'),
+                    'metadata' => $schema->object()->description('Custom key-value pairs.'),
+                ])->description('A memory object to create or update.')
+            )->description('List of memory objects to process in batch.')->required(),
         ];
     }
 
