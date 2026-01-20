@@ -120,8 +120,8 @@ class MemoryService
             $this->logAccess(
                 $isNew ? 'create' : 'update',
                 $actorId,
-                $actorType,
-                $memory->id,
+                null,
+                null,
                 ['title' => $memory->title]
             );
 
@@ -162,6 +162,12 @@ class MemoryService
                 $sourceId => ['relation_type' => $type],
             ]);
         }
+
+        $this->logAccess('link', auth()->id(), null, null, [
+            'source_id' => $sourceId,
+            'target_id' => $targetId,
+            'relation_type' => $type,
+        ]);
     }
 
     /**
@@ -172,15 +178,8 @@ class MemoryService
         // 1. Get base search results (to apply scope isolation)
         $candidates = $this->search(null, array_merge($filters, ['repository' => $repository]));
 
-        // Access Log for Vector Search
-        // We log it here because search() is called internally but we want to capture the vector aspect
-        // Note: search() will also log a 'search' event, which might be double logging.
-        // To avoid double logging, we could add a flag to search() or just accept it.
-        // For now, logging specific vector search is useful.
-        $this->logAccess('vector_search', 'system', 'ai', null, [
-            'repository' => $repository,
-            'filters' => $filters,
-        ]);
+        // search() above already logs access with the correct repository context.
+        $this->logAccess('vector_search', auth()->id(), null, $filters, ['repository' => $repository], $candidates->count());
 
         // 2. Calculate similarity and rank
         return $candidates->map(function (Memory $memory) use ($inputEmbedding) {
@@ -233,7 +232,7 @@ class MemoryService
     {
         $memory = Memory::with(['versions', 'auditLogs'])->findOrFail($id);
 
-        $this->logAccess('read', $actorId, $actorType, $memory->id, ['title' => $memory->title]);
+        $this->logAccess('read', $actorId, null, null, ['title' => $memory->title]);
 
         return $memory;
     }
@@ -252,12 +251,6 @@ class MemoryService
 
         $repository = $filters['repository'] ?? null;
 
-        $this->logAccess('search', auth()->id(), 'human', null, [
-            'repository' => $repository,
-            'query' => $query,
-            'filters' => $filters,
-        ]);
-
         // 1. Resolve Hierarchy Context
         $orgId = $filters['organization'] ?? null;
         if (! $orgId && $repository) {
@@ -268,11 +261,13 @@ class MemoryService
 
             if ($repoModel) {
                 $orgId = $repoModel->organization_id;
+                $repository = $repoModel->id; // Use ID for logs and subsequent steps
             } elseif (str_contains($repository, '/')) {
                 // Infer organization from owner/repo slug
                 $orgId = explode('/', $repository)[0];
             }
         }
+
 
         $userId = $filters['user_id'] ?? $filters['user'] ?? null;
 
@@ -354,7 +349,25 @@ class MemoryService
             ->orderByDesc('created_at')
             ->get();
 
+        $this->logAccess('search', auth()->id(), $query, $filters, ['repository' => $repository], $results->count());
+
         return $results;
+    }
+
+    /**
+     * Delete a memory entry.
+     */
+    public function delete(string $id, ?string $actorId = null, ?string $actorType = 'human'): bool
+    {
+        $memory = Memory::findOrFail($id);
+        $title = $memory->title;
+        $deleted = $memory->delete();
+
+        if ($deleted) {
+            $this->logAccess('delete', $actorId, null, null, ['title' => $title]);
+        }
+
+        return $deleted;
     }
 
     protected function createVersion(Memory $memory, string $content): void
@@ -379,19 +392,19 @@ class MemoryService
         ]);
     }
 
-    protected function logAccess(string $action, ?string $actorId = null, ?string $actorType = null, ?string $resourceId = null, ?array $metadata = null): void
+    protected function logAccess(string $action, ?string $actorId = null, ?string $query = null, ?array $filters = null, ?array $metadata = null, ?int $resultCount = null): void
     {
         try {
             MemoryAccessLog::create([
-                'actor_id' => auth()->id(),
-                'actor_type' => $actorType,
+                'actor_id' => $actorId ?? auth()->id(),
                 'action' => $action,
-                'resource_id' => $resourceId,
+                'query' => $query,
+                'filters' => $filters,
                 'metadata' => $metadata,
+                'result_count' => $resultCount,
             ]);
         } catch (\Exception $e) {
-            // Fail silently to not disrupt the main flow
-            // Log::error('Failed to log memory access: ' . $e->getMessage());
+            // Fail silently
         }
     }
 

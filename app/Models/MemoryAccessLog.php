@@ -13,15 +13,18 @@ class MemoryAccessLog extends Model
 
     protected $fillable = [
         'actor_id',
-        'actor_type',
         'action',
-        'resource_id',
+        'query',
+        'filters',
         'metadata',
+        'result_count',
         'created_at',
     ];
 
     protected $casts = [
+        'filters' => 'array',
         'metadata' => 'array',
+        'result_count' => 'integer',
         'created_at' => 'datetime',
     ];
 }
