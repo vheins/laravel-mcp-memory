@@ -25,6 +25,10 @@ class MemoryUserUsageChartWidget extends ChartWidget
             ->limit(5)
             ->get();
 
+        // Fetch user names for the actor_ids
+        $actorIds = $data->pluck('actor_id')->filter()->toArray();
+        $users = \App\Models\User::whereIn('id', $actorIds)->pluck('name', 'id');
+
         return [
             'datasets' => [
                 [
@@ -33,7 +37,9 @@ class MemoryUserUsageChartWidget extends ChartWidget
                     'backgroundColor' => '#8b5cf6', // violet
                 ],
             ],
-            'labels' => $data->map(fn ($row) => $row->actor_id ?? 'Unknown'),
+            'labels' => $data->map(function ($row) use ($users) {
+                return $users[$row->actor_id] ?? $row->actor_id ?? 'Unknown';
+            }),
         ];
     }
 
