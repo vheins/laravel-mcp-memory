@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Mcp\Tools;
 
 use App\Services\MemoryService;
+use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -27,12 +28,13 @@ class SearchMemoriesTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'repository' => $schema->string()->description('Repository slug to search within.'),
             'query' => $schema->string()->description('Text query to match against content.'),
             'filters' => $schema->object([
-                'user_id' => $schema->string()->description('Optional filter for a specific user ID.'),
+                'repository' => $schema->string()->description('Repository slug to search within.'),
                 'memory_type' => $schema->string()->enum(array_column(MemoryType::cases(), 'value')),
                 'status' => $schema->string()->enum(array_column(MemoryStatus::cases(), 'value')),
+                'scope_type' => $schema->string()->enum(array_column(MemoryScope::cases(), 'value')),
+                'metadata' => $schema->object()->description('Key-value pairs to filter by in metadata.'),
             ]),
         ];
     }
@@ -42,7 +44,6 @@ class SearchMemoriesTool extends Tool
         $filters = $request->get('filters', []);
 
         $results = $service->search(
-            $request->get('repository'),
             $request->get('query'),
             $filters
         );

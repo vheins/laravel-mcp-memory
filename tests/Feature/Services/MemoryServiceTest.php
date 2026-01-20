@@ -146,17 +146,17 @@ it('can search memories', function () {
     ], $this->user->id);
 
     // Search by content
-    $results = $this->service->search('test-repo', 'Apple');
+    $results = $this->service->search('Apple', ['repository' => 'test-repo']);
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($mem1->id);
 
     // Search by type
-    $results = $this->service->search('test-repo', null, ['memory_type' => MemoryType::Preference]);
+    $results = $this->service->search(null, ['repository' => 'test-repo', 'memory_type' => MemoryType::Preference]);
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($mem2->id);
 
     // Search by status
-    $results = $this->service->search('test-repo', null, ['status' => MemoryStatus::Verified]);
+    $results = $this->service->search(null, ['repository' => 'test-repo', 'status' => MemoryStatus::Verified]);
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($mem1->id);
 });
@@ -172,11 +172,11 @@ it('can search by metadata', function () {
         'status' => MemoryStatus::Active,
     ], $this->user->id);
 
-    $results = $this->service->search('test-repo', 'PHP');
+    $results = $this->service->search('PHP', ['repository' => 'test-repo']);
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($memory->id);
 
-    $results = $this->service->search('test-repo', '8.3');
+    $results = $this->service->search('8.3', ['repository' => 'test-repo']);
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($memory->id);
 });

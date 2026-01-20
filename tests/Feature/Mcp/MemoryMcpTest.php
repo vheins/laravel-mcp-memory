@@ -84,8 +84,10 @@ it('can search memories via tool (team context)', function () {
         'params' => [
             'name' => 'memory-search',
             'arguments' => [
-                'repository' => 'search-repo',
                 'query' => 'Team',
+                'filters' => [
+                    'repository' => 'search-repo',
+                ],
             ],
         ],
         'id' => 1,
@@ -181,8 +183,8 @@ it('can search memories with user hierarchy', function () {
         'params' => [
             'name' => 'memory-search',
             'arguments' => [
-                'repository' => 'hier-repo',
                 'filters' => [
+                    'repository' => 'hier-repo',
                     'user_id' => (string) $user->id,
                 ],
             ],
@@ -265,6 +267,7 @@ it('can search memories without repository argument', function () {
         'memory_type' => 'fact',
         'created_by_type' => 'human',
         'current_content' => 'Content in Repo A',
+        'status' => 'active',
     ]);
 
     Memory::create([
@@ -274,6 +277,7 @@ it('can search memories without repository argument', function () {
         'memory_type' => 'fact',
         'created_by_type' => 'human',
         'current_content' => 'Content in Repo B',
+        'status' => 'active',
     ]);
 
     $response = $this->postJson('/api/v1/mcp/memory', [

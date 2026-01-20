@@ -6,6 +6,7 @@ namespace App\Mcp;
 
 use App\Mcp\Resources\MemoryHistoryResource;
 use App\Mcp\Resources\MemoryResource;
+use App\Mcp\Resources\SchemaResource;
 use App\Mcp\Tools\BatchWriteMemoryTool;
 use App\Mcp\Tools\DeleteMemoryTool;
 use App\Mcp\Tools\LinkMemoriesTool;
@@ -39,5 +40,6 @@ class MemoryMcpServer extends Server
     protected array $resources = [
         MemoryResource::class,
         MemoryHistoryResource::class,
+        SchemaResource::class,
     ];
 }

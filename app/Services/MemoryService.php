@@ -170,7 +170,7 @@ class MemoryService
     public function vectorSearch(array $inputEmbedding, ?string $repository = null, array $filters = [], float $threshold = 0.5): \Illuminate\Support\Collection
     {
         // 1. Get base search results (to apply scope isolation)
-        $candidates = $this->search($repository, null, $filters);
+        $candidates = $this->search(null, array_merge($filters, ['repository' => $repository]));
 
         // Access Log for Vector Search
         // We log it here because search() is called internally but we want to capture the vector aspect
@@ -245,9 +245,14 @@ class MemoryService
      * @param  string  $repositoryId  (UUID of repository)
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function search(?string $repository, ?string $query = null, array $filters = [], ?string $actorId = null, ?string $actorType = null)
+    public function search(?string $query = null, array $filters = [])
     {
-        $this->logAccess('search', $actorId, $actorType, null, [
+        $actorId = $filters['actor_id'] ?? auth()->id();
+        $actorType = $filters['actor_type'] ?? 'human';
+
+        $repository = $filters['repository'] ?? null;
+
+        $this->logAccess('search', auth()->id(), 'human', null, [
             'repository' => $repository,
             'query' => $query,
             'filters' => $filters,
@@ -378,7 +383,7 @@ class MemoryService
     {
         try {
             MemoryAccessLog::create([
-                'actor_id' => $actorId,
+                'actor_id' => auth()->id(),
                 'actor_type' => $actorType,
                 'action' => $action,
                 'resource_id' => $resourceId,
