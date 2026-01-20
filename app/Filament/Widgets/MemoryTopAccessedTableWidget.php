@@ -12,24 +12,20 @@ class MemoryTopAccessedTableWidget extends TableWidget
         return $table
             ->query(
                 \App\Models\Memory::query()
-                    ->withCount('accessLogs')
-                    ->whereHas('accessLogs', fn ($q) => $q->where('created_at', '>=', now()->subDays(30)))
-                    ->orderByDesc('access_logs_count')
+                    ->latest()
                     ->limit(10)
             )
-            ->heading('Top Accessed Memories')
-            ->description('Most frequently accessed memories in the last 30 days.')
+            ->heading('Recent Memories')
+            ->description('Most recently created memories.')
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('title')
                     ->label('Memory Title')
                     ->searchable()
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('access_logs_count')
-                    ->label('Access Count (30d)')
-                    ->numeric()
-                    ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Last Updated')
+                \Filament\Tables\Columns\TextColumn::make('status')
+                    ->badge(),
+                \Filament\Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created At')
                     ->dateTime()
                     ->sortable(),
             ]);
