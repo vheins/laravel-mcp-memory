@@ -59,6 +59,7 @@ it('can create a memory', function () {
 
     Livewire::test(CreateMemory::class)
         ->fillForm([
+            'title' => 'Test Memory',
             'organization' => $orgId,
             'repository' => $repository->id,
             'scope_type' => 'repository',
@@ -102,6 +103,7 @@ it('can edit a memory', function () {
         'record' => $memory->getRouteKey(),
     ])
         ->fillForm([
+            'title' => 'Updated Title',
             'current_content' => 'Updated Content',
         ])
         ->call('save')

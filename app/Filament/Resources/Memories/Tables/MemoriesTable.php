@@ -33,13 +33,7 @@ class MemoriesTable
                     ->searchable()
                     ->placeholder('Global/System'),
                 TextColumn::make('memory_type')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'system_constraint' => 'danger',
-                        'business_rule' => 'warning',
-                        'decision_log' => 'info',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 TextColumn::make('scope_type')
                     ->badge(),
                 TextColumn::make('importance')
@@ -52,13 +46,7 @@ class MemoriesTable
                         default => 'info',
                     }),
                 TextColumn::make('status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'verified' => 'success',
-                        'locked' => 'danger',
-                        'deprecated' => 'gray',
-                        default => 'info',
-                    }),
+                    ->badge(),
             ])
             ->filters([
                 \Filament\Tables\Filters\TrashedFilter::make(),
