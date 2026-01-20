@@ -60,8 +60,8 @@ class MemoryForm
                                     ->default('draft'),
                                 \Filament\Forms\Components\Slider::make('importance')
                                     ->label('Importance Score')
-                                    ->min(1)
-                                    ->max(10)
+                                    ->minValue(1)
+                                    ->maxValue(10)
                                     ->step(1)
                                     ->default(1),
                             ]),
