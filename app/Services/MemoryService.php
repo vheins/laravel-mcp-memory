@@ -129,41 +129,52 @@ class MemoryService
 
         $q = Memory::query();
 
-        $q->where(function ($group) use ($repository, $userId) {
-            // System Scope (Global)
-            $group->where(function ($sub) {
-                $sub->where('scope_type', 'system');
+        // 2. Apply Scope Isolation only if context is provided
+        // If no repository or user is specified, we perform a "Full Search" as requested.
+        if ($repository || $userId) {
+            $q->where(function ($group) use ($repository, $userId) {
+                // System Scope (Global)
+                $group->where(function ($sub) {
+                    $sub->where('scope_type', 'system');
+                });
+
+                // Repository Scope
+                if ($repository) {
+                    $group->orWhere(function ($sub) use ($repository) {
+                        $sub->where('scope_type', 'repository')
+                            ->where('repository', $repository);
+                    });
+                } else {
+                    // If no repository specified, still include repository-scoped memories that are visible
+                    $group->orWhere('scope_type', 'repository');
+                }
+
+                // User Scope
+                if ($userId) {
+                    $group->orWhere(function ($sub) use ($userId, $repository) {
+                        $sub->where('scope_type', 'user')
+                            ->where('user_id', $userId);
+
+                        if ($repository) {
+                            $sub->where(function($s) use ($repository) {
+                                $s->where('repository', $repository)
+                                  ->orWhereNull('repository');
+                            });
+                        }
+                    });
+                }
             });
-
-            // Repository Scope
-            if ($repository) {
-                $group->orWhere(function ($sub) use ($repository) {
-                    $sub->where('scope_type', 'repository')
-                        ->where('repository', $repository);
-                });
-            } else {
-                // If no repository specified, still include repository-scoped memories that are visible
-                $group->orWhere('scope_type', 'repository');
-            }
-
-            // User Scope
-            if ($userId) {
-                $group->orWhere(function ($sub) use ($userId, $repository) {
-                    $sub->where('scope_type', 'user')
-                        ->where('user_id', $userId);
-
-                    if ($repository) {
-                        $sub->where(function($s) use ($repository) {
-                            $s->where('repository', $repository)
-                              ->orWhereNull('repository');
-                        });
-                    }
-                });
-            }
-        });
+        }
 
         if ($query) {
-            $q->where('current_content', 'like', "%{$query}%");
+            $q->where(function ($sub) use ($query) {
+                $sub->where('current_content', 'like', "%{$query}%")
+                    ->orWhere('repository', 'like', "%{$query}%")
+                    ->orWhere('user_id', 'like', "%{$query}%")
+                    ->orWhere('memory_type', 'like', "%{$query}%")
+                    ->orWhere('scope_type', 'like', "%{$query}%")
+                    ->orWhere('status', 'like', "%{$query}%");
+            });
         }
 
         if (isset($filters['memory_type'])) {
