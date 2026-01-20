@@ -30,10 +30,10 @@ class WriteMemoryTool extends Tool
             'organization' => $schema->string()->description('Organization name/slug.')->required(),
             'repository' => $schema->string()->description('Repository name/slug.'),
             'title' => $schema->string()->description('Brief summary of the memory.'),
-            'scope_type' => $schema->string()->enum(['system', 'repository', 'user'])->description('Visibility scope of the memory.')->required(),
-            'memory_type' => $schema->string()->enum(['fact', 'preference', 'business_rule', 'system_constraint'])->description('Categorization of the memory.')->required(),
+            'scope_type' => $schema->string()->enum(array_column(\App\Enums\MemoryScope::cases(), 'value'))->description('Visibility scope of the memory.')->required(),
+            'memory_type' => $schema->string()->enum(array_column(\App\Enums\MemoryType::cases(), 'value'))->description('Categorization of the memory.')->required(),
             'current_content' => $schema->string()->description('The text content to store.')->required(),
-            'status' => $schema->string()->enum(['draft', 'published', 'locked'])->default('draft'),
+            'status' => $schema->string()->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))->default(\App\Enums\MemoryStatus::Draft->value),
             'metadata' => $schema->object()->description('Additional key-value pairs.'),
         ];
     }

@@ -29,7 +29,7 @@ class UpdateMemoryTool extends Tool
             'id' => $schema->string()->format('uuid')->description('UUID of the memory to update.')->required(),
             'title' => $schema->string()->description('Updated brief summary of the memory.'),
             'current_content' => $schema->string()->description('Updated text content.'),
-            'status' => $schema->string()->enum(['draft', 'published', 'locked']),
+            'status' => $schema->string()->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value')),
             'metadata' => $schema->object()->description('Additional key-value pairs.'),
         ];
     }
