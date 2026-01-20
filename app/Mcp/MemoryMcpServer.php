@@ -44,4 +44,10 @@ class MemoryMcpServer extends Server
         Resources\DocsResource::class,
         Resources\MemoryIndexResource::class,
     ];
+
+    protected array $prompts = [
+        Prompts\MemoryCorePrompt::class,
+        Prompts\MemoryIndexPolicyPrompt::class,
+        Prompts\ToolUsagePrompt::class,
+    ];
 }
