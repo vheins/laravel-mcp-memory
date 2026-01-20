@@ -50,6 +50,11 @@ class Memory extends Model
         return $this->hasMany(MemoryAuditLog::class);
     }
 
+    public function accessLogs(): HasMany
+    {
+        return $this->hasMany(MemoryAccessLog::class, 'resource_id');
+    }
+
     public function relatedMemories(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(

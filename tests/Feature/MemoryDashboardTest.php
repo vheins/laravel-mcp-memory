@@ -59,3 +59,36 @@ test('user usage widget displays top users', function () {
         ->assertSee('alice') // alice has 2
         ->assertSee('bob');  // bob has 1
 });
+
+test('top accessed memories widget displays popular memories', function () {
+    $memoryA = \App\Models\Memory::factory()->create(['title' => 'Popular Memory']);
+    $memoryB = \App\Models\Memory::factory()->create(['title' => 'Unpopular Memory']);
+
+    // Access Memory A twice
+    MemoryAccessLog::create([
+        'actor_id' => 'user',
+        'action' => 'read',
+        'resource_id' => $memoryA->id,
+        'created_at' => now()
+    ]);
+    MemoryAccessLog::create([
+        'actor_id' => 'user',
+        'action' => 'read',
+        'resource_id' => $memoryA->id,
+        'created_at' => now()
+    ]);
+
+    // Access Memory B once
+    MemoryAccessLog::create([
+        'actor_id' => 'user',
+        'action' => 'read',
+        'resource_id' => $memoryB->id,
+        'created_at' => now()
+    ]);
+
+    Livewire::test(\App\Filament\Widgets\MemoryTopAccessedTableWidget::class)
+        ->assertSee('Popular Memory')
+        ->assertSee('2') // Count
+        ->assertSee('Unpopular Memory')
+        ->assertSee('1');
+});
