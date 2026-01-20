@@ -1,9 +1,12 @@
 <x-filament-panels::page>
-    <x-filament-panels::form wire:submit="save">
+    <form wire:submit="save" class="space-y-6">
         {{ $this->editProfileForm }}
 
-        <x-filament-panels::form.actions :actions="$this->getCachedFormActions()"
-            :full-width="$this->hasFullWidthFormActions()" />
-    </x-filament-panels::form>
+        <div class="flex flex-wrap items-center gap-4 justify-start">
+            @foreach ($this->getCachedFormActions() as $action)
+                {{ $action }}
+            @endforeach
+        </div>
+    </form>
 
 </x-filament-panels::page>
