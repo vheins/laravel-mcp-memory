@@ -25,7 +25,7 @@ class SearchMemoriesTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'repository' => $schema->string()->description('Repository slug to search within.')->required(),
+            'repository' => $schema->string()->description('Repository slug to search within.'),
             'query' => $schema->string()->description('Text query to match against content.'),
             'filters' => $schema->object([
                 'user_id' => $schema->string()->description('Optional filter for a specific user ID.'),

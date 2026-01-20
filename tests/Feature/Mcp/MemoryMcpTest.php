@@ -249,3 +249,57 @@ it('enforces immutable types for AI updates', function () {
     $response->assertStatus(200);
     $this->assertDatabaseHas('memories', ['memory_type' => 'system_constraint']);
 });
+
+it('can search memories without repository argument', function () {
+    Memory::create([
+        'organization' => 'global-org',
+        'repository' => 'repo-a',
+        'scope_type' => 'repository',
+        'memory_type' => 'fact',
+        'created_by_type' => 'human',
+        'current_content' => 'Content in Repo A',
+    ]);
+
+    Memory::create([
+        'organization' => 'global-org',
+        'repository' => 'repo-b',
+        'scope_type' => 'repository',
+        'memory_type' => 'fact',
+        'created_by_type' => 'human',
+        'current_content' => 'Content in Repo B',
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->postJson('/api/v1/mcp/memory', [
+            'jsonrpc' => '2.0',
+            'method' => 'tools/call',
+            'params' => [
+                'name' => 'memory-search',
+                'arguments' => [
+                    'query' => 'Content',
+                ],
+            ],
+            'id' => 1,
+        ]);
+
+    $response->assertStatus(200);
+    $response->assertJsonPath('result.content.0.text', function (string $text) {
+        $data = json_decode($text, true);
+        $contents = collect($data)->pluck('current_content')->toArray();
+        return count($contents) >= 2;
+    });
+});
+
+it('can access the mcp server via memory-mcp alias', function () {
+    $response = $this->actingAs($this->user)
+        ->postJson('/api/v1/mcp/memory-mcp', [
+            'jsonrpc' => '2.0',
+            'method' => 'tools/list',
+            'params' => [],
+            'id' => 1,
+        ]);
+
+    $response->assertStatus(200)
+        ->assertJsonPath('result.tools.0.name', 'memory-write');
+});
+

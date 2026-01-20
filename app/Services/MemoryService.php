@@ -119,7 +119,7 @@ class MemoryService
      * @param array $filters
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function search(string $repository, ?string $query = null, array $filters = [])
+    public function search(?string $repository, ?string $query = null, array $filters = [])
     {
         // 1. Resolve Hierarchy Context
         // Since organization/repository are now strings, we match them directly.
@@ -136,20 +136,28 @@ class MemoryService
             });
 
             // Repository Scope
-            $group->orWhere(function ($sub) use ($repository) {
-                $sub->where('scope_type', 'repository')
-                    ->where('repository', $repository);
-            });
+            if ($repository) {
+                $group->orWhere(function ($sub) use ($repository) {
+                    $sub->where('scope_type', 'repository')
+                        ->where('repository', $repository);
+                });
+            } else {
+                // If no repository specified, still include repository-scoped memories that are visible
+                $group->orWhere('scope_type', 'repository');
+            }
 
             // User Scope
             if ($userId) {
                 $group->orWhere(function ($sub) use ($userId, $repository) {
                     $sub->where('scope_type', 'user')
-                        ->where('user_id', $userId)
-                        ->where(function($s) use ($repository) {
+                        ->where('user_id', $userId);
+
+                    if ($repository) {
+                        $sub->where(function($s) use ($repository) {
                             $s->where('repository', $repository)
                               ->orWhereNull('repository');
                         });
+                    }
                 });
             }
         });
