@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 
 class Term extends Model
 {
     use HasFactory;
+    use Cachable;
 
     protected $fillable = [
         'taxonomy_id',

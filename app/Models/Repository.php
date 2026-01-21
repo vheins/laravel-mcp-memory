@@ -8,11 +8,13 @@ use Database\Factories\RepositoryFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 
 class Repository extends Model
 {
     use HasFactory;
     use HasUuids;
+    use Cachable;
 
     protected $fillable = [
         'slug',

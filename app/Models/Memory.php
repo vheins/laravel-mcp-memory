@@ -8,6 +8,7 @@ use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
 use Exception;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +23,7 @@ class Memory extends Model
     use HasFactory;
     use HasUuids;
     use SoftDeletes;
+    use Cachable;
 
     protected $fillable = [
         'organization', // github organization / user (repository owner)

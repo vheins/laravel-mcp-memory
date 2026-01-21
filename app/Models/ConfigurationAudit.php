@@ -7,10 +7,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 
 class ConfigurationAudit extends Model
 {
     use HasFactory;
+    use Cachable;
 
     protected $fillable = [
         'configuration_id',

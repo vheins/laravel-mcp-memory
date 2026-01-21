@@ -14,12 +14,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 
 class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens;
     use HasFactory;
     use HasRoles;
+    use Cachable;
     use Notifiable;
 
     /**
