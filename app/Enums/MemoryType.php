@@ -16,6 +16,7 @@ enum MemoryType: string implements HasColor, HasIcon, HasLabel
     case DecisionLog = 'decision_log';
     case Documentation = 'documentation';
     case Fact = 'fact';
+    case Overview = 'overview';
     case Preference = 'preference';
     case Risk = 'risk';
     case SystemConstraint = 'system_constraint';
@@ -37,6 +38,7 @@ enum MemoryType: string implements HasColor, HasIcon, HasLabel
             self::Architecture => 'indigo',
             self::UserContext => 'fuchsia',
             self::Convention => 'teal',
+            self::Overview => 'sky',
             self::Risk => 'rose',
         };
     }
@@ -55,6 +57,7 @@ enum MemoryType: string implements HasColor, HasIcon, HasLabel
             self::Architecture => 'heroicon-o-map',
             self::UserContext => 'heroicon-o-user-circle',
             self::Convention => 'heroicon-o-document-duplicate',
+            self::Overview => 'heroicon-o-presentation-chart-bar',
             self::Risk => 'heroicon-o-exclamation-triangle',
         };
     }
@@ -73,6 +76,7 @@ enum MemoryType: string implements HasColor, HasIcon, HasLabel
             self::Architecture => 'Architecture',
             self::UserContext => 'User Context',
             self::Convention => 'Convention',
+            self::Overview => 'Overview',
             self::Risk => 'Risk',
         };
     }

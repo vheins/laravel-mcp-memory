@@ -37,7 +37,7 @@ final class AdvancedMemoryTest extends TestCase
                         [
                             'organization' => 'test-org',
                             'scope_type' => 'organization',
-                            'memory_type' => 'fact',
+                            'memory_type' => 'overview', // Now supported!
                             'current_content' => 'Bulk item 1',
                             'title' => 'Title 1',
                             'importance' => 8,
@@ -58,6 +58,35 @@ final class AdvancedMemoryTest extends TestCase
         $response->assertSuccessful();
         $this->assertCount(2, Memory::all());
         $this->assertEquals(8, Memory::query()->where('title', 'Title 1')->first()->importance);
+        $this->assertEquals('overview', Memory::query()->where('title', 'Title 1')->first()->memory_type->value);
+    }
+
+    public function test_bulk_write_memories_validation_error(): void
+    {
+        $response = $this->postJson('/memory-mcp', [
+            'jsonrpc' => '2.0',
+            'id' => 1,
+            'method' => 'tools/call',
+            'params' => [
+                'name' => 'memory-bulk-write',
+                'arguments' => [
+                    'items' => [
+                        [
+                            'organization' => 'test-org',
+                            'scope_type' => 'organization',
+                            'memory_type' => 'invalid_type', // Truly invalid
+                            'current_content' => 'Bulk item 1',
+                            'title' => 'Title 1',
+                            'importance' => 8,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $response->assertSuccessful();
+        $response->assertJsonPath('result.isError', true);
+        $this->assertStringContainsString('The selected memory type is invalid', (string) $response->json('result.content.0.text'));
     }
 
     public function test_link_memories(): void

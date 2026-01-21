@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Mcp\Tools;
 
 use App\Services\MemoryService;
-use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
-use Laravel\Mcp\Server\Exceptions\JsonRpcException;
 use Laravel\Mcp\Server\Tool;
+use Throwable;
 
 class VectorSearchTool extends Tool
 {
@@ -29,8 +28,10 @@ class VectorSearchTool extends Tool
 
         try {
             $results = $service->vectorSearch($vector, $repository, $filters, $threshold);
-        } catch (Exception $exception) {
-            throw new JsonRpcException($exception->getMessage(), -32000, $request->get('id'));
+        } catch (Throwable $exception) {
+            return Response::make([
+                Response::text(json_encode(['error' => $exception->getMessage()])),
+            ]);
         }
 
         // Map to lightweight locator DTOs

@@ -8,13 +8,13 @@ use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
 use App\Services\MemoryService;
-use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
-use Laravel\Mcp\Server\Exceptions\JsonRpcException;
 use Laravel\Mcp\Server\Tool;
+use Throwable;
 
 class BatchWriteMemoryTool extends Tool
 {
@@ -31,8 +31,14 @@ class BatchWriteMemoryTool extends Tool
 
         try {
             $memories = $service->bulkWrite($items, $actorId, $actorType);
-        } catch (Exception $exception) {
-            throw new JsonRpcException($exception->getMessage(), -32000, $request->get('id'));
+        } catch (ValidationException $exception) {
+            return Response::make([
+                Response::text(json_encode($exception->errors())),
+            ]);
+        } catch (Throwable $exception) {
+            return Response::make([
+                Response::text(json_encode(['error' => $exception->getMessage()])),
+            ]);
         }
 
         return Response::make([
