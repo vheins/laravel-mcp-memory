@@ -50,6 +50,15 @@ TOOL USAGE GUIDELINES
 7. memory-vector-search
    - USE WHEN: Exact keywords fail, or looking for conceptual similarity.
    - OUTPUT: Returns content and metadata.
+
+8. memory-index
+   - USE WHEN: You need to discover available memories before searching or reading.
+   - OUTPUT: Lightweight list of user memories.
+   - REQUIREMENT: Use this first to avoid blind searching.
+
+9. memory-history
+   - USE WHEN: You need to see the evolution of a memory or audit who changed what.
+   - OUTPUT: Full version history and audit logs.
 TEXT
         );
     }

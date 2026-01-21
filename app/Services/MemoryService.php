@@ -284,7 +284,6 @@ class MemoryService
             $id = $data['id'] ?? null;
             $content = $data['current_content'];
             $isNew = false;
-            $oldValue = null;
 
             if ($id) {
                 $memory = Memory::query()->findOrFail($id);
@@ -298,10 +297,12 @@ class MemoryService
                     throw_if($validator->fails(), ValidationException::class, $validator);
                 }
 
-                $oldValue = $memory->toArray();
-
                 // Check if locked
                 throw_if($memory->status === MemoryStatus::Locked && $memory->current_content !== $content, Exception::class, 'Cannot update locked memory.');
+
+                // Set transient properties for Observer
+                $memory->audit_actor_id = $actorId;
+                $memory->audit_actor_type = $actorType;
 
                 $memory->update([
                     'current_content' => $content,
@@ -312,12 +313,10 @@ class MemoryService
                     'memory_type' => $data['memory_type'] ?? $memory->memory_type,
                     'embedding' => $data['embedding'] ?? $memory->embedding,
                     'metadata' => $data['metadata'] ?? $memory->metadata,
-                    // We typically don't update structural keys like organization/repo/user, but if needed:
-                    // 'organization' => $data['organization'] ?? $memory->organization, etc.
                 ]);
             } else {
                 $isNew = true;
-                $memory = Memory::query()->create([
+                $memory = new Memory([
                     'id' => $data['id'] ?? Str::uuid()->toString(),
                     'organization' => $data['organization'] ?? 'default',
                     'repository' => $data['repository'] ?? null,
@@ -332,26 +331,13 @@ class MemoryService
                     'current_content' => $content,
                     'metadata' => $data['metadata'] ?? null,
                 ]);
+
+                // Set transient properties
+                $memory->audit_actor_id = $actorId;
+                $memory->audit_actor_type = $actorType;
+
+                $memory->save();
             }
-
-            // Create Version
-            MemoryVersion::query()->create([
-                'memory_id' => $memory->id,
-                'version_number' => $memory->versions()->max('version_number') + 1,
-                'content' => $content,
-                'created_by' => $actorId,
-                'input_source' => $actorType,
-            ]);
-
-            // Audit Log
-            MemoryAuditLog::query()->create([
-                'memory_id' => $memory->id,
-                'actor_id' => $actorId,
-                'actor_type' => $actorType,
-                'event' => $isNew ? 'create' : 'update',
-                'old_value' => $isNew ? null : $oldValue,
-                'new_value' => $memory->fresh()->toArray(),
-            ]);
 
             // Access Log
             $this->logAccess(

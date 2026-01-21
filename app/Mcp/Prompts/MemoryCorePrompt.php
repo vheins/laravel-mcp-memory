@@ -35,7 +35,8 @@ You MUST adhere to the following core behavioral contract:
 3. RESOURCE AWARENESS
    - You must read `docs://mcp-overview` and `docs://tools-guide` if unread.
    - You must consult `docs://memory-rules` before creating content.
-   - You must respect `memory://index` as a discovery tool, not a knowledge source.
+   - You must use `memory-index` to discover available memories before searching or reading.
+   - You must use `memory-history` context only when relevant to changes.
 
 4. SCOPE CORRECTNESS
    - Use `system` scope for global truths.

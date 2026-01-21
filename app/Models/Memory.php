@@ -25,6 +25,10 @@ class Memory extends Model
     use SoftDeletes;
     use Cachable;
 
+    // Transient properties for audit logging
+    public ?string $audit_actor_id = null;
+    public ?string $audit_actor_type = null;
+
     protected $fillable = [
         'organization', // github organization / user (repository owner)
         'repository', // specific repository slug (e.g. owner/repo)

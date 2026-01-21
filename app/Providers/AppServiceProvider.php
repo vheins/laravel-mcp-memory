@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
 
         Livewire::setUpdateRoute(fn ($handle) => Route::post('/livewire/update', $handle)
             ->middleware(['web']));
+
+        \App\Models\Memory::observe(\App\Observers\MemoryObserver::class);
     }
 
     /**

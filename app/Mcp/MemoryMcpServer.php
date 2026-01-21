@@ -14,6 +14,7 @@ use App\Mcp\Resources\MemoryResource;
 use App\Mcp\Resources\SchemaResource;
 use App\Mcp\Tools\BatchWriteMemoryTool;
 use App\Mcp\Tools\DeleteMemoryTool;
+use App\Mcp\Tools\GetMemoryHistoryTool;
 use App\Mcp\Tools\LinkMemoriesTool;
 use App\Mcp\Tools\SearchMemoriesTool;
 use App\Mcp\Tools\UpdateMemoryTool;
@@ -61,6 +62,8 @@ class MemoryMcpServer extends Server
         BatchWriteMemoryTool::class,
         LinkMemoriesTool::class,
         VectorSearchTool::class,
+        GetMemoryHistoryTool::class,
+        GetMemoryIndexTool::class,
     ];
 
     protected string $version = '1.0.0';
