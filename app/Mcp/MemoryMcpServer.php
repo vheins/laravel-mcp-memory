@@ -26,8 +26,20 @@ use Laravel\Mcp\Server;
 class MemoryMcpServer extends Server
 {
     protected string $instructions = <<<'MARKDOWN'
-        This server manages structured memories (facts, preferences, rules) for the application.
-        It supports hierarchical searching and versioning.
+        This server acts as the long-term memory and Knowledge Graph for the application.
+        It enables agents to store, retrieve, and manage structured information across multiple scopes.
+
+        CORE CAPABILITIES:
+        1. DISCOVERY: Use `memory-index` for lightweight discovery of available knowledge.
+        2. RETRIEVAL: Use `memory-search` (Full-Text) or `vector-search` (Semantic) to find relevant entries.
+        3. MANAGEMENT: Create (`memory-write`), update (`memory-update`), or link (`memory-link`) atomic units of knowledge.
+        4. AUDIT: Track version history and changes using `memory-audit`.
+        5. CONTEXT: Respect scoped isolation (system, organization, user) and repository-specific constraints.
+
+        BEHAVIORAL RULES:
+        - SEARCH BEFORE WRITE: Always check for existing knowledge to avoid duplication.
+        - ATOMICITY: Store only one distinct concept per memory entry.
+        - READ RULES: Consult `docs://memory-rules` and `docs://behavior-rules` for specific project standards.
     MARKDOWN;
 
     protected string $name = 'Memory MCP Server';

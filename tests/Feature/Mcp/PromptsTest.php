@@ -61,7 +61,7 @@ it('can retrieve memory index policy prompt', function (): void {
             'jsonrpc' => '2.0',
             'id' => 2,
             'result' => [
-                'description' => 'Enforces the strict policy regarding memory index usage and content.',
+                'description' => 'Defines and enforces the strict structural and behavioral policy for the memory index. Ensures the index remains a lightweight discovery mechanism by imposing constraints on titles, metadata, and agent interaction patterns.',
             ],
         ]);
 });
