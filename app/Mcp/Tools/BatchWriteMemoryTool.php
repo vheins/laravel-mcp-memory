@@ -33,16 +33,16 @@ class BatchWriteMemoryTool extends Tool
             $memories = $service->bulkWrite($items, $actorId, $actorType);
         } catch (ValidationException $exception) {
             return Response::make([
-                Response::text(json_encode($exception->errors())),
+                Response::error(json_encode($exception->errors(), JSON_UNESCAPED_UNICODE)),
             ]);
         } catch (Throwable $exception) {
             return Response::make([
-                Response::text(json_encode(['error' => $exception->getMessage()])),
+                Response::error(json_encode(['error' => $exception->getMessage()], JSON_UNESCAPED_UNICODE)),
             ]);
         }
 
         return Response::make([
-            Response::text(json_encode(array_map(fn ($m) => $m->toArray(), $memories))),
+            Response::text(json_encode(array_map(fn ($m) => $m->toArray(), $memories), JSON_UNESCAPED_UNICODE)),
         ]);
     }
 

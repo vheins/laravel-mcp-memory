@@ -30,7 +30,7 @@ class VectorSearchTool extends Tool
             $results = $service->vectorSearch($vector, $repository, $filters, $threshold);
         } catch (Throwable $exception) {
             return Response::make([
-                Response::text(json_encode(['error' => $exception->getMessage()])),
+                Response::error(json_encode(['error' => $exception->getMessage()], JSON_UNESCAPED_UNICODE)),
             ]);
         }
 
@@ -49,7 +49,7 @@ class VectorSearchTool extends Tool
         ])->values()->all();
 
         return Response::make([
-            Response::text(json_encode($mappedResults)),
+            Response::text(json_encode($mappedResults, JSON_UNESCAPED_UNICODE)),
         ]);
     }
 

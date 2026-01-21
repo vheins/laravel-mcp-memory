@@ -13,6 +13,7 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
+use Throwable;
 
 class SearchMemoriesTool extends Tool
 {
@@ -27,7 +28,7 @@ class SearchMemoriesTool extends Tool
         $inputQueries = $request->get('queries', []);
         $singleQuery = $request->get('query');
 
-        if (is_string($inputQueries)) {
+        if (\is_string($inputQueries)) {
             $inputQueries = [$inputQueries];
         }
 
@@ -36,16 +37,22 @@ class SearchMemoriesTool extends Tool
         }
 
         $inputQueries = array_unique(array_filter($inputQueries));
-        $allResults = new \Illuminate\Database\Eloquent\Collection();
+        $allResults = new \Illuminate\Database\Eloquent\Collection;
 
-        if (empty($inputQueries)) {
-            // If no query provided, just run search once with null to respect filters
-            $allResults = $service->search(null, $filters);
-        } else {
-            foreach ($inputQueries as $query) {
-                $results = $service->search($query, $filters);
-                $allResults = $allResults->merge($results);
+        try {
+            if (empty($inputQueries)) {
+                // If no query provided, just run search once with null to respect filters
+                $allResults = $service->search(null, $filters);
+            } else {
+                foreach ($inputQueries as $query) {
+                    $results = $service->search($query, $filters);
+                    $allResults = $allResults->merge($results);
+                }
             }
+        } catch (Throwable $exception) {
+            return Response::make([
+                Response::error(json_encode(['error' => $exception->getMessage()], JSON_UNESCAPED_UNICODE)),
+            ]);
         }
 
         // Deduplicate by ID
@@ -67,7 +74,7 @@ class SearchMemoriesTool extends Tool
         ])->all();
 
         return Response::make([
-            Response::text(json_encode($mappedResults)),
+            Response::text(json_encode($mappedResults, JSON_UNESCAPED_UNICODE)),
         ]);
     }
 

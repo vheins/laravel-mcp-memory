@@ -38,11 +38,11 @@ class WriteMemoryTool extends Tool
             $memory = $service->write($arguments, $actorId, $actorType);
         } catch (ValidationException $e) {
             return Response::make([
-                Response::text(json_encode($e->errors())),
+                Response::error(json_encode($e->errors(), JSON_UNESCAPED_UNICODE)),
             ]);
         } catch (Throwable $e) {
             return Response::make([
-                Response::text(json_encode(['error' => $e->getMessage()])),
+                Response::error(json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE)),
             ]);
         }
 

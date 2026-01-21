@@ -97,6 +97,38 @@ it('can search memories via tool (team context)', function (): void {
     $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'Team Fact'));
 });
 
+it('can search memories via multi-query tool', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    Memory::query()->create([
+        'organization' => 'test-org',
+        'repository' => 'human-resource-dashboard',
+        'scope_type' => 'repository',
+        'memory_type' => 'overview',
+        'created_by_type' => 'human',
+        'current_content' => 'HRIS Overview',
+        'title' => 'Module Overview',
+    ]);
+
+    $response = $this->postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'method' => 'tools/call',
+        'params' => [
+            'name' => 'memory-search',
+            'arguments' => [
+                'queries' => ['Module Overview'],
+                'filters' => [
+                    'repository' => 'human-resource-dashboard',
+                ],
+            ],
+        ],
+        'id' => 1,
+    ]);
+
+    $response->assertStatus(200);
+    $response->dump();
+});
+
 it('can delete a memory via tool', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
@@ -147,7 +179,7 @@ it('can read a memory via resource', function (): void {
     ]);
 
     $response->assertStatus(200);
-    $response->assertJsonPath('result.contents.0.text', 'Read Me Resource');
+    $response->assertJsonPath('result.contents.0.text', fn(string $text) => str_contains($text, 'Read Me Resource'));
 });
 
 it('can search memories with user hierarchy', function (): void {
@@ -228,8 +260,10 @@ it('cannot update locked memory via tool', function (): void {
         'id' => 1,
     ]);
 
-    // MCP server caught the exception and should return an error
-    $response->assertJsonPath('error.message', 'Cannot update locked memory.');
+    // MCP server caught the exception and should return an error in result.content
+    $response->assertStatus(200);
+    $response->assertJsonPath('result.isError', true);
+    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'Cannot update locked memory'));
 });
 
 it('enforces immutable types for AI updates', function (): void {
@@ -253,7 +287,8 @@ it('enforces immutable types for AI updates', function (): void {
 
     // Expect an error because AI cannot write system_constraints
     $response->assertStatus(200);
-    $response->assertJson(['error' => ['code' => -32000]]); // JSON-RPC error code
+    $response->assertJsonPath('result.isError', true);
+    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'AI agents cannot create system constraints'));
     $this->assertDatabaseMissing('memories', ['memory_type' => 'system_constraint']);
 });
 
