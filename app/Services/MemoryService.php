@@ -162,12 +162,12 @@ class MemoryService
                 // SQLite fallback using existing LIKE search
                 $q->where(function (Builder $sub) use ($query): void {
                     $term = "%{$query}%";
-                    $sub->whereLike('title', $term)
-                        ->orWhereLike('current_content', $term)
-                        ->orWhereLike('repository', $term)
-                        ->orWhereLike('memory_type', $term)
-                        ->orWhereLike('scope_type', $term)
-                        ->orWhereLike('metadata', $term);
+                    $sub->where('title', 'like', $term)
+                        ->orWhere('current_content', 'like', $term)
+                        ->orWhere('repository', 'like', $term)
+                        ->orWhere('memory_type', 'like', $term)
+                        ->orWhere('scope_type', 'like', $term)
+                        ->orWhere('metadata', 'like', $term);
                 });
             }
         }
@@ -181,12 +181,7 @@ class MemoryService
             $q->where('status', $filters['status']);
         }
 
-        // Handle repository filter from both $repository param and $filters array
-        $finalRepo = $repository ?? $filters['repository'] ?? null;
 
-        if ($finalRepo) {
-            $q->where('repository', $finalRepo);
-        }
 
         if (isset($filters['scope_type'])) {
             $q->where('scope_type', $filters['scope_type']);
@@ -198,7 +193,7 @@ class MemoryService
                     continue;
                 }
 
-                $q->where('metadata->' . $key, $value);
+                $q->where('metadata->' . $key, '=', $value);
             }
         }
 
