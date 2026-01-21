@@ -12,28 +12,28 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Platform;
 use Filament\Support\Enums\Width;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Support\Facades\FilamentAsset;
-use Filament\Support\Assets\Js;
 
 class DashboardPanelProvider extends PanelProvider
 {
     public function boot(): void
     {
-    FilamentAsset::register([
-        Js::make(
-            'filament-spa-fix',
-            asset('filament/spa-livewire-fix.js')
-        ),
-    ]);
+        FilamentAsset::register([
+            Js::make(
+                'filament-spa-fix',
+                asset('filament/spa-livewire-fix.js')
+            ),
+        ]);
     }
 
     public function panel(Panel $panel): Panel
@@ -44,7 +44,7 @@ class DashboardPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login()
             ->font('Inter')
-            ->spa()
+            // ->spa()
             ->databaseNotifications()
             ->databaseTransactions()
             ->maxContentWidth(Width::Full)
