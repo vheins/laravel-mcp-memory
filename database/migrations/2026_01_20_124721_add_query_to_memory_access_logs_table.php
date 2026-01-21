@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('memory_access_logs', function (Blueprint $table) {
+        Schema::table('memory_access_logs', function (Blueprint $table): void {
             $table->text('query')->after('resource_id')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('memory_access_logs', function (Blueprint $table) {
+        Schema::table('memory_access_logs', function (Blueprint $table): void {
             $table->dropColumn('query');
         });
     }

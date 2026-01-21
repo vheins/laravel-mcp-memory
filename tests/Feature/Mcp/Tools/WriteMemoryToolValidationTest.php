@@ -1,15 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Mcp\Tools;
 
+use Laravel\Mcp\Request;
+use Exception;
 use App\Mcp\Tools\WriteMemoryTool;
 use App\Services\MemoryService;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
-class WriteMemoryToolValidationTest extends TestCase
+final class WriteMemoryToolValidationTest extends TestCase
 {
-    public function test_it_returns_validation_errors_in_text_response()
+    public function test_it_returns_validation_errors_in_text_response(): void
     {
         // Mock the service to throw a ValidationException
         $service = $this->mock(MemoryService::class);
@@ -22,7 +26,7 @@ class WriteMemoryToolValidationTest extends TestCase
         $tool = new WriteMemoryTool();
 
         // Create a mock request
-        $request = new \Laravel\Mcp\Request([
+        $request = new Request([
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [
@@ -61,18 +65,18 @@ class WriteMemoryToolValidationTest extends TestCase
         $this->assertEquals(['The memory type field is required.'], $errors['memory_type']);
     }
 
-    public function test_it_returns_generic_error_in_text_response()
+    public function test_it_returns_generic_error_in_text_response(): void
     {
         // Mock the service to throw a generic Exception
         $service = $this->mock(MemoryService::class);
         $service->shouldReceive('write')
             ->once()
-            ->andThrow(new \Exception('Something went wrong'));
+            ->andThrow(new Exception('Something went wrong'));
 
         $tool = new WriteMemoryTool();
 
         // Create a mock request
-        $request = new \Laravel\Mcp\Request([
+        $request = new Request([
             'jsonrpc' => '2.0',
             'method' => 'tools/call',
             'params' => [

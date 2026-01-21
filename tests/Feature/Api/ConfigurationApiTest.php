@@ -5,15 +5,15 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('can fetch public configurations', function () {
-    Configuration::create([
+it('can fetch public configurations', function (): void {
+    Configuration::query()->create([
         'key' => 'site_name',
         'value' => 'My App',
         'type' => 'string',
         'is_public' => true,
     ]);
 
-    Configuration::create([
+    Configuration::query()->create([
         'key' => 'admin_email',
         'value' => 'admin@example.com',
         'type' => 'string',
@@ -27,9 +27,9 @@ it('can fetch public configurations', function () {
         ->assertJsonMissing(['admin_email']);
 });
 
-it('can list all configurations', function () {
-    Configuration::create(['key' => 'k1', 'value' => 'v1']);
-    Configuration::create(['key' => 'k2', 'value' => 'v2']);
+it('can list all configurations', function (): void {
+    Configuration::query()->create(['key' => 'k1', 'value' => 'v1']);
+    Configuration::query()->create(['key' => 'k2', 'value' => 'v2']);
 
     $response = $this->getJson(route('api.v1.configurations.index'));
 
@@ -37,24 +37,25 @@ it('can list all configurations', function () {
         ->assertJsonCount(2, 'data');
 });
 
-it('can update configuration', function () {
-    $config = Configuration::create(['key' => 'maintenance_mode', 'value' => false, 'type' => 'boolean']);
+it('can update configuration', function (): void {
+    $config = Configuration::query()->create(['key' => 'maintenance_mode', 'value' => false, 'type' => 'boolean']);
 
     $response = $this->putJson(route('api.v1.configurations.update', $config), [
         'value' => true,
     ]);
 
     $response->assertOk();
+
     expect($config->refresh()->value)->toBeTrue();
 });
 
-it('casts values correctly', function () {
-    $config = Configuration::create(['key' => 'max_items', 'value' => 10, 'type' => 'number']);
+it('casts values correctly', function (): void {
+    $config = Configuration::query()->create(['key' => 'max_items', 'value' => 10, 'type' => 'number']);
 
     expect($config->value)->toBe(10);
     expect($config->fresh()->value)->toBe(10);
 
-    $jsonConfig = Configuration::create([
+    $jsonConfig = Configuration::query()->create([
         'key' => 'settings',
         'value' => ['theme' => 'dark'],
         'type' => 'json',

@@ -1,11 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
+    use HasFactory;
+
+    protected $appends = [
+        'url',
+    ];
+
     protected $fillable = [
         'disk',
         'directory',
@@ -17,30 +28,32 @@ class Media extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'metadata' => 'array',
-        'size' => 'integer',
-    ];
-
-    protected $appends = [
-        'url',
-    ];
-
-    public function getUrlAttribute(): string
-    {
-        return \Illuminate\Support\Facades\Storage::disk($this->disk)->url($this->directory.'/'.$this->filename.'.'.$this->extension);
-    }
-
-    public function attachments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * @return HasMany<MediaAttachment, $this>
+     */
+    public function attachments(): HasMany
     {
         return $this->hasMany(MediaAttachment::class);
     }
 
+    protected function casts(): array
+    {
+        return [
+            'metadata' => 'array',
+            'size' => 'integer',
+        ];
+    }
+
+    protected function getUrlAttribute(): string
+    {
+        return Storage::disk($this->disk)->url($this->directory . '/' . $this->filename . '.' . $this->extension);
+    }
+
     protected static function booted(): void
     {
-        static::deleting(function (Media $media) {
-            if (\Illuminate\Support\Facades\Storage::disk($media->disk)->exists($media->directory.'/'.$media->filename.'.'.$media->extension)) {
-                \Illuminate\Support\Facades\Storage::disk($media->disk)->delete($media->directory.'/'.$media->filename.'.'.$media->extension);
+        static::deleting(function (Media $media): void {
+            if (Storage::disk($media->disk)->exists($media->directory . '/' . $media->filename . '.' . $media->extension)) {
+                Storage::disk($media->disk)->delete($media->directory . '/' . $media->filename . '.' . $media->extension);
             }
         });
     }

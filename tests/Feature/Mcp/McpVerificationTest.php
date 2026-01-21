@@ -7,7 +7,7 @@ use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
-test('mcp client can list tools', function () {
+test('mcp client can list tools', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
@@ -19,14 +19,14 @@ test('mcp client can list tools', function () {
     ]);
 
     $response->assertStatus(200)
-        ->assertJsonPath('result.tools', fn (array $tools) => count($tools) > 0);
+        ->assertJsonPath('result.tools', fn (array $tools): bool => $tools !== []);
 });
 
-test('mcp client can read a memory resource', function () {
+test('mcp client can read a memory resource', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => 'test-org',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
@@ -48,11 +48,11 @@ test('mcp client can read a memory resource', function () {
         ->assertJsonPath('result.contents.0.text', 'Verification Test Content');
 });
 
-test('mcp client can search memories', function () {
+test('mcp client can search memories', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
-    Memory::create([
+    Memory::query()->create([
         'organization' => 'test-org',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
@@ -74,7 +74,5 @@ test('mcp client can search memories', function () {
     ]);
 
     $response->assertStatus(200);
-    $response->assertJsonPath('result.content.0.text', function (string $text) {
-        return str_contains($text, 'Special Secret Fact');
-    });
+    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'Special Secret Fact'));
 });

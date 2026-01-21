@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('entity_terms', function (Blueprint $table) {
+        Schema::create('entity_terms', function (Blueprint $table): void {
             $table->foreignId('term_id')->constrained()->cascadeOnDelete();
             $table->morphs('entity');
             $table->timestamps();

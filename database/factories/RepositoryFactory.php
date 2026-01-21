@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\Repository;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Repository>
+ * @extends Factory<Repository>
  */
 class RepositoryFactory extends Factory
 {
@@ -17,10 +20,10 @@ class RepositoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'slug' => $this->faker->unique()->slug(),
-            'name' => $this->faker->words(3, true),
-            'organization_id' => $this->faker->uuid(),
-            'description' => $this->faker->sentence(),
+            'slug' => fake()->unique()->slug(),
+            'name' => fake()->words(3, true),
+            'organization_id' => fake()->uuid(),
+            'description' => fake()->sentence(),
             'is_active' => true,
         ];
     }

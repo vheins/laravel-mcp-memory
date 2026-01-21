@@ -8,18 +8,18 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->otherUser = User::factory()->create();
     $this->orgId = Str::uuid()->toString();
-    $this->repo = Repository::create([
+    $this->repo = Repository::query()->create([
         'organization_id' => $this->orgId,
         'name' => 'Isolation Repo',
         'slug' => 'isolation-repo',
     ]);
 });
 
-it('requires authentication for MCP endpoint', function () {
+it('requires authentication for MCP endpoint', function (): void {
     $response = $this->postJson('/api/v1/mcp/memory', [
         'jsonrpc' => '2.0',
         'method' => 'memory.read',
@@ -30,7 +30,7 @@ it('requires authentication for MCP endpoint', function () {
     $response->assertStatus(401);
 });
 
-it('forces authenticated user on write', function () {
+it('forces authenticated user on write', function (): void {
     $payload = [
         'jsonrpc' => '2.0',
         'method' => 'tools/call',
@@ -52,16 +52,16 @@ it('forces authenticated user on write', function () {
 
     $response->assertStatus(200);
 
-    $response->assertJsonPath('result.content.0.text', function ($text) {
+    $response->assertJsonPath('result.content.0.text', function ($text): bool {
         $data = json_decode($text, true);
 
         return (string) $data['user_id'] === (string) $this->user->id && (string) $data['user_id'] !== (string) $this->otherUser->id;
     });
 });
 
-it('forces authenticated user on search', function () {
+it('forces authenticated user on search', function (): void {
     // Create User A Memory
-    Memory::create([
+    Memory::query()->create([
         'id' => Str::uuid(),
         'organization' => $this->orgId,
         'repository' => $this->repo->id,
@@ -73,7 +73,7 @@ it('forces authenticated user on search', function () {
     ]);
 
     // Create User B Memory
-    Memory::create([
+    Memory::query()->create([
         'id' => Str::uuid(),
         'organization' => $this->orgId,
         'repository' => $this->repo->id,
@@ -104,11 +104,11 @@ it('forces authenticated user on search', function () {
 
     $response->assertStatus(200);
 
-    $response->assertJsonPath('result.content.0.text', function ($text) {
+    $response->assertJsonPath('result.content.0.text', function ($text): bool {
         $content = collect(json_decode($text, true) ?? []);
 
         return $content->count() > 0
             && $content->pluck('current_content')->contains('User A Secret')
-            && ! $content->pluck('current_content')->contains('User B Secret');
+            && $content->pluck('current_content')->doesntContain('User B Secret');
     });
 });

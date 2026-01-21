@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Mcp;
 
+use App\Mcp\Prompts\MemoryCorePrompt;
+use App\Mcp\Prompts\MemoryIndexPolicyPrompt;
+use App\Mcp\Prompts\ToolUsagePrompt;
+use App\Mcp\Resources\DocsResource;
 use App\Mcp\Resources\MemoryHistoryResource;
+use App\Mcp\Resources\MemoryIndexResource;
 use App\Mcp\Resources\MemoryResource;
 use App\Mcp\Resources\SchemaResource;
 use App\Mcp\Tools\BatchWriteMemoryTool;
@@ -18,15 +23,36 @@ use Laravel\Mcp\Server;
 
 class MemoryMcpServer extends Server
 {
-    protected string $name = 'Memory MCP Server';
-
-    protected string $version = '1.0.0';
-
     protected string $instructions = <<<'MARKDOWN'
         This server manages structured memories (facts, preferences, rules) for the application.
         It supports hierarchical searching and versioning.
     MARKDOWN;
 
+    protected string $name = 'Memory MCP Server';
+
+    /**
+     * @var array<int, class-string<MemoryCorePrompt>|class-string<MemoryIndexPolicyPrompt>|class-string<ToolUsagePrompt>>
+     */
+    protected array $prompts = [
+        MemoryCorePrompt::class,
+        MemoryIndexPolicyPrompt::class,
+        ToolUsagePrompt::class,
+    ];
+
+    /**
+     * @var array<int, class-string<MemoryResource>|class-string<MemoryHistoryResource>|class-string<SchemaResource>|class-string<DocsResource>|class-string<MemoryIndexResource>>
+     */
+    protected array $resources = [
+        MemoryResource::class,
+        MemoryHistoryResource::class,
+        SchemaResource::class,
+        DocsResource::class,
+        MemoryIndexResource::class,
+    ];
+
+    /**
+     * @var array<int, class-string<WriteMemoryTool>|class-string<UpdateMemoryTool>|class-string<DeleteMemoryTool>|class-string<SearchMemoriesTool>|class-string<BatchWriteMemoryTool>|class-string<LinkMemoriesTool>|class-string<VectorSearchTool>>
+     */
     protected array $tools = [
         WriteMemoryTool::class,
         UpdateMemoryTool::class,
@@ -37,17 +63,5 @@ class MemoryMcpServer extends Server
         VectorSearchTool::class,
     ];
 
-    protected array $resources = [
-        MemoryResource::class,
-        MemoryHistoryResource::class,
-        SchemaResource::class,
-        Resources\DocsResource::class,
-        Resources\MemoryIndexResource::class,
-    ];
-
-    protected array $prompts = [
-        Prompts\MemoryCorePrompt::class,
-        Prompts\MemoryIndexPolicyPrompt::class,
-        Prompts\ToolUsagePrompt::class,
-    ];
+    protected string $version = '1.0.0';
 }

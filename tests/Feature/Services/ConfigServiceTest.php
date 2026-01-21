@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Cache;
 
 uses(RefreshDatabase::class);
 
-it('caches configuration calculation', function () {
-    $item = Configuration::create(['key' => 'foo', 'value' => 'bar']);
+it('caches configuration calculation', function (): void {
+    $item = Configuration::query()->create(['key' => 'foo', 'value' => 'bar']);
 
     Cache::shouldReceive('rememberForever')
         ->once()
@@ -21,8 +21,8 @@ it('caches configuration calculation', function () {
     expect($value)->toBe('bar');
 });
 
-it('invalidates cache on update', function () {
-    $config = Configuration::create(['key' => 'foo', 'value' => 'bar']);
+it('invalidates cache on update', function (): void {
+    $config = Configuration::query()->create(['key' => 'foo', 'value' => 'bar']);
 
     // Seed cache
     $service = new ConfigService;

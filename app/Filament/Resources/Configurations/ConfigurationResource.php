@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Configurations;
 
 use App\Filament\Resources\Configurations\Pages\CreateConfiguration;
@@ -12,31 +14,19 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ConfigurationResource extends Resource
 {
     protected static ?string $model = Configuration::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'System';
+    protected static UnitEnum|string|null $navigationGroup = 'System';
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     public static function form(Schema $schema): Schema
     {
         return ConfigurationForm::configure($schema);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return ConfigurationsTable::configure($table)
-            ->defaultSort('created_at', 'desc');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
@@ -46,5 +36,18 @@ class ConfigurationResource extends Resource
             'create' => CreateConfiguration::route('/create'),
             'edit' => EditConfiguration::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return ConfigurationsTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use function Pest\Laravel\getJson;
 use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -9,9 +11,9 @@ use Laravel\Sanctum\Sanctum;
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\postJson;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
-it('can upload a file', function () {
+it('can upload a file', function (): void {
     Storage::fake('public');
     $user = User::factory()->create();
     Sanctum::actingAs($user);
@@ -34,19 +36,19 @@ it('can upload a file', function () {
             ],
         ]);
 
-    $media = Media::first();
+    $media = Media::query()->first();
     expect($media)->not->toBeNull();
     expect($media->mime_type)->toBe('image/jpeg');
 
     Storage::disk('public')->assertExists('uploads/'.$media->filename.'.jpg');
 });
 
-it('can fetch media details', function () {
+it('can fetch media details', function (): void {
     Storage::fake('public');
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
-    $media = Media::create([
+    $media = Media::query()->create([
         'disk' => 'public',
         'directory' => 'uploads',
         'filename' => 'test-file',
@@ -57,13 +59,13 @@ it('can fetch media details', function () {
         'metadata' => ['original_filename' => 'old.jpg'],
     ]);
 
-    $response = \Pest\Laravel\getJson(route('api.v1.media.show', $media));
+    $response = getJson(route('api.v1.media.show', $media));
 
-    $response->assertStatus(200)
+    $response->assertOk()
         ->assertJsonPath('data.id', (string) $media->id);
 });
 
-it('can delete media', function () {
+it('can delete media', function (): void {
     Storage::fake('public');
     $user = User::factory()->create();
     Sanctum::actingAs($user);
@@ -71,7 +73,7 @@ it('can delete media', function () {
     $file = UploadedFile::fake()->create('document.pdf', 100);
     $path = $file->storeAs('uploads', 'test-doc.pdf', 'public');
 
-    $media = Media::create([
+    $media = Media::query()->create([
         'disk' => 'public',
         'directory' => 'uploads',
         'filename' => 'test-doc',
@@ -86,11 +88,11 @@ it('can delete media', function () {
 
     $response->assertNoContent();
 
-    expect(Media::count())->toBe(0);
+    expect(Media::query()->count())->toBe(0);
     Storage::disk('public')->assertMissing($path);
 });
 
-it('validates upload size', function () {
+it('validates upload size', function (): void {
     Storage::fake('public');
     $user = User::factory()->create();
     Sanctum::actingAs($user);
@@ -101,6 +103,6 @@ it('validates upload size', function () {
         'file' => $file,
     ]);
 
-    $response->assertStatus(422)
+    $response->assertUnprocessable()
         ->assertJsonValidationErrors(['file']);
 });

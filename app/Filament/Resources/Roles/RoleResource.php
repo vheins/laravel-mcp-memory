@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Roles;
 
 use App\Filament\Resources\Roles\Pages\CreateRole;
@@ -12,31 +14,19 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Access Management';
+    protected static UnitEnum|string|null $navigationGroup = 'Access Management';
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
     public static function form(Schema $schema): Schema
     {
         return RoleForm::configure($schema);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return RolesTable::configure($table)
-            ->defaultSort('created_at', 'desc');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
@@ -46,5 +36,18 @@ class RoleResource extends Resource
             'create' => CreateRole::route('/create'),
             'edit' => EditRole::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return RolesTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 }

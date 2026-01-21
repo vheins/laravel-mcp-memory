@@ -10,11 +10,6 @@ use Laravel\Mcp\Server\Prompt;
 
 class MemoryCorePrompt extends Prompt
 {
-    public function name(): string
-    {
-        return 'memory-agent-core';
-    }
-
     public function description(): string
     {
         return 'The core behavioral contract for all agents interacting with the Memory MCP.';
@@ -50,5 +45,10 @@ You MUST adhere to the following core behavioral contract:
 Violating these rules will result in memory pollution and system degradation.
 TEXT
         );
+    }
+
+    public function name(): string
+    {
+        return 'memory-agent-core';
     }
 }

@@ -1,11 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Memories\Pages;
 
 use App\Filament\Resources\Memories\MemoryResource;
+use App\Models\Memory;
+use App\Services\GeminiService;
+use Exception;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\ViewField;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditMemory extends EditRecord
@@ -15,12 +25,12 @@ class EditMemory extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('enhanceMemory')
+            Action::make('enhanceMemory')
                 ->label('Enhance with AI')
                 ->icon('heroicon-o-sparkles')
                 ->color('success')
                 ->form([
-                    \Filament\Forms\Components\Select::make('shortcut')
+                    Select::make('shortcut')
                         ->label('Quick Action')
                         ->options([
                             'optimize_code' => 'Optimize Code & Logic',
@@ -33,7 +43,7 @@ class EditMemory extends EditRecord
                             'format_tech' => 'Format as Technical Markdown',
                         ])
                         ->reactive()
-                        ->afterStateUpdated(function ($state, $set) {
+                        ->afterStateUpdated(function ($state, $set): void {
                             $instructions = [
                                 'optimize_code' => 'Analyze the code in the content and suggest optimizations for performance and readability.',
                                 'add_documentation' => 'Add comprehensive DocBlocks, inline comments, and description to the code snippets.',
@@ -49,20 +59,20 @@ class EditMemory extends EditRecord
                                 $set('instruction', $instructions[$state]);
                             }
                         }),
-                    \Filament\Forms\Components\Textarea::make('instruction')
+                    Textarea::make('instruction')
                         ->label('Enhancement Instruction')
                         ->required()
                         ->default('Improve grammar and clarity.')
                         ->rows(4),
-                    \Filament\Forms\Components\ViewField::make('ai_loader')
+                    ViewField::make('ai_loader')
                         ->view('filament.resources.memories.components.ai-loader')
                         ->hiddenLabel()
                         ->dehydrated(false),
                 ])
-                ->action(function (array $data, \App\Models\Memory $record) {
-                    $geminiService = app(\App\Services\GeminiService::class);
+                ->action(function (array $data, Memory $record): void {
+                    $geminiService = app(GeminiService::class);
 
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title('Enhancing Memory...')
                         ->body('Please wait while the AI enhances the content.')
                         ->info()
@@ -76,15 +86,15 @@ class EditMemory extends EditRecord
                         $record->update($enhancedData);
                         $this->fillForm(); // Refresh form with new data
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Memory Enhanced')
                             ->success()
                             ->send();
 
-                    } catch (\Exception $e) {
-                        \Filament\Notifications\Notification::make()
+                    } catch (Exception $exception) {
+                        Notification::make()
                             ->title('Enhancement Failed')
-                            ->body($e->getMessage())
+                            ->body($exception->getMessage())
                             ->danger()
                             ->send();
                     }

@@ -6,7 +6,7 @@ use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
-test('users can register', function () {
+test('users can register', function (): void {
     $response = $this->postJson('/api/v1/auth/register', [
         'data' => [
             'type' => 'auth_register',
@@ -24,7 +24,7 @@ test('users can register', function () {
     $this->assertDatabaseHas('users', ['email' => 'test@example.com']);
 });
 
-test('users can login', function () {
+test('users can login', function (): void {
     $user = User::factory()->create([
         'email' => 'test@example.com',
         'password' => 'Password123!',
@@ -51,7 +51,7 @@ test('users can login', function () {
         ]);
 });
 
-test('users cannot login with invalid credentials', function () {
+test('users cannot login with invalid credentials', function (): void {
     $user = User::factory()->create([
         'email' => 'test@example.com',
         'password' => 'Password123!',
@@ -71,7 +71,7 @@ test('users cannot login with invalid credentials', function () {
         ->assertJsonValidationErrors(['data.attributes.email']);
 });
 
-test('authenticated users can get their profile', function () {
+test('authenticated users can get their profile', function (): void {
     $user = User::factory()->create();
 
     Sanctum::actingAs($user, ['*']);
@@ -83,7 +83,7 @@ test('authenticated users can get their profile', function () {
         ->assertJsonPath('data.attributes.email', $user->email);
 });
 
-test('authenticated users can logout', function () {
+test('authenticated users can logout', function (): void {
     $user = User::factory()->create();
 
     Sanctum::actingAs($user, ['*']);

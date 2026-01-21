@@ -1,20 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
+use Exception;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Memory extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory;
+    use HasUuids;
+    use SoftDeletes;
 
     protected $fillable = [
         'organization', // github organization / user (repository owner)
@@ -31,37 +38,26 @@ class Memory extends Model
         'metadata', // additional structured data
     ];
 
-    protected $casts = [
-        'metadata' => 'array',
-        'embedding' => 'array',
-        'importance' => 'integer',
-        'status' => MemoryStatus::class,
-        'memory_type' => MemoryType::class,
-        'scope_type' => MemoryScope::class,
-    ];
-
-    // User relationship
-    public function userRel(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function versions(): HasMany
-    {
-        return $this->hasMany(MemoryVersion::class);
-    }
-
-    public function auditLogs(): HasMany
-    {
-        return $this->hasMany(MemoryAuditLog::class);
-    }
-
+    /**
+     * @return HasMany<MemoryAccessLog, $this>
+     */
     public function accessLogs(): HasMany
     {
         return $this->hasMany(MemoryAccessLog::class, 'resource_id');
     }
 
-    public function relatedMemories(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /**
+     * @return HasMany<MemoryAuditLog, $this>
+     */
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(MemoryAuditLog::class);
+    }
+
+    /**
+     * @return BelongsToMany<Memory, $this, Pivot>
+     */
+    public function relatedMemories(): BelongsToMany
     {
         return $this->belongsToMany(
             Memory::class,
@@ -71,18 +67,45 @@ class Memory extends Model
         )->withPivot('relation_type')->withTimestamps();
     }
 
+    // User relationship
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function userRel(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * @return HasMany<MemoryVersion, $this>
+     */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(MemoryVersion::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'metadata' => 'array',
+            'embedding' => 'array',
+            'importance' => 'integer',
+            'status' => MemoryStatus::class,
+            'memory_type' => MemoryType::class,
+            'scope_type' => MemoryScope::class,
+        ];
+    }
+
     protected static function booted(): void
     {
-        static::creating(function (Memory $memory) {
+        static::creating(function (Memory $memory): void {
             if (! $memory->created_by_type) {
                 $memory->created_by_type = 'human';
             }
         });
 
-        static::updating(function (Memory $memory) {
-            if ($memory->getOriginal('status') === MemoryStatus::Locked && $memory->isDirty('current_content')) {
-                throw new \Exception('Cannot update locked memory.');
-            }
+        static::updating(function (Memory $memory): void {
+            throw_if($memory->getOriginal('status') === MemoryStatus::Locked && $memory->isDirty('current_content'), Exception::class, 'Cannot update locked memory.');
         });
     }
 }

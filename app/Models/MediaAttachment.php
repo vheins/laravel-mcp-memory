@@ -1,11 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MediaAttachment extends Model
 {
+    use HasFactory;
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -15,17 +22,23 @@ class MediaAttachment extends Model
         'tag',
     ];
 
-    protected $casts = [
-        'attached_at' => 'datetime',
-    ];
+    public function entity(): MorphTo
+    {
+        return $this->morphTo();
+    }
 
-    public function media(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<Media, $this>
+     */
+    public function media(): BelongsTo
     {
         return $this->belongsTo(Media::class);
     }
 
-    public function entity(): \Illuminate\Database\Eloquent\Relations\MorphTo
+    protected function casts(): array
     {
-        return $this->morphTo();
+        return [
+            'attached_at' => 'datetime',
+        ];
     }
 }

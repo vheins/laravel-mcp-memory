@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
+use Laravel\Mcp\Request;
 use App\Mcp\Resources\DocsResource;
 use App\Mcp\Resources\MemoryIndexResource;
 use App\Models\Memory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Mcp\Server\Contracts\Resource;
 
 uses(RefreshDatabase::class);
 
-test('docs resource returns overview', function () {
+test('docs resource returns overview', function (): void {
     $resource = new DocsResource();
-    $request = new \Laravel\Mcp\Request(['slug' => 'mcp-overview']);
+    $request = new Request(['slug' => 'mcp-overview']);
 
     $response = $resource->handle($request);
 
@@ -20,9 +20,9 @@ test('docs resource returns overview', function () {
         ->and($response->content()->toArray()['_meta']['type'])->toBe('documentation');
 });
 
-test('docs resource returns tools guide', function () {
+test('docs resource returns tools guide', function (): void {
     $resource = new DocsResource();
-    $request = new \Laravel\Mcp\Request(['slug' => 'tools-guide']);
+    $request = new Request(['slug' => 'tools-guide']);
 
     $response = $resource->handle($request);
 
@@ -30,27 +30,27 @@ test('docs resource returns tools guide', function () {
         ->and((string) $response->content())->toContain('memory-write');
 });
 
-test('docs resource returns behavior rules', function () {
+test('docs resource returns behavior rules', function (): void {
     $resource = new DocsResource();
-    $request = new \Laravel\Mcp\Request(['slug' => 'behavior-rules']);
+    $request = new Request(['slug' => 'behavior-rules']);
 
     $response = $resource->handle($request);
 
     expect((string) $response->content())->toContain('# Agent Behavior Rules');
 });
 
-test('docs resource returns memory rules', function () {
+test('docs resource returns memory rules', function (): void {
     $resource = new DocsResource();
-    $request = new \Laravel\Mcp\Request(['slug' => 'memory-rules']);
+    $request = new Request(['slug' => 'memory-rules']);
 
     $response = $resource->handle($request);
 
     expect((string) $response->content())->toContain('# Memory Quality Rules');
 });
 
-test('docs resource returns error for unknown slug', function () {
+test('docs resource returns error for unknown slug', function (): void {
     $resource = new DocsResource();
-    $request = new \Laravel\Mcp\Request(['slug' => 'unknown-doc']);
+    $request = new Request(['slug' => 'unknown-doc']);
 
     $response = $resource->handle($request);
 
@@ -58,7 +58,7 @@ test('docs resource returns error for unknown slug', function () {
         ->and($response->content()->toArray()['_meta']['error'])->toBeTrue();
 });
 
-test('memory index resource returns recent memories', function () {
+test('memory index resource returns recent memories', function (): void {
     Memory::factory()->create([
         'title' => 'Test Memory A',
         'current_content' => 'Content A',
@@ -70,7 +70,7 @@ test('memory index resource returns recent memories', function () {
     ]);
 
     $resource = new MemoryIndexResource();
-    $request = new \Laravel\Mcp\Request([]);
+    $request = new Request([]);
 
     $response = $resource->handle($request);
 
@@ -81,15 +81,15 @@ test('memory index resource returns recent memories', function () {
         ->and($data[0]['title'])->toBe('Test Memory A')
         ->and($data[0]['importance'])->toBe(5)
         ->and($data[0]['metadata'])->toHaveCount(3)
-        ->and(strlen($data[0]['metadata']['long']))->toBeLessThan(55) // 47 + ...
+        ->and(strlen((string) $data[0]['metadata']['long']))->toBeLessThan(55) // 47 + ...
         ->and($data[0])->not->toHaveKey('current_content') // Content forbidden
         ->and($response->content()->toArray()['_meta']['type'])->toBe('index')
         ->and($response->content()->toArray()['_meta']['count'])->toBe(1);
 });
 
-test('memory index handles empty state', function () {
+test('memory index handles empty state', function (): void {
     $resource = new MemoryIndexResource();
-    $request = new \Laravel\Mcp\Request([]);
+    $request = new Request([]);
 
     $response = $resource->handle($request);
 

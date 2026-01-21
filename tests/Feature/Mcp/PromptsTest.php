@@ -5,15 +5,12 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use Laravel\Mcp\Server\Prompt;
-use Laravel\Mcp\Server\Transport\JsonRpcRequest;
-use Laravel\Mcp\Server\Transport\JsonRpcResponse;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
 
 uses(RefreshDatabase::class);
 
-it('can retrieve memory core prompt', function () {
+it('can retrieve memory core prompt', function (): void {
     Config::set('mcp.server.enabled', true);
 
     actingAs(User::factory()->create());
@@ -45,7 +42,7 @@ it('can retrieve memory core prompt', function () {
         ]);
 });
 
-it('can retrieve memory index policy prompt', function () {
+it('can retrieve memory index policy prompt', function (): void {
     Config::set('mcp.server.enabled', true);
 
     actingAs(User::factory()->create());
@@ -69,7 +66,7 @@ it('can retrieve memory index policy prompt', function () {
         ]);
 });
 
-it('can retrieve tool usage prompt', function () {
+it('can retrieve tool usage prompt', function (): void {
     Config::set('mcp.server.enabled', true);
 
     actingAs(User::factory()->create());

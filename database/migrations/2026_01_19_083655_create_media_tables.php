@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('media', function (Blueprint $table) {
+        Schema::create('media', function (Blueprint $table): void {
             $table->id();
             $table->string('disk');
             $table->string('directory');
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('media_attachments', function (Blueprint $table) {
+        Schema::create('media_attachments', function (Blueprint $table): void {
             $table->foreignId('media_id')->constrained('media')->cascadeOnDelete();
             $table->morphs('entity');
             $table->string('tag')->default('default');

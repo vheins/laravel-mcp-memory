@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
@@ -19,23 +21,35 @@ class AuthController extends Controller
     {
         $attributes = $request->input('data.attributes');
 
-        $user = User::create([
+        $user = User::query()->create([
             'name' => $attributes['full_name'],
             'email' => $attributes['email'],
             'password' => Hash::make($attributes['password']),
         ]);
 
-        return (new UserResource($user))
+        return new UserResource($user)
             ->response()
             ->setStatusCode(201)
             ->header('Content-Type', 'application/vnd.api+json');
+    }
+
+    public function changePassword(Request $request)
+    {
+        // To be implemented
+        return response()->json(['meta' => ['message' => 'Not implemented yet']], 501);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        // To be implemented
+        return response()->json(['meta' => ['message' => 'Not implemented yet']], 501);
     }
 
     public function login(LoginRequest $request): JsonResponse
     {
         $attributes = $request->input('data.attributes');
 
-        $user = User::where('email', $attributes['email'])->first();
+        $user = User::query()->where('email', $attributes['email'])->first();
 
         if (! $user || ! Hash::check($attributes['password'], $user->password)) {
             throw ValidationException::withMessages([
@@ -45,10 +59,10 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return (new AuthSessionResource([
+        return new AuthSessionResource([
             'id' => 'current',
             'access_token' => $token,
-        ]))
+        ])
             ->response()
             ->setStatusCode(200)
             ->header('Content-Type', 'application/vnd.api+json');
@@ -63,25 +77,13 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return (new UserResource($request->user()))
+        return new UserResource($request->user())
             ->response()
             ->setStatusCode(200)
             ->header('Content-Type', 'application/vnd.api+json');
     }
 
-    public function forgotPassword(Request $request)
-    {
-        // To be implemented
-        return response()->json(['meta' => ['message' => 'Not implemented yet']], 501);
-    }
-
     public function resetPassword(Request $request)
-    {
-        // To be implemented
-        return response()->json(['meta' => ['message' => 'Not implemented yet']], 501);
-    }
-
-    public function changePassword(Request $request)
     {
         // To be implemented
         return response()->json(['meta' => ['message' => 'Not implemented yet']], 501);

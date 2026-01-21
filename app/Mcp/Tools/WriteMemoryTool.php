@@ -4,23 +4,56 @@ declare(strict_types=1);
 
 namespace App\Mcp\Tools;
 
+use App\Enums\MemoryScope;
+use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
 use App\Services\MemoryService;
+use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Exceptions\JsonRpcException;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
+use Throwable;
 
 class WriteMemoryTool extends Tool
 {
-    public function name(): string
-    {
-        return 'memory-write';
-    }
-
     public function description(): string
     {
         return 'Create a new memory entry. Supports facts, preferences, and business rules.';
+    }
+
+    public function handle(Request $request, MemoryService $service): ResponseFactory
+    {
+        $arguments = $request->all();
+        $arguments['user_id'] = auth()->id();
+
+        $actorId = (string) (auth()->id() ?? 'system');
+        $actorType = request()->is('api/*') ? 'ai' : 'human';
+
+        try {
+            throw_if($actorType === 'ai' && ($arguments['memory_type'] ?? '') === 'system_constraint', Exception::class, 'AI agents cannot create system constraints.');
+
+            $memory = $service->write($arguments, $actorId, $actorType);
+        } catch (ValidationException $e) {
+            return Response::make([
+                Response::text(json_encode($e->errors())),
+            ]);
+        } catch (Throwable $e) {
+            return Response::make([
+                Response::text(json_encode(['error' => $e->getMessage()])),
+            ]);
+        }
+
+        return Response::make([
+            Response::text(json_encode($memory->toArray())),
+        ]);
+    }
+
+    public function name(): string
+    {
+        return 'memory-write';
     }
 
     public function schema(JsonSchema $schema): array
@@ -31,49 +64,20 @@ class WriteMemoryTool extends Tool
             'repository' => $schema->string()->description('The specific repository slug (e.g., "frontend-repo") if this memory is project-specific.'),
             'title' => $schema->string()->description('A concise summary of the memory content. Rule: Max 12 words, no explanation, no proper sentences.'),
             'scope_type' => $schema->string()
-                ->enum(array_column(\App\Enums\MemoryScope::cases(), 'value'))
+                ->enum(array_column(MemoryScope::cases(), 'value'))
                 ->description('The visibility scope: "system" for global rules, "organization" for team-wide knowledge, or "user" for private context.')
                 ->required(),
             'memory_type' => $schema->string()
-                ->enum(array_column(\App\Enums\MemoryType::cases(), 'value'))
+                ->enum(array_column(MemoryType::cases(), 'value'))
                 ->description('The category of the memory: "business_rule", "preference", "fact", "system_constraint", etc.')
                 ->required(),
             'current_content' => $schema->string()->description('The actual content of the memory. Be precise and concise.')->required(),
             'status' => $schema->string()
-                ->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))
-                ->default(\App\Enums\MemoryStatus::Draft->value)
+                ->enum(array_column(MemoryStatus::cases(), 'value'))
+                ->default(MemoryStatus::Draft->value)
                 ->description('The lifecycle status: "draft" (default), "active" (verified), or "archived".'),
             'importance' => $schema->number()->min(1)->max(10)->description('Set the priority level (1-10). Default is 1. Higher values are returned first in searches.'),
             'metadata' => $schema->object()->description('Arbitrary JSON key-value pairs. Rule: Max 5 keys, flat key-values only, no nested objects, no long text.'),
         ];
-    }
-
-    public function handle(Request $request, MemoryService $service)
-    {
-        $arguments = $request->all();
-        $arguments['user_id'] = auth()->id();
-
-        $actorId = (string) (auth()->id() ?? 'system');
-        $actorType = request()->is('api/*') ? 'ai' : 'human';
-
-        try {
-            if ($actorType === 'ai' && ($arguments['memory_type'] ?? '') === 'system_constraint') {
-                throw new \Exception('AI agents cannot create system constraints.');
-            }
-
-            $memory = $service->write($arguments, $actorId, $actorType);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return Response::make([
-                Response::text(json_encode($e->errors())),
-            ]);
-        } catch (\Throwable $e) {
-            return Response::make([
-                Response::text(json_encode(['error' => $e->getMessage()])),
-            ]);
-        }
-
-        return Response::make([
-            Response::text(json_encode($memory->toArray())),
-        ]);
     }
 }

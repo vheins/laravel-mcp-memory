@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
-use App\Enums\MemoryScope;
+use App\Models\Memory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Memory>
+ * @extends Factory<Memory>
  */
 class MemoryFactory extends Factory
 {
@@ -24,12 +28,12 @@ class MemoryFactory extends Factory
             'repository' => 'test-repo',
             'scope_type' => MemoryScope::Organization,
             'memory_type' => MemoryType::Fact,
-            'title' => $this->faker->sentence(),
-            'current_content' => $this->faker->paragraph(),
+            'title' => fake()->sentence(),
+            'current_content' => fake()->paragraph(),
             'status' => MemoryStatus::Draft,
             'importance' => 1,
             'created_by_type' => 'human',
-            'user_id' => \App\Models\User::factory(),
+            'user_id' => User::factory(),
         ];
     }
 }

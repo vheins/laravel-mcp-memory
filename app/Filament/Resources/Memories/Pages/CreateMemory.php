@@ -1,8 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Memories\Pages;
 
 use App\Filament\Resources\Memories\MemoryResource;
+use App\Services\GeminiService;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\ViewField;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateMemory extends CreateRecord
@@ -12,22 +20,22 @@ class CreateMemory extends CreateRecord
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('generateMemory')
+            Action::make('generateMemory')
                 ->label('Generate with AI')
                 ->icon('heroicon-o-sparkles')
                 ->color('primary')
                 ->form([
-                    \Filament\Forms\Components\Textarea::make('prompt')
+                    Textarea::make('prompt')
                         ->label('Describe the memory you want to create')
                         ->required()
                         ->rows(4)
                         ->placeholder('e.g., Create a documentation for the Auth authentication flow...'),
-                    \Filament\Forms\Components\ViewField::make('ai_loader')
+                    ViewField::make('ai_loader')
                         ->view('filament.resources.memories.components.ai-loader')
                         ->hiddenLabel()
                         ->dehydrated(false),
                 ])
-                ->action(function (array $data, \App\Services\GeminiService $geminiService) {
+                ->action(function (array $data, GeminiService $geminiService): void {
                     try {
                         $generatedData = $geminiService->generateMemoryFromPrompt($data['prompt']);
 
@@ -35,22 +43,22 @@ class CreateMemory extends CreateRecord
                         $generatedData['user_id'] = auth()->id();
 
                         // Fallback defaults if AI misses them
-                        $generatedData['scope_type'] = $generatedData['scope_type'] ?? 'user';
-                        $generatedData['memory_type'] = $generatedData['memory_type'] ?? 'documentation_ref';
-                        $generatedData['status'] = $generatedData['status'] ?? 'active';
-                        $generatedData['importance'] = $generatedData['importance'] ?? 5;
+                        $generatedData['scope_type'] ??= 'user';
+                        $generatedData['memory_type'] ??= 'documentation_ref';
+                        $generatedData['status'] ??= 'active';
+                        $generatedData['importance'] ??= 5;
 
                         $this->form->fill($generatedData);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Memory Generated Successfully')
                             ->success()
                             ->send();
 
-                    } catch (\Exception $e) {
-                        \Filament\Notifications\Notification::make()
+                    } catch (Exception $exception) {
+                        Notification::make()
                             ->title('Generation Failed')
-                            ->body($e->getMessage())
+                            ->body($exception->getMessage())
                             ->danger()
                             ->send();
                     }

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use App\Filament\Resources\Memories\Widgets\MemoryStatsOverview;
 use App\Models\Memory;
 use App\Models\Repository;
@@ -9,14 +10,14 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-it('can render memory stats widget', function () {
+it('can render memory stats widget', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repo = Repository::create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
+    $orgId = Str::uuid()->toString();
+    $repo = Repository::query()->create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
 
-    Memory::create([
+    Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repo->id,
         'scope_type' => 'repository',
@@ -27,7 +28,7 @@ it('can render memory stats widget', function () {
         'user' => $user->id,
     ]);
 
-    Memory::create([
+    Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repo->id,
         'scope_type' => 'repository',

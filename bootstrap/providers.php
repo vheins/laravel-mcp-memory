@@ -1,8 +1,13 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\Filament\DashboardPanelProvider;
+use App\Providers\McpServiceProvider;
+use App\Providers\VoltServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\Filament\DashboardPanelProvider::class,
-    App\Providers\McpServiceProvider::class,
-    App\Providers\VoltServiceProvider::class,
+    AppServiceProvider::class,
+    DashboardPanelProvider::class,
+    McpServiceProvider::class,
+    VoltServiceProvider::class,
 ];

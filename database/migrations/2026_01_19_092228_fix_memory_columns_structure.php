@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('memories', function (Blueprint $table) {
+        Schema::table('memories', function (Blueprint $table): void {
             // Drop existing user_id if present (it was a varchar/uuid)
             if (Schema::hasColumn('memories', 'user_id')) {
                 // Try dropping index first (generic name or specific)
                 // In SQLite, dropping index might be needed
                 try {
                     $table->dropIndex(['user_id']);
-                } catch (\Exception $e) {
+                } catch (Exception) {
                 }
 
                 $table->dropColumn('user_id');
@@ -40,7 +40,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('memories', function (Blueprint $table) {
+        Schema::table('memories', function (Blueprint $table): void {
             $table->dropForeign(['user']);
             $table->dropColumn('user');
 

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('memory_relations', function (Blueprint $table) {
+        Schema::create('memory_relations', function (Blueprint $table): void {
             $table->id();
             $table->foreignUuid('source_id')->constrained('memories')->onDelete('cascade');
             $table->foreignUuid('target_id')->constrained('memories')->onDelete('cascade');

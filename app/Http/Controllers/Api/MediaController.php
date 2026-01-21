@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -12,6 +14,18 @@ use Illuminate\Http\Response;
 class MediaController extends Controller
 {
     public function __construct(protected MediaService $mediaService) {}
+
+    public function destroy(Media $media): Response
+    {
+        $this->mediaService->delete($media);
+
+        return response()->noContent();
+    }
+
+    public function show(Media $media): MediaResource
+    {
+        return new MediaResource($media);
+    }
 
     public function upload(Request $request): MediaResource
     {
@@ -28,17 +42,5 @@ class MediaController extends Controller
         );
 
         return new MediaResource($media);
-    }
-
-    public function show(Media $media): MediaResource
-    {
-        return new MediaResource($media);
-    }
-
-    public function destroy(Media $media): Response
-    {
-        $this->mediaService->delete($media);
-
-        return response()->noContent();
     }
 }

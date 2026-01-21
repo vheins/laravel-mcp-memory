@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -7,23 +9,18 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, \Laravel\Sanctum\HasApiTokens, Notifiable, \Spatie\Permission\Traits\HasRoles;
-
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true;
-    }
-
-    public function terms(): MorphToMany
-    {
-        return $this->morphToMany(Term::class, 'entity', 'entity_terms');
-    }
+    use HasApiTokens;
+    use HasFactory;
+    use HasRoles;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -45,6 +42,19 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
+    /**
+     * @return MorphToMany<Term, $this, Pivot>
+     */
+    public function terms(): MorphToMany
+    {
+        return $this->morphToMany(Term::class, 'entity', 'entity_terms');
+    }
 
     /**
      * Get the attributes that should be cast.

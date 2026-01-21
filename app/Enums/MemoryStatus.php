@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
@@ -8,20 +10,20 @@ use Filament\Support\Contracts\HasLabel;
 
 enum MemoryStatus: string implements HasColor, HasIcon, HasLabel
 {
-    case Draft = 'draft';
-    case Verified = 'verified';
-    case Locked = 'locked';
-    case Deprecated = 'deprecated';
     case Active = 'active';
+    case Deprecated = 'deprecated';
+    case Draft = 'draft';
+    case Locked = 'locked';
+    case Verified = 'verified';
 
-    public function getLabel(): ?string
+    public function getColor(): array|string|null
     {
         return match ($this) {
-            self::Draft => 'Draft',
-            self::Verified => 'Verified',
-            self::Locked => 'Locked',
-            self::Deprecated => 'Deprecated',
-            self::Active => 'Active',
+            self::Draft => 'gray',
+            self::Verified => 'info',
+            self::Locked => 'danger',
+            self::Deprecated => 'warning',
+            self::Active => 'success',
         };
     }
 
@@ -36,14 +38,14 @@ enum MemoryStatus: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getLabel(): ?string
     {
         return match ($this) {
-            self::Draft => 'gray',
-            self::Verified => 'info',
-            self::Locked => 'danger',
-            self::Deprecated => 'warning',
-            self::Active => 'success',
+            self::Draft => 'Draft',
+            self::Verified => 'Verified',
+            self::Locked => 'Locked',
+            self::Deprecated => 'Deprecated',
+            self::Active => 'Active',
         };
     }
 }

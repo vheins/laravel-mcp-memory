@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use App\Filament\Resources\Memories\MemoryResource;
 use App\Filament\Resources\Memories\Pages\CreateMemory;
 use App\Filament\Resources\Memories\Pages\EditMemory;
@@ -12,7 +13,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-it('can render memory resource page', function () {
+it('can render memory resource page', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
@@ -20,18 +21,18 @@ it('can render memory resource page', function () {
         ->assertSuccessful();
 });
 
-it('can list memories', function () {
+it('can list memories', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user); // Assuming user has permission
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repository = Repository::create([
+    $orgId = Str::uuid()->toString();
+    $repository = Repository::query()->create([
         'organization_id' => $orgId,
         'name' => 'Test Repo',
         'slug' => 'test-repo',
     ]);
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repository->id,
         'scope_type' => 'repository',
@@ -46,12 +47,12 @@ it('can list memories', function () {
         ->assertCanSeeTableRecords([$memory]);
 });
 
-it('can create a memory', function () {
+it('can create a memory', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repository = Repository::create([
+    $orgId = Str::uuid()->toString();
+    $repository = Repository::query()->create([
         'organization_id' => $orgId,
         'name' => 'Test Repo',
         'slug' => 'test-repo',
@@ -77,18 +78,18 @@ it('can create a memory', function () {
     ]);
 });
 
-it('can edit a memory', function () {
+it('can edit a memory', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repository = Repository::create([
+    $orgId = Str::uuid()->toString();
+    $repository = Repository::query()->create([
         'organization_id' => $orgId,
         'name' => 'Test Repo',
         'slug' => 'test-repo',
     ]);
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repository->id,
         'scope_type' => 'repository',

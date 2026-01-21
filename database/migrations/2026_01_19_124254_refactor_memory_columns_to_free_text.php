@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('memories', function (Blueprint $table) {
+        Schema::table('memories', function (Blueprint $table): void {
             // Change organization and repository to string
             $table->string('organization')->change();
             $table->string('repository')->nullable()->change();
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('memories', function (Blueprint $table) {
+        Schema::table('memories', function (Blueprint $table): void {
             $table->renameColumn('user_id', 'user');
 
             // We can't easily revert to UUID type without knowing the previous state,

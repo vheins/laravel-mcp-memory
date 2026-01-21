@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
+use App\Models\MemoryAccessLog;
 use Filament\Widgets\ChartWidget;
 
 class MemoryTrafficChartWidget extends ChartWidget
 {
-    protected static ?int $sort = -2;
-
     protected ?string $heading = 'Memory Traffic';
+
+    protected static ?int $sort = -2;
 
     public function getDescription(): ?string
     {
@@ -17,7 +20,7 @@ class MemoryTrafficChartWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $data = \App\Models\MemoryAccessLog::selectRaw('DATE(created_at) as date, count(*) as count')
+        $data = MemoryAccessLog::query()->selectRaw('DATE(created_at) as date, count(*) as count')
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')

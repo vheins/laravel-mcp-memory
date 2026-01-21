@@ -3,7 +3,7 @@
 use App\Rules\ImmutableTypeRule;
 use Illuminate\Support\Facades\Validator;
 
-it('passes for human actor', function () {
+it('passes for human actor', function (): void {
     $rule = new ImmutableTypeRule('human');
 
     $validator = Validator::make(['type' => 'system_constraint'], [
@@ -13,7 +13,7 @@ it('passes for human actor', function () {
     expect($validator->passes())->toBeTrue();
 });
 
-it('fails for ai actor with restricted type', function () {
+it('fails for ai actor with restricted type', function (): void {
     $rule = new ImmutableTypeRule('ai');
 
     $validator = Validator::make(['type' => 'system_constraint'], [
@@ -24,7 +24,7 @@ it('fails for ai actor with restricted type', function () {
     expect($validator->errors()->first('type'))->toContain('AI agents cannot');
 });
 
-it('passes for ai actor with allowed type', function () {
+it('passes for ai actor with allowed type', function (): void {
     $rule = new ImmutableTypeRule('ai');
 
     $validator = Validator::make(['type' => 'preference'], [

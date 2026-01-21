@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Models\MemoryAccessLog;
-use Filament\Actions\BulkActionGroup;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class TopQueriesTableWidget extends TableWidget
 {
@@ -17,9 +19,9 @@ class TopQueriesTableWidget extends TableWidget
                 MemoryAccessLog::query()
                     ->select([
                         'query',
-                        \Illuminate\Support\Facades\DB::raw('count(*) as count'),
-                        \Illuminate\Support\Facades\DB::raw('MAX(created_at) as last_searched_at'),
-                        \Illuminate\Support\Facades\DB::raw('MIN(id) as id'),
+                        DB::raw('count(*) as count'),
+                        DB::raw('MAX(created_at) as last_searched_at'),
+                        DB::raw('MIN(id) as id'),
                     ])
                     ->where('action', 'search')
                     ->whereNotNull('query')
@@ -31,14 +33,14 @@ class TopQueriesTableWidget extends TableWidget
             ->heading('Top Search Queries')
             ->description('Most frequent search queries.')
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('query')
+                TextColumn::make('query')
                     ->label('Search Query')
                     ->searchable(),
-                \Filament\Tables\Columns\TextColumn::make('count')
+                TextColumn::make('count')
                     ->label('Count')
                     ->numeric()
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('last_searched_at')
+                TextColumn::make('last_searched_at')
                     ->label('Last Searched')
                     ->dateTime()
                     ->sortable(),

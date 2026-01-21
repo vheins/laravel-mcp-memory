@@ -10,11 +10,6 @@ use Laravel\Mcp\Server\Prompt;
 
 class MemoryIndexPolicyPrompt extends Prompt
 {
-    public function name(): string
-    {
-        return 'memory-index-policy';
-    }
-
     public function description(): string
     {
         return 'Enforces the strict policy regarding memory index usage and content.';
@@ -52,5 +47,10 @@ The memory index is a compact discovery tool, NOT a mirror of content.
    - The system automatically actively excludes `current_content` from the index.
 TEXT
         );
+    }
+
+    public function name(): string
+    {
+        return 'memory-index-policy';
     }
 }

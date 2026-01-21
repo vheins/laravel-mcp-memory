@@ -1,5 +1,7 @@
 <?php
 
+use App\Filament\Widgets\MemoryUserUsageChartWidget;
+use App\Filament\Widgets\MemoryTopAccessedTableWidget;
 use App\Filament\Widgets\MemoryUsageStatsWidget;
 use App\Models\Memory;
 use App\Models\MemoryAccessLog;
@@ -9,37 +11,37 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('memory service logs access on read', function () {
+test('memory service logs access on read', function (): void {
     $memory = Memory::factory()->create(['title' => 'Test Memory']);
     $service = app(MemoryService::class);
 
     $service->read($memory->id, 'user-1', 'user');
 
-    expect(MemoryAccessLog::count())->toBe(1);
-    $log = MemoryAccessLog::first();
+    expect(MemoryAccessLog::query()->count())->toBe(1);
+    $log = MemoryAccessLog::query()->first();
     expect($log->action)->toBe('read');
     expect($log->resource_id)->toBe($memory->id);
     expect($log->actor_id)->toBe('user-1');
 });
 
-test('memory service logs access on search', function () {
+test('memory service logs access on search', function (): void {
     $service = app(MemoryService::class);
 
-    $service->search('repo-1', 'query', [], 'user-1', 'user');
+    $service->search('repo-1', 'query');
 
-    expect(MemoryAccessLog::count())->toBe(1);
-    $log = MemoryAccessLog::first();
+    expect(MemoryAccessLog::query()->count())->toBe(1);
+    $log = MemoryAccessLog::query()->first();
     expect($log->action)->toBe('search');
     expect($log->actor_id)->toBe('user-1');
     expect($log->metadata['query'])->toBe('query');
 });
 
-test('dashboard stats widget calculates correctly', function () {
+test('dashboard stats widget calculates correctly', function (): void {
     // Create some logs
-    MemoryAccessLog::create(['action' => 'read', 'created_at' => now()]);
-    MemoryAccessLog::create(['action' => 'search', 'created_at' => now()]);
-    MemoryAccessLog::create(['action' => 'search', 'created_at' => now()]);
-    MemoryAccessLog::create(['action' => 'create', 'created_at' => now()]);
+    MemoryAccessLog::query()->create(['action' => 'read', 'created_at' => now()]);
+    MemoryAccessLog::query()->create(['action' => 'search', 'created_at' => now()]);
+    MemoryAccessLog::query()->create(['action' => 'search', 'created_at' => now()]);
+    MemoryAccessLog::query()->create(['action' => 'create', 'created_at' => now()]);
 
     Livewire::test(MemoryUsageStatsWidget::class)
         ->assertSee('Total Requests (30d)')
@@ -50,28 +52,28 @@ test('dashboard stats widget calculates correctly', function () {
         ->assertSee('1');
 });
 
-test('user usage widget displays top users', function () {
-    MemoryAccessLog::create(['actor_id' => 'alice', 'action' => 'read', 'created_at' => now()]);
-    MemoryAccessLog::create(['actor_id' => 'alice', 'action' => 'read', 'created_at' => now()]);
-    MemoryAccessLog::create(['actor_id' => 'bob', 'action' => 'read', 'created_at' => now()]);
+test('user usage widget displays top users', function (): void {
+    MemoryAccessLog::query()->create(['actor_id' => 'alice', 'action' => 'read', 'created_at' => now()]);
+    MemoryAccessLog::query()->create(['actor_id' => 'alice', 'action' => 'read', 'created_at' => now()]);
+    MemoryAccessLog::query()->create(['actor_id' => 'bob', 'action' => 'read', 'created_at' => now()]);
 
-    Livewire::test(\App\Filament\Widgets\MemoryUserUsageChartWidget::class)
+    Livewire::test(MemoryUserUsageChartWidget::class)
         ->assertSee('alice') // alice has 2
         ->assertSee('bob');  // bob has 1
 });
 
-test('top accessed memories widget displays popular memories', function () {
-    $memoryA = \App\Models\Memory::factory()->create(['title' => 'Popular Memory']);
-    $memoryB = \App\Models\Memory::factory()->create(['title' => 'Unpopular Memory']);
+test('top accessed memories widget displays popular memories', function (): void {
+    $memoryA = Memory::factory()->create(['title' => 'Popular Memory']);
+    $memoryB = Memory::factory()->create(['title' => 'Unpopular Memory']);
 
     // Access Memory A twice
-    MemoryAccessLog::create([
+    MemoryAccessLog::query()->create([
         'actor_id' => 'user',
         'action' => 'read',
         'resource_id' => $memoryA->id,
         'created_at' => now(),
     ]);
-    MemoryAccessLog::create([
+    MemoryAccessLog::query()->create([
         'actor_id' => 'user',
         'action' => 'read',
         'resource_id' => $memoryA->id,
@@ -79,14 +81,14 @@ test('top accessed memories widget displays popular memories', function () {
     ]);
 
     // Access Memory B once
-    MemoryAccessLog::create([
+    MemoryAccessLog::query()->create([
         'actor_id' => 'user',
         'action' => 'read',
         'resource_id' => $memoryB->id,
         'created_at' => now(),
     ]);
 
-    Livewire::test(\App\Filament\Widgets\MemoryTopAccessedTableWidget::class)
+    Livewire::test(MemoryTopAccessedTableWidget::class)
         ->assertSee('Popular Memory')
         ->assertSee('2') // Count
         ->assertSee('Unpopular Memory')

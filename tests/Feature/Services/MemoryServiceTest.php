@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Validation\ValidationException;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
 use App\Enums\MemoryScope;
@@ -11,13 +12,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->service = new MemoryService;
     $this->user = User::factory()->create();
     $this->repository = Repository::factory()->create(['organization_id' => str()->uuid()]);
 });
 
-it('can create a new memory', function () {
+it('can create a new memory', function (): void {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
@@ -48,7 +49,7 @@ it('can create a new memory', function () {
     expect($memory->auditLogs->first()->event)->toBe('create');
 });
 
-it('creates a new version when content updates', function () {
+it('creates a new version when content updates', function (): void {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
@@ -76,7 +77,7 @@ it('creates a new version when content updates', function () {
     expect($updatedMemory->auditLogs()->latest('created_at')->first()->event)->toBe('update');
 });
 
-it('prevents update when memory is locked', function () {
+it('prevents update when memory is locked', function (): void {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
@@ -89,7 +90,7 @@ it('prevents update when memory is locked', function () {
 
     // Force create a locked memory directly via model to bypass service check if any
     // asking service to create locked memory
-    $memory = Memory::create(array_merge($data, ['organization' => 'test-org']));
+    $memory = Memory::query()->create(array_merge($data, ['organization' => 'test-org']));
 
     $updateData = [
         'id' => $memory->id,
@@ -103,10 +104,10 @@ it('prevents update when memory is locked', function () {
     ];
 
     expect(fn () => $this->service->write($updateData, $this->user->id))
-        ->toThrow(\Exception::class, 'Cannot update locked memory.');
+        ->toThrow(Exception::class, 'Cannot update locked memory.');
 });
 
-it('can read a memory', function () {
+it('can read a memory', function (): void {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
@@ -123,7 +124,7 @@ it('can read a memory', function () {
     expect($readMemory->current_content)->toBe('Content to read');
 });
 
-it('can search memories', function () {
+it('can search memories', function (): void {
     // Create queryable memories
     $mem1 = $this->service->write([
         'organization' => 'test-org',
@@ -161,7 +162,7 @@ it('can search memories', function () {
     expect($results->first()->id)->toBe($mem1->id);
 });
 
-it('can search by metadata', function () {
+it('can search by metadata', function (): void {
     $memory = $this->service->write([
         'organization' => 'test-org',
         'repository' => 'test-repo',
@@ -181,7 +182,7 @@ it('can search by metadata', function () {
     expect($results->first()->id)->toBe($memory->id);
 });
 
-it('prevents AI from creating restricted memory types', function () {
+it('prevents AI from creating restricted memory types', function (): void {
     $data = [
         'organization' => 'test-org',
         'repository' => 'test-repo',
@@ -192,10 +193,10 @@ it('prevents AI from creating restricted memory types', function () {
     ];
 
     expect(fn () => $this->service->write($data, 'agent-1', 'ai'))
-        ->toThrow(\Illuminate\Validation\ValidationException::class);
+        ->toThrow(ValidationException::class);
 });
 
-it('prevents AI from updating restricted memory types', function () {
+it('prevents AI from updating restricted memory types', function (): void {
     // Created by human (allowed)
     $memory = $this->service->write([
         'organization' => 'test-org',
@@ -213,5 +214,5 @@ it('prevents AI from updating restricted memory types', function () {
     ];
 
     expect(fn () => $this->service->write($updateData, 'agent-1', 'ai'))
-        ->toThrow(\Illuminate\Validation\ValidationException::class);
+        ->toThrow(ValidationException::class);
 });

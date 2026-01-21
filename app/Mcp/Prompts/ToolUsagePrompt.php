@@ -10,11 +10,6 @@ use Laravel\Mcp\Server\Prompt;
 
 class ToolUsagePrompt extends Prompt
 {
-    public function name(): string
-    {
-        return 'tool-usage-guidelines';
-    }
-
     public function description(): string
     {
         return 'Strict guidelines on when to use (and when NOT to use) each MCP tool.';
@@ -55,5 +50,10 @@ TOOL USAGE GUIDELINES
    - USE WHEN: Exact keywords fail, or looking for conceptual similarity.
 TEXT
         );
+    }
+
+    public function name(): string
+    {
+        return 'tool-usage-guidelines';
     }
 }

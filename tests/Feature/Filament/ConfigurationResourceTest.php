@@ -10,17 +10,17 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
 });
 
-it('can renders list page', function () {
+it('can renders list page', function (): void {
     Livewire::test(ListConfigurations::class)
         ->assertSuccessful();
 });
 
-it('can create a configuration', function () {
+it('can create a configuration', function (): void {
     Livewire::test(CreateConfiguration::class)
         ->fillForm([
             'key' => 'feature_x',
@@ -31,11 +31,11 @@ it('can create a configuration', function () {
         ->call('create')
         ->assertHasNoFormErrors();
 
-    expect(Configuration::where('key', 'feature_x')->exists())->toBeTrue();
+    expect(Configuration::query()->where('key', 'feature_x')->exists())->toBeTrue();
 });
 
-it('can edit a configuration', function () {
-    $config = Configuration::create([
+it('can edit a configuration', function (): void {
+    $config = Configuration::query()->create([
         'key' => 'site_title',
         'value' => 'Old Title',
         'type' => 'string',
@@ -52,8 +52,8 @@ it('can edit a configuration', function () {
     expect($config->fresh()->value)->toBe('New Title');
 });
 
-it('validates unique key', function () {
-    Configuration::create(['key' => 'exists', 'value' => '1', 'type' => 'string']);
+it('validates unique key', function (): void {
+    Configuration::query()->create(['key' => 'exists', 'value' => '1', 'type' => 'string']);
 
     Livewire::test(CreateConfiguration::class)
         ->fillForm(['key' => 'exists'])

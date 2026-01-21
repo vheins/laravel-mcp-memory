@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Users;
 
+use App\Filament\RelationManagers\EntityTermsRelationManager;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -12,31 +15,19 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Access Management';
+    protected static UnitEnum|string|null $navigationGroup = 'Access Management';
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return UsersTable::configure($table)
-            ->defaultSort('created_at', 'desc');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            \App\Filament\RelationManagers\EntityTermsRelationManager::class,
-        ];
     }
 
     public static function getPages(): array
@@ -46,5 +37,18 @@ class UserResource extends Resource
             'create' => CreateUser::route('/create'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            EntityTermsRelationManager::class,
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return UsersTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 }

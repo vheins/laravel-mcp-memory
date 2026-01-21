@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use App\Filament\Resources\Memories\Pages\ListMemories;
 use App\Models\Memory;
 use App\Models\Repository;
@@ -9,14 +10,14 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-it('can verify a memory', function () {
+it('can verify a memory', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repo = Repository::create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
+    $orgId = Str::uuid()->toString();
+    $repo = Repository::query()->create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repo->id,
         'scope_type' => 'repository',
@@ -33,14 +34,14 @@ it('can verify a memory', function () {
     expect($memory->refresh()->status)->toBe('verified');
 });
 
-it('can lock a memory', function () {
+it('can lock a memory', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repo = Repository::create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
+    $orgId = Str::uuid()->toString();
+    $repo = Repository::query()->create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repo->id,
         'scope_type' => 'repository',

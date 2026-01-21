@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Memories;
 
 use App\Filament\Resources\Memories\Pages\CreateMemory;
 use App\Filament\Resources\Memories\Pages\EditMemory;
 use App\Filament\Resources\Memories\Pages\ListMemories;
+use App\Filament\Resources\Memories\RelationManagers\AuditLogsRelationManager;
 use App\Filament\Resources\Memories\Schemas\MemoryForm;
 use App\Filament\Resources\Memories\Tables\MemoriesTable;
+use App\Filament\Resources\Memories\Widgets\MemoryStatsOverview;
 use App\Models\Memory;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -14,31 +18,19 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class MemoryResource extends Resource
 {
     protected static ?string $model = Memory::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Knowledge Base';
+    protected static UnitEnum|string|null $navigationGroup = 'Knowledge Base';
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cpu-chip';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cpu-chip';
 
     public static function form(Schema $schema): Schema
     {
         return MemoryForm::configure($schema);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return MemoriesTable::configure($table)
-            ->defaultSort('created_at', 'desc');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            \App\Filament\Resources\Memories\RelationManagers\AuditLogsRelationManager::class,
-        ];
     }
 
     public static function getPages(): array
@@ -50,18 +42,31 @@ class MemoryResource extends Resource
         ];
     }
 
-    public static function getWidgets(): array
-    {
-        return [
-            \App\Filament\Resources\Memories\Widgets\MemoryStatsOverview::class,
-        ];
-    }
-
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            AuditLogsRelationManager::class,
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            MemoryStatsOverview::class,
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return MemoriesTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 }

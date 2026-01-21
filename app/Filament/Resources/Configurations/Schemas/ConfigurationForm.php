@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Configurations\Schemas;
 
 use App\Models\Configuration;
@@ -52,14 +54,14 @@ class ConfigurationForm
                     ->schema([
                         Toggle::make('value')
                             ->label('Enabled')
-                            ->visible(fn (Get $get) => $get('type') === 'boolean'),
+                            ->visible(fn (Get $get): bool => $get('type') === 'boolean'),
                         TextInput::make('value')
                             ->numeric()
-                            ->visible(fn (Get $get) => $get('type') === 'number'),
+                            ->visible(fn (Get $get): bool => $get('type') === 'number'),
                         Textarea::make('value')
                             ->rows(5)
-                            ->visible(fn (Get $get) => in_array($get('type'), ['string', 'json', null]))
-                            ->json(fn (Get $get) => $get('type') === 'json'),
+                            ->visible(fn (Get $get): bool => \in_array($get('type'), ['string', 'json', null]))
+                            ->json(fn (Get $get): bool => $get('type') === 'json'),
                     ]),
             ]);
     }

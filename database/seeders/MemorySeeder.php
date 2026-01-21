@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Repository;
@@ -14,11 +16,10 @@ class MemorySeeder extends Seeder
      */
     public function run(MemoryService $service): void
     {
-        $orgId = Str::uuid()->toString();
+        Str::uuid()->toString();
 
         // Create Demo Repository
-        $repo = Repository::create([
-            'organization_id' => $orgId,
+        $repo = Repository::query()->create([
             'organization_id' => $organizationId,
             'name' => 'Demo Repository',
             'slug' => 'demo-repo',

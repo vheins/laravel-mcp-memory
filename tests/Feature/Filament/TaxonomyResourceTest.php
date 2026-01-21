@@ -10,17 +10,17 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
 });
 
-it('can render list taxonomies page', function () {
+it('can render list taxonomies page', function (): void {
     Livewire::test(ListTaxonomies::class)
         ->assertSuccessful();
 });
 
-it('can create a taxonomy', function () {
+it('can create a taxonomy', function (): void {
     Livewire::test(CreateTaxonomy::class)
         ->fillForm([
             'name' => 'Product Categories',
@@ -30,10 +30,10 @@ it('can create a taxonomy', function () {
         ->call('create')
         ->assertHasNoFormErrors();
 
-    expect(Taxonomy::where('slug', 'product-categories')->exists())->toBeTrue();
+    expect(Taxonomy::query()->where('slug', 'product-categories')->exists())->toBeTrue();
 });
 
-it('can edit a taxonomy', function () {
+it('can edit a taxonomy', function (): void {
     $taxonomy = Taxonomy::factory()->create();
 
     Livewire::test(EditTaxonomy::class, ['record' => $taxonomy->getRouteKey()])
@@ -46,7 +46,7 @@ it('can edit a taxonomy', function () {
     expect($taxonomy->refresh()->name)->toBe('Updated Name');
 });
 
-it('can validate taxonomy unique slug', function () {
+it('can validate taxonomy unique slug', function (): void {
     $taxonomy = Taxonomy::factory()->create(['slug' => 'existing-slug']);
 
     Livewire::test(CreateTaxonomy::class)

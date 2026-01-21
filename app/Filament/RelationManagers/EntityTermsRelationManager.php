@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\RelationManagers;
 
 use Filament\Actions\AttachAction;
@@ -9,14 +11,14 @@ use Filament\Actions\DetachBulkAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class EntityTermsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'terms';
-
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static string $relationship = 'terms';
 
     public function form(Schema $schema): Schema
     {
@@ -32,13 +34,13 @@ class EntityTermsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
+                TextColumn::make('slug')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('taxonomy.name')
+                TextColumn::make('taxonomy.name')
                     ->label('Taxonomy')
                     ->badge()
                     ->sortable(),

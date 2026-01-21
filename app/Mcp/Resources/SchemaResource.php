@@ -13,21 +13,6 @@ use Laravel\Mcp\Server\Resource;
 
 class SchemaResource extends Resource
 {
-    public function name(): string
-    {
-        return 'schema';
-    }
-
-    public function uri(): string
-    {
-        return 'schema://schema';
-    }
-
-    public function title(): string
-    {
-        return 'Memory Schema and Enums';
-    }
-
     public function description(): string
     {
         return 'Information about available memory types, statuses, and scopes.';
@@ -40,7 +25,7 @@ class SchemaResource extends Resource
             'enums' => [
                 'MemoryType' => [
                     'description' => 'Categorizes the nature of the stored information.',
-                    'options' => array_map(fn ($case) => [
+                    'options' => array_map(fn (MemoryType $case): array => [
                         'value' => $case->value,
                         'label' => method_exists($case, 'getLabel') ? $case->getLabel() : $case->name,
                         'description' => $this->getEnumDescription($case),
@@ -48,7 +33,7 @@ class SchemaResource extends Resource
                 ],
                 'MemoryStatus' => [
                     'description' => 'Tracks the lifecycle state of a memory.',
-                    'options' => array_map(fn ($case) => [
+                    'options' => array_map(fn (MemoryStatus $case): array => [
                         'value' => $case->value,
                         'label' => method_exists($case, 'getLabel') ? $case->getLabel() : $case->name,
                         'description' => $this->getEnumDescription($case),
@@ -56,7 +41,7 @@ class SchemaResource extends Resource
                 ],
                 'MemoryScope' => [
                     'description' => 'Defines the visibility and access level of the memory.',
-                    'options' => array_map(fn ($case) => [
+                    'options' => array_map(fn (MemoryScope $case): array => [
                         'value' => $case->value,
                         'label' => method_exists($case, 'getLabel') ? $case->getLabel() : $case->name,
                         'description' => $this->getEnumDescription($case),
@@ -82,6 +67,21 @@ class SchemaResource extends Resource
 
         return Response::text(json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))
             ->withMeta(['mimeType' => 'application/json']);
+    }
+
+    public function name(): string
+    {
+        return 'schema';
+    }
+
+    public function title(): string
+    {
+        return 'Memory Schema and Enums';
+    }
+
+    public function uri(): string
+    {
+        return 'schema://schema';
     }
 
     protected function getEnumDescription(mixed $case): ?string

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('repositories', function (Blueprint $table) {
+        Schema::create('repositories', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('slug')->unique();
             $table->string('name');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('memories', function (Blueprint $table) {
+        Schema::create('memories', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->uuid('organization_id')->index();
             $table->uuid('repository_id')->nullable()->index();
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->index(['memory_type', 'status'], 'index_memory_classification');
         });
 
-        Schema::create('memory_versions', function (Blueprint $table) {
+        Schema::create('memory_versions', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('memory_id')->constrained('memories');
             $table->integer('version_number');
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->unique(['memory_id', 'version_number']);
         });
 
-        Schema::create('memory_audit_logs', function (Blueprint $table) {
+        Schema::create('memory_audit_logs', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('memory_id')->constrained('memories');
             $table->string('actor_id'); // User ID or Agent ID

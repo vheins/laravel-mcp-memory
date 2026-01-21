@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
+use App\Models\MemoryAccessLog;
 use Filament\Widgets\ChartWidget;
 
 class MemoryEventsChartWidget extends ChartWidget
 {
-    protected static ?int $sort = -1;
-
     protected ?string $heading = 'Memory Events Breakdown';
+
+    protected static ?int $sort = -1;
 
     public function getDescription(): ?string
     {
@@ -17,7 +20,7 @@ class MemoryEventsChartWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $data = \App\Models\MemoryAccessLog::selectRaw('action, count(*) as count')
+        $data = MemoryAccessLog::query()->selectRaw('action, count(*) as count')
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('action')
             ->orderByDesc('count')

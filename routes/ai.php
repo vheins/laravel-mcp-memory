@@ -1,9 +1,10 @@
 <?php
 
+use App\Mcp\MemoryMcpServer;
 use Illuminate\Support\Facades\Route;
 use Laravel\Mcp\Facades\Mcp;
 
-Route::middleware(['auth:sanctum'])->group(function () {
-    Mcp::web('memory', \App\Mcp\MemoryMcpServer::class);
-    Mcp::web('memory-mcp', \App\Mcp\MemoryMcpServer::class);
+Route::middleware(['auth:sanctum'])->group(function (): void {
+    Mcp::web('memory', MemoryMcpServer::class);
+    Mcp::web('memory-mcp', MemoryMcpServer::class);
 });

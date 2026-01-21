@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use App\Filament\Resources\Memories\Pages\ListMemories;
 use App\Models\Memory;
 use App\Models\Repository;
@@ -9,15 +10,15 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-it('can filter memories by repository', function () {
+it('can filter memories by repository', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repo1 = Repository::create(['organization_id' => $orgId, 'name' => 'Repo A', 'slug' => 'repo-a']);
-    $repo2 = Repository::create(['organization_id' => $orgId, 'name' => 'Repo B', 'slug' => 'repo-b']);
+    $orgId = Str::uuid()->toString();
+    $repo1 = Repository::query()->create(['organization_id' => $orgId, 'name' => 'Repo A', 'slug' => 'repo-a']);
+    $repo2 = Repository::query()->create(['organization_id' => $orgId, 'name' => 'Repo B', 'slug' => 'repo-b']);
 
-    $mem1 = Memory::create([
+    $mem1 = Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repo1->id,
         'scope_type' => 'repository',
@@ -28,7 +29,7 @@ it('can filter memories by repository', function () {
         'user' => $user->id,
     ]);
 
-    $mem2 = Memory::create([
+    $mem2 = Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repo2->id, // Different repo
         'scope_type' => 'repository',

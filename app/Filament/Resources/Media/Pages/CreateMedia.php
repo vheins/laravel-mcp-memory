@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Media\Pages;
 
 use App\Filament\Resources\Media\MediaResource;
@@ -11,6 +13,27 @@ class CreateMedia extends CreateRecord
 {
     protected static string $resource = MediaResource::class;
 
+    protected function getAggregateType(?string $mime): string
+    {
+        if (Str::startsWith($mime, 'image/')) {
+            return 'image';
+        }
+
+        if (Str::startsWith($mime, 'video/')) {
+            return 'video';
+        }
+
+        if (Str::startsWith($mime, 'audio/')) {
+            return 'audio';
+        }
+
+        if ($mime === 'application/pdf') {
+            return 'pdf';
+        }
+
+        return 'other';
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $path = $data['attachment'];
@@ -18,12 +41,12 @@ class CreateMedia extends CreateRecord
 
         // Get file details from storage
         $storage = Storage::disk($disk);
-        $fullPath = $storage->path($path); // Absolute path if needed, or use Relative for Storage methods
+        $storage->path($path); // Absolute path if needed, or use Relative for Storage methods
 
         $mimeType = $storage->mimeType($path);
         $size = $storage->size($path);
 
-        $parts = pathinfo($path);
+        $parts = pathinfo((string) $path);
         $directory = $parts['dirname'] === '.' ? '' : $parts['dirname'];
         $filename = $parts['filename'];
         $extension = $parts['extension'];
@@ -39,31 +62,12 @@ class CreateMedia extends CreateRecord
         $data['aggregate_type'] = $aggregateType;
         $data['size'] = $size;
         $data['metadata'] = [
-            'original_filename' => $data['original_filename'] ?? $filename.'.'.$extension,
+            'original_filename' => $data['original_filename'] ?? $filename . '.' . $extension,
         ];
 
         // Clean up temporary fields
-        unset($data['attachment']);
-        unset($data['original_filename']);
+        unset($data['attachment'], $data['original_filename']);
 
         return $data;
-    }
-
-    protected function getAggregateType(?string $mime): string
-    {
-        if (Str::startsWith($mime, 'image/')) {
-            return 'image';
-        }
-        if (Str::startsWith($mime, 'video/')) {
-            return 'video';
-        }
-        if (Str::startsWith($mime, 'audio/')) {
-            return 'audio';
-        }
-        if ($mime === 'application/pdf') {
-            return 'pdf';
-        }
-
-        return 'other';
     }
 }

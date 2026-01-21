@@ -4,46 +4,26 @@ declare(strict_types=1);
 
 namespace App\Mcp\Tools;
 
+use App\Enums\MemoryScope;
+use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
 use App\Services\MemoryService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
-use Laravel\Mcp\Server\Exceptions\JsonRpcException;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
+use Throwable;
 
 class UpdateMemoryTool extends Tool
 {
-    public function name(): string
-    {
-        return 'memory-update';
-    }
-
     public function description(): string
     {
         return 'Update an existing memory entry by its UUID.';
     }
 
-    public function schema(JsonSchema $schema): array
-    {
-        return [
-            'id' => $schema->string()->format('uuid')->description('The unique UUID of the memory entry you wish to update.')->required(),
-            'title' => $schema->string()->description('A new summary title. Rule: Max 12 words, no explanation.'),
-            'current_content' => $schema->string()->description('The new text content. Replaces the existing content entirely.'),
-            'status' => $schema->string()
-                ->enum(array_column(\App\Enums\MemoryStatus::cases(), 'value'))
-                ->description('Update the status (e.g., promote "draft" to "active" after verification).'),
-            'scope_type' => $schema->string()
-                ->enum(array_column(\App\Enums\MemoryScope::cases(), 'value'))
-                ->description('Change the visibility scope (e.g., move from "user" to "organization" for shared knowledge).'),
-            'memory_type' => $schema->string()
-                ->enum(array_column(\App\Enums\MemoryType::cases(), 'value'))
-                ->description('Reclassify the memory type (e.g., from "fact" to "business_rule").'),
-            'importance' => $schema->number()->min(1)->max(10)->description('Adjust the priority level (1-10). Higher importance boosts vector search ranking.'),
-            'metadata' => $schema->object()->description('Merge or replace metadata keys. Rule: Max 5 keys, flat key-values only, no nested objects.'),
-        ];
-    }
-
-    public function handle(Request $request, MemoryService $service)
+    public function handle(Request $request, MemoryService $service): ResponseFactory
     {
         $arguments = $request->all();
         $arguments['user_id'] = auth()->id();
@@ -53,11 +33,11 @@ class UpdateMemoryTool extends Tool
 
         try {
             $memory = $service->write($arguments, $actorId, $actorType);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return Response::make([
                 Response::text(json_encode($e->errors())),
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return Response::make([
                 Response::text(json_encode(['error' => $e->getMessage()])),
             ]);
@@ -66,5 +46,30 @@ class UpdateMemoryTool extends Tool
         return Response::make([
             Response::text(json_encode($memory->toArray())),
         ]);
+    }
+
+    public function name(): string
+    {
+        return 'memory-update';
+    }
+
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'id' => $schema->string()->format('uuid')->description('The unique UUID of the memory entry you wish to update.')->required(),
+            'title' => $schema->string()->description('A new summary title. Rule: Max 12 words, no explanation.'),
+            'current_content' => $schema->string()->description('The new text content. Replaces the existing content entirely.'),
+            'status' => $schema->string()
+                ->enum(array_column(MemoryStatus::cases(), 'value'))
+                ->description('Update the status (e.g., promote "draft" to "active" after verification).'),
+            'scope_type' => $schema->string()
+                ->enum(array_column(MemoryScope::cases(), 'value'))
+                ->description('Change the visibility scope (e.g., move from "user" to "organization" for shared knowledge).'),
+            'memory_type' => $schema->string()
+                ->enum(array_column(MemoryType::cases(), 'value'))
+                ->description('Reclassify the memory type (e.g., from "fact" to "business_rule").'),
+            'importance' => $schema->number()->min(1)->max(10)->description('Adjust the priority level (1-10). Higher importance boosts vector search ranking.'),
+            'metadata' => $schema->object()->description('Merge or replace metadata keys. Rule: Max 5 keys, flat key-values only, no nested objects.'),
+        ];
     }
 }

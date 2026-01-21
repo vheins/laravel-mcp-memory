@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         if (config('database.default') !== 'sqlite') {
-            Schema::table('memories', function (Blueprint $table) {
+            Schema::table('memories', function (Blueprint $table): void {
                 $table->fullText(['title', 'current_content']);
             });
         }
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         if (config('database.default') !== 'sqlite') {
-            Schema::table('memories', function (Blueprint $table) {
+            Schema::table('memories', function (Blueprint $table): void {
                 $table->dropFullText(['title', 'current_content']);
             });
         }

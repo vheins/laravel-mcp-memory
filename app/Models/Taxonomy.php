@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,12 +19,18 @@ class Taxonomy extends Model
         'is_hierarchical',
     ];
 
-    protected $casts = [
-        'is_hierarchical' => 'boolean',
-    ];
-
+    /**
+     * @return HasMany<Term, $this>
+     */
     public function terms(): HasMany
     {
         return $this->hasMany(Term::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_hierarchical' => 'boolean',
+        ];
     }
 }

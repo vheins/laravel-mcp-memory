@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Pages\Profile;
 
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
@@ -8,11 +10,6 @@ use Filament\Schemas\Schema;
 
 class EditProfile extends BaseEditProfile
 {
-    public function getLayout(): string
-    {
-        return 'filament-panels::components.layout.index';
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -23,5 +20,10 @@ class EditProfile extends BaseEditProfile
                 $this->getPasswordConfirmationFormComponent(),
                 SchemaView::make('filament.pages.profile.mcp-tokens-wrapper'),
             ]);
+    }
+
+    public function getLayout(): string
+    {
+        return 'filament-panels::components.layout.index';
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('memory_access_logs', function (Blueprint $table) {
+        Schema::table('memory_access_logs', function (Blueprint $table): void {
             $table->json('filters')->after('query')->nullable();
             $table->integer('result_count')->after('metadata')->nullable();
             $table->dropColumn(['actor_type', 'resource_id']);
@@ -20,7 +20,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('memory_access_logs', function (Blueprint $table) {
+        Schema::table('memory_access_logs', function (Blueprint $table): void {
             $table->string('actor_type')->after('actor_id')->nullable();
             $table->uuid('resource_id')->after('action')->nullable();
             $table->dropColumn(['filters', 'result_count']);

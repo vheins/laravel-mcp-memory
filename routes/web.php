@@ -2,6 +2,4 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('filament.dashboard.auth.login');
-});
+Route::get('/', fn () => to_route('filament.dashboard.auth.login'));

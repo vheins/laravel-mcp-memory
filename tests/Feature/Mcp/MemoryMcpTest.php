@@ -7,7 +7,7 @@ use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
-it('can discover tools', function () {
+it('can discover tools', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -24,7 +24,7 @@ it('can discover tools', function () {
         ->assertJsonPath('result.tools.3.name', 'memory-search');
 });
 
-it('can discover resource templates', function () {
+it('can discover resource templates', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -39,7 +39,7 @@ it('can discover resource templates', function () {
     $response->assertJsonFragment(['name' => 'memory-history']);
 });
 
-it('can write a memory via tool', function () {
+it('can write a memory via tool', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -64,11 +64,11 @@ it('can write a memory via tool', function () {
     ]);
 });
 
-it('can search memories via tool (team context)', function () {
+it('can search memories via tool (team context)', function (): void {
     Sanctum::actingAs(User::factory()->create());
     $anotherUser = User::factory()->create();
 
-    Memory::create([
+    Memory::query()->create([
         'organization' => 'search-org',
         'repository' => 'search-repo',
         'scope_type' => 'repository',
@@ -94,16 +94,14 @@ it('can search memories via tool (team context)', function () {
     ]);
 
     $response->assertStatus(200);
-    $response->assertJsonPath('result.content.0.text', function (string $text) {
-        return str_contains($text, 'Team Fact');
-    });
+    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'Team Fact'));
 });
 
-it('can delete a memory via tool', function () {
+it('can delete a memory via tool', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => 'del-org',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
@@ -128,10 +126,10 @@ it('can delete a memory via tool', function () {
     $this->assertSoftDeleted('memories', ['id' => $memory->id]);
 });
 
-it('can read a memory via resource', function () {
+it('can read a memory via resource', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => 'res-org',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
@@ -152,12 +150,12 @@ it('can read a memory via resource', function () {
     $response->assertJsonPath('result.contents.0.text', 'Read Me Resource');
 });
 
-it('can search memories with user hierarchy', function () {
+it('can search memories with user hierarchy', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
     // Create a repository-scoped memory
-    Memory::create([
+    Memory::query()->create([
         'organization' => 'hier-org',
         'repository' => 'hier-repo',
         'scope_type' => 'repository',
@@ -167,7 +165,7 @@ it('can search memories with user hierarchy', function () {
     ]);
 
     // Create a user-scoped memory for the same repository
-    Memory::create([
+    Memory::query()->create([
         'organization' => 'hier-org',
         'repository' => 'hier-repo',
         'scope_type' => 'user',
@@ -194,7 +192,7 @@ it('can search memories with user hierarchy', function () {
 
     $response->assertStatus(200);
     // Values are returned as JSON string in result.content[0].text
-    $response->assertJsonPath('result.content.0.text', function (string $text) {
+    $response->assertJsonPath('result.content.0.text', function (string $text): bool {
         $data = json_decode($text, true);
         $contents = collect($data)->pluck('current_content')->toArray();
 
@@ -202,10 +200,10 @@ it('can search memories with user hierarchy', function () {
     });
 });
 
-it('cannot update locked memory via tool', function () {
+it('cannot update locked memory via tool', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => 'lock-org',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
@@ -234,7 +232,7 @@ it('cannot update locked memory via tool', function () {
     $response->assertJsonPath('error.message', 'Cannot update locked memory.');
 });
 
-it('enforces immutable types for AI updates', function () {
+it('enforces immutable types for AI updates', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
@@ -259,10 +257,10 @@ it('enforces immutable types for AI updates', function () {
     $this->assertDatabaseMissing('memories', ['memory_type' => 'system_constraint']);
 });
 
-it('can search memories without repository argument', function () {
+it('can search memories without repository argument', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
-    Memory::create([
+    Memory::query()->create([
         'organization' => 'global-org',
         'repository' => 'repo-a',
         'scope_type' => 'repository',
@@ -272,7 +270,7 @@ it('can search memories without repository argument', function () {
         'status' => 'active',
     ]);
 
-    Memory::create([
+    Memory::query()->create([
         'organization' => 'global-org',
         'repository' => 'repo-b',
         'scope_type' => 'repository',
@@ -295,7 +293,7 @@ it('can search memories without repository argument', function () {
     ]);
 
     $response->assertStatus(200);
-    $response->assertJsonPath('result.content.0.text', function (string $text) {
+    $response->assertJsonPath('result.content.0.text', function (string $text): bool {
         $data = json_decode($text, true);
         $contents = collect($data)->pluck('current_content')->toArray();
 
@@ -303,7 +301,7 @@ it('can search memories without repository argument', function () {
     });
 });
 
-it('can access the mcp server via memory-mcp alias', function () {
+it('can access the mcp server via memory-mcp alias', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $response = $this->postJson('/api/v1/mcp/memory-mcp', [

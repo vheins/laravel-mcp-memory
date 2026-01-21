@@ -13,24 +13,9 @@ use Laravel\Mcp\Support\UriTemplate;
 
 class MemoryHistoryResource extends Resource implements HasUriTemplate
 {
-    public function name(): string
-    {
-        return 'memory-history';
-    }
-
-    public function title(): string
-    {
-        return 'Memory Version History';
-    }
-
     public function description(): string
     {
         return 'Retrieve all versions and audit logs for a specific memory.';
-    }
-
-    public function uriTemplate(): UriTemplate
-    {
-        return new UriTemplate('memory://{id}/history');
     }
 
     public function handle(Request $request): Response
@@ -42,5 +27,20 @@ class MemoryHistoryResource extends Resource implements HasUriTemplate
             'versions' => $memory->versions->toArray(),
             'audit_logs' => $memory->auditLogs->toArray(),
         ]);
+    }
+
+    public function name(): string
+    {
+        return 'memory-history';
+    }
+
+    public function title(): string
+    {
+        return 'Memory Version History';
+    }
+
+    public function uriTemplate(): UriTemplate
+    {
+        return new UriTemplate('memory://{id}/history');
     }
 }

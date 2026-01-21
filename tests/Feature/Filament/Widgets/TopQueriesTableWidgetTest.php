@@ -7,13 +7,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('can render top queries widget', function () {
+it('can render top queries widget', function (): void {
     // Create logs with specific queries
-    MemoryAccessLog::create(['action' => 'search', 'query' => 'laravel', 'actor_id' => 'user-1']);
-    MemoryAccessLog::create(['action' => 'search', 'query' => 'laravel', 'actor_id' => 'user-2']); // Count 2
-    MemoryAccessLog::create(['action' => 'search', 'query' => 'mcp', 'actor_id' => 'user-1']);     // Count 1
-    MemoryAccessLog::create(['action' => 'read', 'query' => 'ignored', 'actor_id' => 'user-1']);    // Wrong action
-    MemoryAccessLog::create(['action' => 'search', 'query' => null, 'actor_id' => 'user-1']);       // Null query
+    MemoryAccessLog::query()->create(['action' => 'search', 'query' => 'laravel', 'actor_id' => 'user-1']);
+    MemoryAccessLog::query()->create(['action' => 'search', 'query' => 'laravel', 'actor_id' => 'user-2']); // Count 2
+    MemoryAccessLog::query()->create(['action' => 'search', 'query' => 'mcp', 'actor_id' => 'user-1']);     // Count 1
+    MemoryAccessLog::query()->create(['action' => 'read', 'query' => 'ignored', 'actor_id' => 'user-1']);    // Wrong action
+    MemoryAccessLog::query()->create(['action' => 'search', 'query' => null, 'actor_id' => 'user-1']);       // Null query
 
     Livewire::test(TopQueriesTableWidget::class)
         ->assertCanSeeTableRecords([

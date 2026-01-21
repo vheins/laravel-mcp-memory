@@ -11,21 +11,6 @@ use Laravel\Mcp\Server\Resource;
 
 class MemoryIndexResource extends Resource
 {
-    public function name(): string
-    {
-        return 'memory-index';
-    }
-
-    public function uri(): string
-    {
-        return 'memory://index';
-    }
-
-    public function title(): string
-    {
-        return 'Memory Index';
-    }
-
     public function description(): string
     {
         return 'Discovery endpoint listing recent memories. Returns a JSON array of lightweight objects for topic discovery and de-duplication. NEVER contains full content.';
@@ -39,7 +24,7 @@ class MemoryIndexResource extends Resource
             ->latest()
             ->limit(50) // Expanded limit for better discovery since payload is lighter
             ->get()
-            ->map(fn (Memory $memory) => [
+            ->map(fn (Memory $memory): array => [
                 'id' => $memory->id,
                 'title' => $memory->title,
                 'scope_type' => $memory->scope_type->value,
@@ -52,11 +37,26 @@ class MemoryIndexResource extends Resource
                 'metadata' => $this->filterMetadata($memory->metadata ?? []),
             ])
             ->values()
-            ->toArray();
+            ->all();
 
         // Return structured JSON data
         return Response::json($memories)
-            ->withMeta(['type' => 'index', 'count' => count($memories)]);
+            ->withMeta(['type' => 'index', 'count' => \count($memories)]);
+    }
+
+    public function name(): string
+    {
+        return 'memory-index';
+    }
+
+    public function title(): string
+    {
+        return 'Memory Index';
+    }
+
+    public function uri(): string
+    {
+        return 'memory://index';
     }
 
     protected function filterMetadata(array $metadata): array
@@ -71,11 +71,12 @@ class MemoryIndexResource extends Resource
             }
 
             // Only allow scalar values (string, int, bool)
-            if (is_scalar($value)) {
+            if (\is_scalar($value)) {
                 // Truncate long strings just in case
-                if (is_string($value) && strlen($value) > 50) {
+                if (\is_string($value) && \strlen($value) > 50) {
                     $value = substr($value, 0, 47) . '...';
                 }
+
                 $filtered[$key] = $value;
                 $count++;
             }

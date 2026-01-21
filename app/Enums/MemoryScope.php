@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
@@ -8,18 +10,18 @@ use Filament\Support\Contracts\HasLabel;
 
 enum MemoryScope: string implements HasColor, HasIcon, HasLabel
 {
-    case System = 'system';
     case Organization = 'organization';
     case Repository = 'repository';
+    case System = 'system';
     case User = 'user';
 
-    public function getLabel(): ?string
+    public function getColor(): array|string|null
     {
         return match ($this) {
-            self::System => 'System',
-            self::Organization => 'Organization',
-            self::Repository => 'Repository',
-            self::User => 'User',
+            self::System => 'danger',
+            self::Organization => 'warning',
+            self::Repository => 'info',
+            self::User => 'success',
         };
     }
 
@@ -33,13 +35,13 @@ enum MemoryScope: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getLabel(): ?string
     {
         return match ($this) {
-            self::System => 'danger',
-            self::Organization => 'warning',
-            self::Repository => 'info',
-            self::User => 'success',
+            self::System => 'System',
+            self::Organization => 'Organization',
+            self::Repository => 'Repository',
+            self::User => 'User',
         };
     }
 }

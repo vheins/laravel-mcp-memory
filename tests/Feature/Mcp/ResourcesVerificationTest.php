@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('can list all resources including schema', function () {
+it('can list all resources including schema', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -22,7 +22,7 @@ it('can list all resources including schema', function () {
     expect($resources->contains('name', 'schema'))->toBeTrue();
 });
 
-it('can read the schema resource', function () {
+it('can read the schema resource', function (): void {
     Sanctum::actingAs(User::factory()->create());
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -41,8 +41,11 @@ it('can read the schema resource', function () {
         // fwrite(STDERR, print_r($response->json(), true));
     }
 
-    $response->assertJsonPath('result.contents.0.text', function ($text) {
-        if (is_null($text)) return false;
+    $response->assertJsonPath('result.contents.0.text', function ($text): bool {
+        if (is_null($text)) {
+            return false;
+        }
+
         $data = json_decode((string)$text, true);
         return isset($data['enums']['MemoryType']) && isset($data['attributes']);
     });

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('memory_access_logs', function (Blueprint $table) {
+        Schema::create('memory_access_logs', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('actor_id')->nullable();
             $table->string('actor_type')->nullable(); // 'user', 'system', 'ai'

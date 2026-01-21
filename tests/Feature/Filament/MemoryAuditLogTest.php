@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use App\Filament\Resources\Memories\Pages\EditMemory;
 use App\Filament\Resources\Memories\RelationManagers\AuditLogsRelationManager;
 use App\Models\Memory;
@@ -11,14 +12,14 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-it('can render audit logs relation manager', function () {
+it('can render audit logs relation manager', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $orgId = \Illuminate\Support\Str::uuid()->toString();
-    $repo = Repository::create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
+    $orgId = Str::uuid()->toString();
+    $repo = Repository::query()->create(['organization_id' => $orgId, 'name' => 'Repo', 'slug' => 'repo']);
 
-    $memory = Memory::create([
+    $memory = Memory::query()->create([
         'organization' => $orgId,
         'repository' => $repo->id,
         'scope_type' => 'repository',
@@ -30,7 +31,7 @@ it('can render audit logs relation manager', function () {
     ]);
 
     // Create a dummy audit log manually since we don't know if Memory observer creates it automatically yet
-    MemoryAuditLog::create([
+    MemoryAuditLog::query()->create([
         'memory_id' => $memory->id,
         'actor_id' => $user->id,
         'actor_type' => User::class,

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Memories\Pages;
 
 use App\Filament\Resources\Memories\MemoryResource;
+use App\Filament\Resources\Memories\Widgets\MemoryStatsOverview;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -15,16 +18,12 @@ class ListMemories extends ListRecords
         return [
             CreateAction::make(),
         ];
-
-        return [
-            CreateAction::make(),
-        ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Resources\Memories\Widgets\MemoryStatsOverview::class,
+            MemoryStatsOverview::class,
         ];
     }
 }

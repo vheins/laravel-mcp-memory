@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('can list taxonomies', function () {
+it('can list taxonomies', function (): void {
     Taxonomy::factory()->count(3)->create();
 
     $response = $this->getJson(route('api.v1.taxonomies.index'));
@@ -15,9 +15,9 @@ it('can list taxonomies', function () {
         ->assertJsonCount(3, 'data');
 });
 
-it('can show a taxonomy with terms', function () {
+it('can show a taxonomy with terms', function (): void {
     $taxonomy = Taxonomy::factory()->create();
-    $term = Term::create([
+    $term = Term::query()->create([
         'taxonomy_id' => $taxonomy->id,
         'name' => 'Electronic',
         'slug' => 'electronic',

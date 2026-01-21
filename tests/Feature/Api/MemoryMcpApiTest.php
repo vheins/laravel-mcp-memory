@@ -1,17 +1,18 @@
 <?php
 
+use App\Services\MemoryService;
 use App\Models\Repository;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->repository = Repository::factory()->create();
 });
 
-it('can write memory via MCP', function () {
+it('can write memory via MCP', function (): void {
     $payload = [
         'jsonrpc' => '2.0',
         'method' => 'tools/call',
@@ -33,7 +34,7 @@ it('can write memory via MCP', function () {
         ->postJson('/api/v1/mcp/memory', $payload);
 
     $response->assertStatus(200)
-        ->assertJsonPath('result.content.0.text', function ($text) {
+        ->assertJsonPath('result.content.0.text', function ($text): bool {
             $data = json_decode($text, true);
 
             return $data['current_content'] === 'MCP Content';
@@ -41,9 +42,9 @@ it('can write memory via MCP', function () {
         ->assertJsonPath('id', 1);
 });
 
-it('can read memory via MCP', function () {
+it('can read memory via MCP', function (): void {
     // Seed
-    $service = app(\App\Services\MemoryService::class);
+    $service = app(MemoryService::class);
     $memory = $service->write([
         'organization' => $this->repository->organization_id,
         'repository' => $this->repository->id,
@@ -66,8 +67,8 @@ it('can read memory via MCP', function () {
         ->assertJsonPath('result.contents.0.text', 'Read Me');
 });
 
-it('can search memory via MCP', function () {
-    $service = app(\App\Services\MemoryService::class);
+it('can search memory via MCP', function (): void {
+    $service = app(MemoryService::class);
     $service->write([
         'organization' => $this->repository->organization_id,
         'repository' => $this->repository->id,
@@ -93,14 +94,14 @@ it('can search memory via MCP', function () {
     $this->actingAs($this->user)
         ->postJson('/api/v1/mcp/memory', $payload)
         ->assertStatus(200)
-        ->assertJsonPath('result.content.0.text', function ($text) {
+        ->assertJsonPath('result.content.0.text', function ($text): bool {
             $data = json_decode($text, true);
 
-            return is_array($data) && count($data) > 0 && $data[0]['current_content'] === 'Searchable';
+            return is_array($data) && $data !== [] && $data[0]['current_content'] === 'Searchable';
         });
 });
 
-it('returns error for unknown method', function () {
+it('returns error for unknown method', function (): void {
     $payload = [
         'jsonrpc' => '2.0',
         'method' => 'unknown.method',

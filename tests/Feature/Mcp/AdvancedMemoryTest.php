@@ -1,18 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Mcp;
 
+use App\Enums\MemoryStatus;
 use App\Models\Memory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class AdvancedMemoryTest extends TestCase
+final class AdvancedMemoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $user;
+    private User $user;
 
     protected function setUp(): void
     {
@@ -21,7 +24,7 @@ class AdvancedMemoryTest extends TestCase
         Sanctum::actingAs($this->user);
     }
 
-    public function test_bulk_write_memories()
+    public function test_bulk_write_memories(): void
     {
         $response = $this->postJson('/memory-mcp', [
             'jsonrpc' => '2.0',
@@ -54,10 +57,10 @@ class AdvancedMemoryTest extends TestCase
 
         $response->assertSuccessful();
         $this->assertCount(2, Memory::all());
-        $this->assertEquals(8, Memory::where('title', 'Title 1')->first()->importance);
+        $this->assertEquals(8, Memory::query()->where('title', 'Title 1')->first()->importance);
     }
 
-    public function test_link_memories()
+    public function test_link_memories(): void
     {
         $m1 = Memory::factory()->create(['title' => 'Memory 1']);
         $m2 = Memory::factory()->create(['title' => 'Memory 2']);
@@ -80,26 +83,26 @@ class AdvancedMemoryTest extends TestCase
         $this->assertTrue($m1->relatedMemories->contains($m2));
     }
 
-    public function test_vector_search()
+    public function test_vector_search(): void
     {
         // Seed memories with embeddings (highly simplified)
         Memory::factory()->create([
             'title' => 'Apple',
             'embedding' => [1.0, 0.0, 0.0],
             'importance' => 1,
-            'status' => \App\Enums\MemoryStatus::Active,
+            'status' => MemoryStatus::Active,
         ]);
         Memory::factory()->create([
             'title' => 'Banana',
             'embedding' => [0.0, 1.0, 0.0],
             'importance' => 1,
-            'status' => \App\Enums\MemoryStatus::Active,
+            'status' => MemoryStatus::Active,
         ]);
         Memory::factory()->create([
             'title' => 'Important Apple',
             'embedding' => [1.0, 0.1, 0.0],
             'importance' => 10,
-            'status' => \App\Enums\MemoryStatus::Active,
+            'status' => MemoryStatus::Active,
         ]);
 
         $response = $this->postJson('/memory-mcp', [
@@ -116,7 +119,8 @@ class AdvancedMemoryTest extends TestCase
         ]);
 
         $response->assertSuccessful();
-        $data = json_decode($response->json('result.content.0.text'), true);
+
+        $data = json_decode((string) $response->json('result.content.0.text'), true);
 
         // Should return 'Important Apple' first because of higher importance, then 'Apple'
         $this->assertEquals('Important Apple', $data[0]['title']);

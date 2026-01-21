@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
@@ -8,34 +10,34 @@ use Filament\Support\Contracts\HasLabel;
 
 enum MemoryType: string implements HasColor, HasIcon, HasLabel
 {
-    case BusinessRule = 'business_rule';
-    case DecisionLog = 'decision_log';
-    case Preference = 'preference';
-    case SystemConstraint = 'system_constraint';
-    case Documentation = 'documentation';
-    case TechStack = 'tech_stack';
-    case Fact = 'fact';
-    case Task = 'task';
     case Architecture = 'architecture';
-    case UserContext = 'user_context';
+    case BusinessRule = 'business_rule';
     case Convention = 'convention';
+    case DecisionLog = 'decision_log';
+    case Documentation = 'documentation';
+    case Fact = 'fact';
+    case Preference = 'preference';
     case Risk = 'risk';
+    case SystemConstraint = 'system_constraint';
+    case Task = 'task';
+    case TechStack = 'tech_stack';
+    case UserContext = 'user_context';
 
-    public function getLabel(): ?string
+    public function getColor(): array|string|null
     {
         return match ($this) {
-            self::BusinessRule => 'Business Rule',
-            self::DecisionLog => 'Decision Log',
-            self::Preference => 'Preference',
-            self::SystemConstraint => 'System Constraint',
-            self::Documentation => 'Documentation',
-            self::TechStack => 'Tech Stack',
-            self::Fact => 'Fact',
-            self::Task => 'Task',
-            self::Architecture => 'Architecture',
-            self::UserContext => 'User Context',
-            self::Convention => 'Convention',
-            self::Risk => 'Risk',
+            self::BusinessRule => 'primary',
+            self::DecisionLog => 'secondary',
+            self::Preference => 'gray',
+            self::SystemConstraint => 'danger',
+            self::Documentation => 'info',
+            self::TechStack => 'success',
+            self::Fact => 'info',
+            self::Task => 'warning',
+            self::Architecture => 'indigo',
+            self::UserContext => 'fuchsia',
+            self::Convention => 'teal',
+            self::Risk => 'rose',
         };
     }
 
@@ -57,21 +59,21 @@ enum MemoryType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getLabel(): ?string
     {
         return match ($this) {
-            self::BusinessRule => 'primary',
-            self::DecisionLog => 'secondary',
-            self::Preference => 'gray',
-            self::SystemConstraint => 'danger',
-            self::Documentation => 'info',
-            self::TechStack => 'success',
-            self::Fact => 'info',
-            self::Task => 'warning',
-            self::Architecture => 'indigo',
-            self::UserContext => 'fuchsia',
-            self::Convention => 'teal',
-            self::Risk => 'rose',
+            self::BusinessRule => 'Business Rule',
+            self::DecisionLog => 'Decision Log',
+            self::Preference => 'Preference',
+            self::SystemConstraint => 'System Constraint',
+            self::Documentation => 'Documentation',
+            self::TechStack => 'Tech Stack',
+            self::Fact => 'Fact',
+            self::Task => 'Task',
+            self::Architecture => 'Architecture',
+            self::UserContext => 'User Context',
+            self::Convention => 'Convention',
+            self::Risk => 'Risk',
         };
     }
 }

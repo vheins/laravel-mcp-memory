@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('memories', function (Blueprint $table) {
+        Schema::table('memories', function (Blueprint $table): void {
             $table->unsignedInteger('importance')->default(1)->after('status');
             $table->json('embedding')->nullable()->after('current_content');
         });
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('memories', function (Blueprint $table) {
+        Schema::table('memories', function (Blueprint $table): void {
             $table->dropColumn(['importance', 'embedding']);
         });
     }

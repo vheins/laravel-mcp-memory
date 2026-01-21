@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -21,10 +23,48 @@ class Configuration extends Model
         'is_system',
     ];
 
-    protected $casts = [
-        'is_public' => 'boolean',
-        'is_system' => 'boolean',
-    ];
+    /**
+     * @return HasMany<ConfigurationAudit, $this>
+     */
+    public function audits(): HasMany
+    {
+        return $this->hasMany(ConfigurationAudit::class);
+    }
+
+    protected function castValue($value, string $type)
+    {
+        if (\is_null($value)) {
+            return null;
+        }
+
+        return match ($type) {
+            'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+            'number' => is_numeric($value) ? $value + 0 : $value,
+            'json' => json_decode($value, true),
+            default => $value,
+        };
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+            'is_system' => 'boolean',
+        ];
+    }
+
+    protected function prepareValue($value)
+    {
+        if (\is_array($value) || \is_object($value)) {
+            return json_encode($value);
+        }
+
+        if (\is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        return (string) $value;
+    }
 
     /**
      * Get the value casted to the correct type.
@@ -37,45 +77,13 @@ class Configuration extends Model
         );
     }
 
-    protected function castValue($value, string $type)
-    {
-        if (is_null($value)) {
-            return null;
-        }
-
-        return match ($type) {
-            'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
-            'number' => is_numeric($value) ? $value + 0 : $value,
-            'json' => json_decode($value, true),
-            default => $value,
-        };
-    }
-
-    protected function prepareValue($value)
-    {
-        if (is_array($value) || is_object($value)) {
-            return json_encode($value);
-        }
-
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
-        }
-
-        return (string) $value;
-    }
-
-    public function audits(): HasMany
-    {
-        return $this->hasMany(ConfigurationAudit::class);
-    }
-
     protected static function booted()
     {
-        static::saved(function (Configuration $config) {
+        static::saved(function (Configuration $config): void {
             Cache::forget("config_{$config->key}");
         });
 
-        static::deleted(function (Configuration $config) {
+        static::deleted(function (Configuration $config): void {
             Cache::forget("config_{$config->key}");
         });
     }

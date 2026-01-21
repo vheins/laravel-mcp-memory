@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Database\Factories\RepositoryFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Repository extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
+    use HasUuids;
 
     protected $fillable = [
         'slug',
@@ -18,12 +22,15 @@ class Repository extends Model
         'is_active',
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
-
-    public static function factory(): \Database\Factories\RepositoryFactory
+    public static function factory(): RepositoryFactory
     {
-        return \Database\Factories\RepositoryFactory::new();
+        return RepositoryFactory::new();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
     }
 }

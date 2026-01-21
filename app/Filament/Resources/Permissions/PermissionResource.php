@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Permissions;
 
 use App\Filament\Resources\Permissions\Pages\CreatePermission;
@@ -12,31 +14,19 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Access Management';
+    protected static UnitEnum|string|null $navigationGroup = 'Access Management';
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-key';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-key';
 
     public static function form(Schema $schema): Schema
     {
         return PermissionForm::configure($schema);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return PermissionsTable::configure($table)
-            ->defaultSort('created_at', 'desc');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
@@ -46,5 +36,18 @@ class PermissionResource extends Resource
             'create' => CreatePermission::route('/create'),
             'edit' => EditPermission::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return PermissionsTable::configure($table)
+            ->defaultSort('created_at', 'desc');
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -15,17 +17,14 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Super Admin Role
-        $role = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
+        $role = Role::query()->firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
 
         // 2. Create Developer User
-        $user = User::firstOrCreate(
-            ['email' => 'developer@memory-mcp.id'],
-            [
-                'name' => 'Super Developer',
-                'password' => Hash::make('dev-root'),
-                'email_verified_at' => now(),
-            ]
-        );
+        $user = User::query()->firstOrCreate(['email' => 'developer@memory-mcp.id'], [
+            'name' => 'Super Developer',
+            'password' => Hash::make('dev-root'),
+            'email_verified_at' => now(),
+        ]);
 
         // 3. Assign Role
         $user->assignRole($role);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -15,11 +17,26 @@ class ConfigController extends Controller
     public function __construct(protected ConfigService $configService) {}
 
     /**
+     * Public fetch endpoint.
+     */
+    public function fetch(): JsonResponse
+    {
+        // Public configs only
+        $configs = Configuration::query()->where('is_public', true)->get();
+
+        $mapped = $configs->mapWithKeys(fn ($item) => [$item->key => $item->value]);
+
+        return response()->json([
+            'data' => $mapped,
+        ]);
+    }
+
+    /**
      * list all configurations (Admin only usually, but for now restricted via middleware if needed).
      */
     public function index(): AnonymousResourceCollection
     {
-        $configs = Configuration::latest()->paginate();
+        $configs = Configuration::query()->latest()->paginate();
 
         return ConfigurationResource::collection($configs);
     }
@@ -37,8 +54,8 @@ class ConfigController extends Controller
      */
     public function update(Request $request, Configuration $configuration): ConfigurationResource
     {
-        $validated = $request->validate([
-            'value' => 'nullable', // Validation relies on casting preparation basically
+        $request->validate([
+            'value' => ['nullable'], // Validation relies on casting preparation basically
         ]);
 
         // Using service to ensure consistency if we add more logic there
@@ -53,22 +70,5 @@ class ConfigController extends Controller
         $configuration->update($request->only(['value', 'is_public', 'group']));
 
         return new ConfigurationResource($configuration);
-    }
-
-    /**
-     * Public fetch endpoint.
-     */
-    public function fetch(): JsonResponse
-    {
-        // Public configs only
-        $configs = Configuration::where('is_public', true)->get();
-
-        $mapped = $configs->mapWithKeys(function ($item) {
-            return [$item->key => $item->value];
-        });
-
-        return response()->json([
-            'data' => $mapped,
-        ]);
     }
 }

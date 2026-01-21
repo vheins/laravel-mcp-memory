@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -9,7 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MemoryVersion extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
+    use HasUuids;
+
+    public $timestamps = false;
 
     protected $fillable = [
         'memory_id',
@@ -17,14 +22,18 @@ class MemoryVersion extends Model
         'content',
     ];
 
-    public $timestamps = false;
-
-    protected $casts = [
-        'created_at' => 'datetime',
-    ];
-
+    /**
+     * @return BelongsTo<Memory, $this>
+     */
     public function memory(): BelongsTo
     {
         return $this->belongsTo(Memory::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+        ];
     }
 }

@@ -1,11 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
+    public function attributes(): array
+    {
+        return [
+            'data.attributes.email' => 'email',
+            'data.attributes.password' => 'password',
+        ];
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -17,14 +27,6 @@ class LoginRequest extends FormRequest
             'data.type' => ['required', 'in:auth_login'],
             'data.attributes.email' => ['required', 'string', 'email'],
             'data.attributes.password' => ['required', 'string'],
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'data.attributes.email' => 'email',
-            'data.attributes.password' => 'password',
         ];
     }
 }

@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
+use App\Models\Memory;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 
@@ -11,20 +15,20 @@ class MemoryTopAccessedTableWidget extends TableWidget
     {
         return $table
             ->query(
-                \App\Models\Memory::query()
+                Memory::query()
                     ->latest()
                     ->limit(10)
             )
             ->heading('Recent Memories')
             ->description('Most recently created memories.')
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label('Memory Title')
                     ->searchable()
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->badge(),
-                \Filament\Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
                     ->sortable(),

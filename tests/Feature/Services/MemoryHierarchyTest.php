@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Memory;
 use App\Models\Repository;
 use App\Models\User;
 use App\Services\MemoryService;
@@ -9,10 +8,10 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->service = new MemoryService;
     $this->orgId = Str::uuid()->toString();
-    $this->repo = Repository::create([
+    $this->repo = Repository::query()->create([
         'organization_id' => $this->orgId, // Repository model map to organization_id column
         'name' => 'Hierarchy Repo',
         'slug' => 'hierarchy-repo',
@@ -22,7 +21,7 @@ beforeEach(function () {
     $this->userId = $this->user->id;
 });
 
-it('resolves hierarchy correctly', function () {
+it('resolves hierarchy correctly', function (): void {
     // 1. System Memory
     $this->service->write([
         'organization' => $this->orgId,
@@ -97,10 +96,10 @@ it('resolves hierarchy correctly', function () {
         ->not->toContain('Other User Content');
 });
 
-it('isolates memories between organizations and repositories', function () {
+it('isolates memories between organizations and repositories', function (): void {
     // 1. Create a different Organization and Repository
     $otherOrgId = Str::uuid()->toString();
-    $otherRepo = Repository::create([
+    $otherRepo = Repository::query()->create([
         'organization_id' => $otherOrgId,
         'name' => 'Other Repo',
         'slug' => 'other-repo',

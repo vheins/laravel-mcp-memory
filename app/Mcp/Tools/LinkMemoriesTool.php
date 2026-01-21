@@ -1,24 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mcp\Tools;
 
 use App\Services\MemoryService;
+use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Exceptions\JsonRpcException;
 use Laravel\Mcp\Server\Tool;
 
 class LinkMemoriesTool extends Tool
 {
-    public function name(): string
-    {
-        return 'memory-link';
-    }
-
     public function description(): string
     {
         return 'Create a relationship between two existing memories (Knowledge Graph).';
+    }
+
+    public function handle(Request $request, MemoryService $service): ResponseFactory
+    {
+        $sourceId = $request->get('source_id');
+        $targetId = $request->get('target_id');
+        $type = $request->get('relation_type', 'related');
+
+        try {
+            $service->linkMemories($sourceId, $targetId, $type);
+        } catch (Exception $exception) {
+            throw new JsonRpcException($exception->getMessage(), -32000, $request->get('id'));
+        }
+
+        return Response::make([
+            Response::text("Memories linked successfully as '{$type}'."),
+        ]);
+    }
+
+    public function name(): string
+    {
+        return 'memory-link';
     }
 
     public function schema(JsonSchema $schema): array
@@ -31,22 +52,5 @@ class LinkMemoriesTool extends Tool
                 ->default('related')
                 ->description('The nature of the relationship: "related" (neutral connection), "conflicts" (contradictory info), or "supports" (strengthens validation).'),
         ];
-    }
-
-    public function handle(Request $request, MemoryService $service)
-    {
-        $sourceId = $request->get('source_id');
-        $targetId = $request->get('target_id');
-        $type = $request->get('relation_type', 'related');
-
-        try {
-            $service->linkMemories($sourceId, $targetId, $type);
-        } catch (\Exception $e) {
-            throw new JsonRpcException($e->getMessage(), -32000, $request->get('id'));
-        }
-
-        return Response::make([
-            Response::text("Memories linked successfully as '{$type}'."),
-        ]);
     }
 }

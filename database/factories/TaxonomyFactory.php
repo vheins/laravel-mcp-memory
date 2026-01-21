@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\Taxonomy;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Taxonomy>
+ * @extends Factory<Taxonomy>
  */
 class TaxonomyFactory extends Factory
 {
@@ -17,13 +20,13 @@ class TaxonomyFactory extends Factory
      */
     public function definition(): array
     {
-        $name = $this->faker->words(2, true);
+        $name = fake()->words(2, true);
 
         return [
             'name' => $name,
             'slug' => Str::slug($name),
-            'description' => $this->faker->sentence(),
-            'is_hierarchical' => $this->faker->boolean(),
+            'description' => fake()->sentence(),
+            'is_hierarchical' => fake()->boolean(),
         ];
     }
 }

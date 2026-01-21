@@ -1,10 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Memories\Schemas;
 
 use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Enums\MemoryType;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Slider;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class MemoryForm
@@ -13,37 +22,37 @@ class MemoryForm
     {
         return $schema
             ->components([
-                \Filament\Schemas\Components\Section::make('Context')
+                Section::make('Context')
                     ->schema([
-                        \Filament\Forms\Components\TextInput::make('repository')
+                        TextInput::make('repository')
                             ->label('Repository')
                             ->placeholder('e.g. owner/repo')
                             ->helperText('Free text repository identifier (e.g. vheins/laravel-mcp-memory)'),
-                        \Filament\Forms\Components\Select::make('user_id')
+                        Select::make('user_id')
                             ->label('User')
                             ->relationship('userRel', 'name')
                             ->searchable()
                             ->preload(),
-                        \Filament\Forms\Components\TextInput::make('organization')
+                        TextInput::make('organization')
                             ->label('Organization')
                             ->placeholder('e.g. vheins')
                             ->required(),
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                \Filament\Forms\Components\Select::make('scope_type')
+                                Select::make('scope_type')
                                     ->options(MemoryScope::class)
                                     ->required(),
-                                \Filament\Forms\Components\Select::make('memory_type')
+                                Select::make('memory_type')
                                     ->options(MemoryType::class)
                                     ->required(),
                             ]),
-                        \Filament\Schemas\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                \Filament\Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->options(MemoryStatus::class)
                                     ->required()
                                     ->default(MemoryStatus::Draft),
-                                \Filament\Forms\Components\Slider::make('importance')
+                                Slider::make('importance')
                                     ->label('Importance Score')
                                     ->minValue(1)
                                     ->maxValue(10)
@@ -51,14 +60,14 @@ class MemoryForm
                                     ->default(1),
                             ]),
                     ]),
-                \Filament\Schemas\Components\Section::make('Content')
+                Section::make('Content')
                     ->schema([
-                        \Filament\Forms\Components\TextInput::make('title')
+                        TextInput::make('title')
                             ->label('Title')
                             ->placeholder('Brief summary of the memory')
                             ->required()
                             ->columnSpanFull(),
-                        \Filament\Forms\Components\MarkdownEditor::make('current_content')
+                        MarkdownEditor::make('current_content')
                             ->label('Content')
                             ->toolbarButtons([
                                 'attachFiles',
@@ -76,12 +85,12 @@ class MemoryForm
                             ])
                             ->required()
                             ->columnSpanFull(),
-                        \Filament\Forms\Components\KeyValue::make('metadata')
+                        KeyValue::make('metadata')
                             ->columnSpanFull(),
-                        \Filament\Forms\Components\Select::make('relatedMemories')
+                        Select::make('relatedMemories')
                             ->label('Related Memories (Knowledge Graph)')
                             ->relationship('relatedMemories', 'title')
-                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->title ?? substr($record->current_content, 0, 50).'...')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->title ?? substr((string) $record->current_content, 0, 50) . '...')
                             ->multiple()
                             ->searchable()
                             ->preload()

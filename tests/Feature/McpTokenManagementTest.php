@@ -1,5 +1,6 @@
 <?php
 
+use Laravel\Sanctum\NewAccessToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -7,7 +8,7 @@ use Livewire\Volt\Volt;
 
 uses(RefreshDatabase::class);
 
-test('mcp token management component can be rendered', function () {
+test('mcp token management component can be rendered', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user);
@@ -17,19 +18,19 @@ test('mcp token management component can be rendered', function () {
         ->assertSee('MCP Access Tokens');
 });
 
-test('user can create an mcp token', function () {
+test('user can create an mcp token', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
     $token = $user->createToken('test-token', ['mcp:read', 'mcp:write']);
 
-    expect($token)->toBeInstanceOf(\Laravel\Sanctum\NewAccessToken::class);
+    expect($token)->toBeInstanceOf(NewAccessToken::class);
     expect($user->tokens)->toHaveCount(1);
     expect($user->tokens->first()->name)->toBe('test-token');
     expect($user->tokens->first()->abilities)->toBe(['mcp:read', 'mcp:write']);
 });
 
-test('mcp token can receive specific abilities', function () {
+test('mcp token can receive specific abilities', function (): void {
     $user = User::factory()->create();
 
     $token = $user->createToken('admin-token', ['mcp:admin']);
@@ -38,7 +39,7 @@ test('mcp token can receive specific abilities', function () {
     expect($token->accessToken->can('mcp:read'))->toBeFalse();
 });
 
-test('user can revoke an mcp token', function () {
+test('user can revoke an mcp token', function (): void {
     $user = User::factory()->create();
     $user->createToken('revoke-me');
 
@@ -49,7 +50,7 @@ test('user can revoke an mcp token', function () {
     expect($user->fresh()->tokens)->toHaveCount(0);
 });
 
-test('tokens are long lived by default unless configured otherwise', function () {
+test('tokens are long lived by default unless configured otherwise', function (): void {
     // Sanctum tokens by default have expires_at as null unless configured.
     // We want to ensure that for our use case, we can create tokens that do not expire.
     // Using createToken with no expiration argument (which relies on config or default).

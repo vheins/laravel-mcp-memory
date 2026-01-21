@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Configuration;
@@ -13,7 +15,7 @@ class ConfigService
     public function get(string $key, mixed $default = null): mixed
     {
         $value = Cache::rememberForever("config_{$key}", function () use ($key) {
-            $config = Configuration::where('key', $key)->first();
+            $config = Configuration::query()->where('key', $key)->first();
 
             return $config ? $config->value : null;
         });
@@ -26,7 +28,7 @@ class ConfigService
      */
     public function set(string $key, mixed $value): Configuration
     {
-        $config = Configuration::where('key', $key)->firstOrFail();
+        $config = Configuration::query()->where('key', $key)->firstOrFail();
 
         $config->update(['value' => $value]);
 
