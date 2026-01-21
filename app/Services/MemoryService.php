@@ -131,12 +131,7 @@ class MemoryService
         }
 
         $q = Memory::query()
-            ->disableCache()
-            ->unless($repository || auth()->id() || $orgId, function ($query): void {
-                $query->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified]);
-            }, function ($query): void {
-                $query->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified, MemoryStatus::Draft]);
-            });
+                ->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified, MemoryStatus::Locked]);
 
         // 2. Apply Scope Isolation only if context is provided
         if ($repository || auth()->id() || $orgId) {
@@ -153,7 +148,8 @@ class MemoryService
         }
 
         if ($query) {
-            $isMysql = DB::connection()->getDriverName() === 'mysql';
+            $driver = DB::connection()->getDriverName();
+            $isMysql = in_array($driver, ['mysql', 'mariadb']);
 
             if ($isMysql) {
                 // MySQL Full-Text search with relevance scoring

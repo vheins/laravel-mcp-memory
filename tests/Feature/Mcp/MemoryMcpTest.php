@@ -131,6 +131,49 @@ it('accepts markdown format in current_content', function (): void {
     $this->assertDatabaseHas('memories', ['current_content' => "# Title\n\n- Item 1\n- Item 2"]);
 });
 
+it('excludes draft memories from search results', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    // Create a draft memory
+    Memory::query()->create([
+        'organization' => 'test-org',
+        'repository' => 'test-repo',
+        'scope_type' => 'repository',
+        'memory_type' => 'fact',
+        'created_by_type' => 'human',
+        'current_content' => 'Draft Content Hidden',
+        'status' => 'draft',
+    ]);
+
+    // Create an active memory
+    Memory::query()->create([
+        'organization' => 'test-org',
+        'repository' => 'test-repo',
+        'scope_type' => 'repository',
+        'memory_type' => 'fact',
+        'created_by_type' => 'human',
+        'current_content' => 'Active Content Visible',
+        'status' => 'active',
+    ]);
+
+    $response = $this->postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'method' => 'tools/call',
+        'params' => [
+            'name' => 'memory-search',
+            'arguments' => [
+                'query' => 'Content',
+            ],
+        ],
+        'id' => 1,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJsonPath('result.content.0.text', function (string $text) {
+        return ! str_contains($text, 'Draft Content Hidden') && str_contains($text, 'Active Content Visible');
+    });
+});
+
 it('can search memories via tool (team context)', function (): void {
     Sanctum::actingAs(User::factory()->create());
     $anotherUser = User::factory()->create();
@@ -143,6 +186,7 @@ it('can search memories via tool (team context)', function (): void {
         'created_by_type' => 'human',
         'current_content' => 'Team Fact',
         'user_id' => $anotherUser->id,
+        'status' => 'active',
     ]);
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -175,6 +219,7 @@ it('can search memories via multi-query tool', function (): void {
         'created_by_type' => 'human',
         'current_content' => 'HRIS Overview',
         'title' => 'Module Overview',
+        'status' => 'active',
     ]);
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -207,6 +252,7 @@ it('can delete a memory via tool', function (): void {
         'created_by_type' => 'human',
         'current_content' => 'Delete Me',
         'user_id' => $user->id,
+        'status' => 'active',
     ]);
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -234,6 +280,7 @@ it('can read a memory via resource', function (): void {
         'memory_type' => 'fact',
         'created_by_type' => 'human',
         'current_content' => 'Read Me Resource',
+        'status' => 'active',
     ]);
 
     $response = $this->postJson('/api/v1/mcp/memory', [
@@ -253,7 +300,6 @@ it('can search memories with user hierarchy', function (): void {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
 
-    // Create a repository-scoped memory
     Memory::query()->create([
         'organization' => 'hier-org',
         'repository' => 'hier-repo',
@@ -261,6 +307,7 @@ it('can search memories with user hierarchy', function (): void {
         'memory_type' => 'fact',
         'created_by_type' => 'human',
         'current_content' => 'Repo Fact',
+        'status' => 'active',
     ]);
 
     // Create a user-scoped memory for the same repository
@@ -272,6 +319,7 @@ it('can search memories with user hierarchy', function (): void {
         'created_by_type' => 'human',
         'current_content' => 'User Fact',
         'user_id' => $user->id,
+        'status' => 'active',
     ]);
 
     $response = $this->postJson('/api/v1/mcp/memory', [
