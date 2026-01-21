@@ -24,7 +24,7 @@ document.addEventListener('filament:navigated', initializeLivewireConfig);
 // Wrap Chart.js destroy to prevent null reference errors during SPA navigation
 if (window.Chart) {
     const originalDestroy = window.Chart.prototype.destroy;
-    window.Chart.prototype.destroy = function() {
+    window.Chart.prototype.destroy = function () {
         if (this && typeof originalDestroy === 'function') {
             try {
                 originalDestroy.call(this);
