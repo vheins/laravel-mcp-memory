@@ -62,7 +62,8 @@ class SearchMemoriesTool extends Tool
             'status' => $memory->status->value,
             'importance' => (int) $memory->importance,
             'created_at' => $memory->created_at->toIso8601String(),
-            // STRICTLY EXCLUDED: current_content, embedding
+            'current_content' => $memory->current_content,
+            'metadata' => $memory->metadata,
         ])->all();
 
         return Response::make([

@@ -32,9 +32,9 @@ TOOL USAGE GUIDELINES
 
 3. memory-search
    - USE WHEN: You need to FIND relevant memories.
-   - OUTPUT: Returns METADATA ONLY (IDs, Titles, Scores).
+   - OUTPUT: Returns content and metadata.
    - REQUIREMENT 1: Use specific keywords to limit noise.
-   - REQUIREMENT 2: You MUST use `read_resource("memory://{id}")` to view the actual content. Do NOT guess content from the title.
+   - REQUIREMENT 2: Verify the content is relevant before using it.
 
 4. memory-delete
    - USE WHEN: Information is strictly invalid or completely obsolete.
@@ -49,8 +49,7 @@ TOOL USAGE GUIDELINES
 
 7. memory-vector-search
    - USE WHEN: Exact keywords fail, or looking for conceptual similarity.
-   - OUTPUT: Returns METADATA ONLY.
-   - REQUIREMENT: Follow up with `read_resource("memory://{id}")` to get the content.
+   - OUTPUT: Returns content and metadata.
 TEXT
         );
     }

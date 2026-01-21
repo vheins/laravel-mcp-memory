@@ -43,7 +43,8 @@ class VectorSearchTool extends Tool
             'repository' => $memory->repository,
             'status' => $memory->status->value,
             'importance' => (int) $memory->importance,
-            // STRICTLY EXCLUDED: current_content
+            'current_content' => $memory->current_content,
+            'metadata' => $memory->metadata,
         ])->values()->all();
 
         return Response::make([
