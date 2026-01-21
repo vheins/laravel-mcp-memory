@@ -64,6 +64,31 @@ it('can write a memory via tool', function (): void {
     ]);
 });
 
+it('can write a memory via tool with missing default fields', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    $response = $this->postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'method' => 'tools/call',
+        'params' => [
+            'name' => 'memory-write',
+            'arguments' => [
+                'organization' => 'test-org',
+                'current_content' => 'Missing Fields Content',
+            ],
+        ],
+        'id' => 1,
+    ]);
+
+    $response->assertStatus(200);
+    $this->assertDatabaseHas('memories', [
+        'current_content' => 'Missing Fields Content',
+        'organization' => 'test-org',
+        'memory_type' => 'fact',
+        'scope_type' => 'repository',
+    ]);
+});
+
 it('can search memories via tool (team context)', function (): void {
     Sanctum::actingAs(User::factory()->create());
     $anotherUser = User::factory()->create();

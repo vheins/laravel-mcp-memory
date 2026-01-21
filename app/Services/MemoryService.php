@@ -317,12 +317,12 @@ class MemoryService
                 $isNew = true;
                 $memory = Memory::query()->create([
                     'id' => $data['id'] ?? Str::uuid()->toString(),
-                    'organization' => $data['organization'],
+                    'organization' => $data['organization'] ?? 'default',
                     'repository' => $data['repository'] ?? null,
                     'title' => $data['title'] ?? null,
                     'user_id' => auth()->id(),
-                    'scope_type' => $data['scope_type'],
-                    'memory_type' => $data['memory_type'],
+                    'scope_type' => $data['scope_type'] ?? MemoryScope::Repository->value,
+                    'memory_type' => $data['memory_type'] ?? MemoryType::Fact->value,
                     'created_by_type' => $data['created_by_type'] ?? $actorType,
                     'status' => $data['status'] ?? ($actorType === 'ai' ? MemoryStatus::Active : MemoryStatus::Draft),
                     'importance' => $data['importance'] ?? 1,
