@@ -4,6 +4,8 @@ use App\Models\Repository;
 use App\Models\User;
 use App\Services\MemoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use App\Models\Memory;
 use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
@@ -30,6 +32,8 @@ it('resolves hierarchy correctly', function (): void {
         'memory_type' => 'system_constraint',
         'created_by_type' => 'human',
         'current_content' => 'System Content',
+        'title' => 'System Memory',
+        'status' => 'active',
     ], 'system', 'human');
 
     // 2. Organization Memory
@@ -40,6 +44,8 @@ it('resolves hierarchy correctly', function (): void {
         'memory_type' => 'business_rule',
         'created_by_type' => 'human',
         'current_content' => 'Org Content',
+        'title' => 'Org Memory',
+        'status' => 'active',
     ], 'org-admin', 'human');
 
     // 3. Repository Memory
@@ -50,9 +56,12 @@ it('resolves hierarchy correctly', function (): void {
         'memory_type' => 'business_rule',
         'created_by_type' => 'human',
         'current_content' => 'Repo Content',
+        'title' => 'Repo Memory',
+        'status' => 'active',
     ], 'repo-admin', 'human');
 
     // 4. User Memory (for this user)
+    $this->actingAs($this->user);
     $this->service->write([
         'organization' => $this->orgId,
         'repository' => $this->repo->id,
@@ -61,10 +70,14 @@ it('resolves hierarchy correctly', function (): void {
         'memory_type' => 'preference',
         'created_by_type' => 'human',
         'current_content' => 'User Content',
+        'title' => 'User Memory',
+        'status' => 'active',
     ], (string) $this->userId, 'human');
+    auth()->logout();
 
     // 5. Another User Memory (should NOT be seen)
     $otherUser = User::factory()->create();
+    $this->actingAs($otherUser);
     $this->service->write([
         'organization' => $this->orgId,
         'repository' => $this->repo->id,
@@ -73,11 +86,15 @@ it('resolves hierarchy correctly', function (): void {
         'memory_type' => 'preference',
         'created_by_type' => 'human',
         'current_content' => 'Other User Content',
+        'title' => 'Other User Memory',
+        'status' => 'active',
     ], (string) $otherUser->id, 'human');
+    auth()->logout();
 
     // Search WITHOUT user context -> Expect System, Org, Repo (3 items)
-    $resultsNoUser = $this->service->search($this->repo->id);
+    $resultsNoUser = $this->service->search(null, ['repository' => $this->repo->id]);
     expect($resultsNoUser)->toHaveCount(3);
+
     expect($resultsNoUser->pluck('current_content'))
         ->toContain('System Content')
         ->toContain('Org Content')
@@ -86,7 +103,8 @@ it('resolves hierarchy correctly', function (): void {
         ->not->toContain('Other User Content');
 
     // Search WITH user context -> Expect System, Org, Repo, User (4 items)
-    $resultsUser = $this->service->search($this->repo->id, null, ['user' => $this->userId]);
+    $this->actingAs($this->user);
+    $resultsUser = $this->service->search(null, ['repository' => $this->repo->id]);
     expect($resultsUser)->toHaveCount(4);
     expect($resultsUser->pluck('current_content'))
         ->toContain('System Content')
@@ -113,13 +131,15 @@ it('isolates memories between organizations and repositories', function (): void
         'memory_type' => 'business_rule',
         'created_by_type' => 'human',
         'current_content' => 'Other Repo Rule',
+        'title' => 'Other Repo Rule',
+        'status' => 'active',
     ], 'other-admin', 'human');
 
     // 3. Search in ORIGINAL Repo -> Should NOT see Other Repo Rule
-    $results = $this->service->search($this->repo->id);
+    $results = $this->service->search(null, ['repository' => $this->repo->id]);
     expect($results->pluck('current_content'))->not->toContain('Other Repo Rule');
 
     // 4. Search in OTHER Repo -> Should see Other Repo Rule
-    $resultsOther = $this->service->search($otherRepo->id);
+    $resultsOther = $this->service->search(null, ['repository' => $otherRepo->id]);
     expect($resultsOther->pluck('current_content'))->toContain('Other Repo Rule');
 });

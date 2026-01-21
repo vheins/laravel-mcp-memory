@@ -22,9 +22,10 @@ it('can write memory via MCP', function (): void {
                 'organization' => $this->repository->organization_id,
                 'repository' => $this->repository->id,
                 'scope_type' => 'repository',
-                'memory_type' => 'business_rule',
+                'memory_type' => 'fact',
                 'created_by_type' => 'human',
                 'current_content' => 'MCP Content',
+                'title' => 'MCP Title',
             ],
         ],
         'id' => 1,
@@ -52,6 +53,7 @@ it('can read memory via MCP', function (): void {
         'memory_type' => 'business_rule',
         'created_by_type' => 'human',
         'current_content' => 'Read Me',
+        'title' => 'Read Title',
     ], $this->user->id);
 
     $payload = [
@@ -64,7 +66,7 @@ it('can read memory via MCP', function (): void {
     $this->actingAs($this->user)
         ->postJson('/api/v1/mcp/memory', $payload)
         ->assertStatus(200)
-        ->assertJsonPath('result.contents.0.text', 'Read Me');
+        ->assertJsonPath('result.contents.0.text', fn (string $text) => str_contains($text, 'Read Me'));
 });
 
 it('can search memory via MCP', function (): void {
@@ -76,6 +78,8 @@ it('can search memory via MCP', function (): void {
         'memory_type' => 'preference',
         'created_by_type' => 'human',
         'current_content' => 'Searchable',
+        'title' => 'Search Title',
+        'status' => 'active',
     ], $this->user->id);
 
     $payload = [

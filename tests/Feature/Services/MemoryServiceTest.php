@@ -26,6 +26,7 @@ it('can create a new memory', function (): void {
         'memory_type' => 'business_rule',
         'created_by_type' => 'human',
         'current_content' => 'Initial content',
+        'title' => 'Test Title',
         'metadata' => ['key' => 'value'],
     ];
 
@@ -57,6 +58,7 @@ it('creates a new version when content updates', function (): void {
         'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
         'current_content' => 'Initial content',
+        'title' => 'Test Title',
     ];
 
     $memory = $this->service->write($data, $this->user->id);
@@ -86,6 +88,7 @@ it('prevents update when memory is locked', function (): void {
         'created_by_type' => 'human',
         'current_content' => 'Content',
         'status' => MemoryStatus::Locked,
+        'title' => 'Locked Memory',
     ];
 
     // Force create a locked memory directly via model to bypass service check if any
@@ -101,6 +104,7 @@ it('prevents update when memory is locked', function (): void {
         'scope_type' => MemoryScope::Repository,
         'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
+        'title' => 'Locked Memory',
     ];
 
     expect(fn () => $this->service->write($updateData, $this->user->id))
@@ -115,6 +119,7 @@ it('can read a memory', function (): void {
         'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
         'current_content' => 'Content to read',
+        'title' => 'Readable Memory',
     ];
     $memory = $this->service->write($data, $this->user->id);
 
@@ -133,6 +138,7 @@ it('can search memories', function (): void {
         'memory_type' => MemoryType::BusinessRule,
         'created_by_type' => 'human',
         'current_content' => 'Apple pie recipe',
+        'title' => 'Apple Pie',
         'status' => MemoryStatus::Verified,
     ], $this->user->id);
 
@@ -143,7 +149,8 @@ it('can search memories', function (): void {
         'memory_type' => MemoryType::Preference,
         'created_by_type' => 'human',
         'current_content' => 'Banana bread recipe',
-        'status' => MemoryStatus::Draft,
+        'title' => 'Banana Bread',
+        'status' => MemoryStatus::Active,
     ], $this->user->id);
 
     // Search by content
@@ -169,6 +176,7 @@ it('can search by metadata', function (): void {
         'scope_type' => MemoryScope::Repository,
         'memory_type' => MemoryType::Fact,
         'current_content' => 'Tech Info',
+        'title' => 'PHP Info',
         'metadata' => ['language' => 'PHP', 'version' => '8.3'],
         'status' => MemoryStatus::Active,
     ], $this->user->id);
@@ -190,6 +198,7 @@ it('prevents AI from creating restricted memory types', function (): void {
         'memory_type' => MemoryType::SystemConstraint, // Restricted
         'created_by_type' => 'ai',
         'current_content' => 'Restricted Content',
+        'title' => 'Restricted Memory',
     ];
 
     expect(fn () => $this->service->write($data, 'agent-1', 'ai'))
@@ -205,6 +214,7 @@ it('prevents AI from updating restricted memory types', function (): void {
         'memory_type' => MemoryType::BusinessRule, // Restricted
         'created_by_type' => 'human',
         'current_content' => 'Human Rule',
+        'title' => 'Human Rule',
     ], $this->user->id, 'human');
 
     // AI tries to update

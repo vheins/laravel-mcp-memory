@@ -59,6 +59,9 @@ test('docs resource returns error for unknown slug', function (): void {
 });
 
 test('memory index resource returns recent memories', function (): void {
+    $user = \App\Models\User::factory()->create();
+    $this->actingAs($user);
+
     Memory::factory()->create([
         'title' => 'Test Memory A',
         'current_content' => 'Content A',
@@ -66,6 +69,8 @@ test('memory index resource returns recent memories', function (): void {
         'scope_type' => 'system',
         'memory_type' => 'fact',
         'importance' => 5,
+        'status' => 'active',
+        'user_id' => $user->id,
         'metadata' => ['key1' => 'val1', 'key2' => 'val2', 'long' => str_repeat('a', 100)]
     ]);
 

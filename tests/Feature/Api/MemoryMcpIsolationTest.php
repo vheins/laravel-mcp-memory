@@ -42,6 +42,7 @@ it('forces authenticated user on write', function (): void {
                 'scope_type' => 'user',
                 'memory_type' => 'preference',
                 'current_content' => 'My Preference',
+                'title' => 'Isolation Title',
                 'user' => $this->otherUser->id, // Attempt to spoof
             ],
         ],
@@ -70,6 +71,8 @@ it('forces authenticated user on search', function (): void {
         'memory_type' => 'preference',
         'created_by_type' => 'human',
         'current_content' => 'User A Secret',
+        'title' => 'User A Title',
+        'status' => 'active',
     ]);
 
     // Create User B Memory
@@ -82,6 +85,8 @@ it('forces authenticated user on search', function (): void {
         'memory_type' => 'preference',
         'created_by_type' => 'human',
         'current_content' => 'User B Secret',
+        'title' => 'User B Title',
+        'status' => 'active',
     ]);
 
     // User A tries to search for User B's memories

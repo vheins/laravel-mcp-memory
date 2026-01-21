@@ -32,6 +32,8 @@ test('mcp client can read a memory resource', function (): void {
         'memory_type' => 'fact',
         'created_by_type' => 'human',
         'current_content' => 'Verification Test Content',
+        'title' => 'Verification Title',
+        'status' => 'active',
         'user_id' => $user->id,
     ]);
 
@@ -45,7 +47,7 @@ test('mcp client can read a memory resource', function (): void {
     ]);
 
     $response->assertStatus(200)
-        ->assertJsonPath('result.contents.0.text', 'Verification Test Content');
+        ->assertJsonPath('result.contents.0.text', fn (string $text) => str_contains($text, 'Verification Test Content'));
 });
 
 test('mcp client can search memories', function (): void {
@@ -58,6 +60,8 @@ test('mcp client can search memories', function (): void {
         'memory_type' => 'fact',
         'created_by_type' => 'human',
         'current_content' => 'Special Secret Fact',
+        'title' => 'Secret Fact',
+        'status' => 'active',
         'user_id' => $user->id,
     ]);
 

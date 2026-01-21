@@ -7,6 +7,7 @@ use App\Models\Repository;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use App\Enums\MemoryStatus;
 
 uses(RefreshDatabase::class);
 
@@ -22,7 +23,7 @@ it('can verify a memory', function (): void {
         'repository' => $repo->id,
         'scope_type' => 'repository',
         'memory_type' => 'business_rule',
-        'status' => 'draft',
+        'status' => MemoryStatus::Draft,
         'created_by_type' => 'human',
         'current_content' => 'Content',
         'user' => $user->id,
@@ -31,7 +32,7 @@ it('can verify a memory', function (): void {
     Livewire::test(ListMemories::class)
         ->callTableAction('verify', $memory);
 
-    expect($memory->refresh()->status)->toBe('verified');
+    expect($memory->refresh()->status)->toBe(MemoryStatus::Verified);
 });
 
 it('can lock a memory', function (): void {
@@ -46,7 +47,7 @@ it('can lock a memory', function (): void {
         'repository' => $repo->id,
         'scope_type' => 'repository',
         'memory_type' => 'business_rule',
-        'status' => 'verified',
+        'status' => MemoryStatus::Verified,
         'created_by_type' => 'human',
         'current_content' => 'Content',
         'user' => $user->id,
@@ -55,5 +56,5 @@ it('can lock a memory', function (): void {
     Livewire::test(ListMemories::class)
         ->callTableAction('lock', $memory);
 
-    expect($memory->refresh()->status)->toBe('locked');
+    expect($memory->refresh()->status)->toBe(MemoryStatus::Locked);
 });

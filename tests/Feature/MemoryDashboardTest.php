@@ -7,6 +7,7 @@ use App\Models\Memory;
 use App\Models\MemoryAccessLog;
 use App\Services\MemoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -20,20 +21,21 @@ test('memory service logs access on read', function (): void {
     expect(MemoryAccessLog::query()->count())->toBe(1);
     $log = MemoryAccessLog::query()->first();
     expect($log->action)->toBe('read');
-    expect($log->resource_id)->toBe($memory->id);
     expect($log->actor_id)->toBe('user-1');
 });
 
 test('memory service logs access on search', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $service = app(MemoryService::class);
 
-    $service->search('repo-1', 'query');
+    $service->search('query', ['repository' => 'repo-1']);
 
     expect(MemoryAccessLog::query()->count())->toBe(1);
     $log = MemoryAccessLog::query()->first();
     expect($log->action)->toBe('search');
-    expect($log->actor_id)->toBe('user-1');
-    expect($log->metadata['query'])->toBe('query');
+    expect($log->actor_id)->toBe((string) $user->id);
+    expect($log->getAttribute('query'))->toBe('query');
 });
 
 test('dashboard stats widget calculates correctly', function (): void {

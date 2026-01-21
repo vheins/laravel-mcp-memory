@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Mcp;
 
+use App\Enums\MemoryScope;
 use App\Enums\MemoryStatus;
 use App\Models\Memory;
 use App\Models\User;
@@ -120,18 +121,24 @@ final class AdvancedMemoryTest extends TestCase
             'embedding' => [1.0, 0.0, 0.0],
             'importance' => 1,
             'status' => MemoryStatus::Active,
+            'scope_type' => MemoryScope::Repository,
+            'organization' => 'test-org',
         ]);
         Memory::factory()->create([
             'title' => 'Banana',
             'embedding' => [0.0, 1.0, 0.0],
             'importance' => 1,
             'status' => MemoryStatus::Active,
+            'scope_type' => MemoryScope::Repository,
+            'organization' => 'test-org',
         ]);
         Memory::factory()->create([
             'title' => 'Important Apple',
             'embedding' => [1.0, 0.1, 0.0],
             'importance' => 10,
             'status' => MemoryStatus::Active,
+            'scope_type' => MemoryScope::Repository,
+            'organization' => 'test-org',
         ]);
 
         $response = $this->postJson('/memory-mcp', [

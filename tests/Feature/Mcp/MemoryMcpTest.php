@@ -49,6 +49,7 @@ it('can write a memory via tool', function (): void {
             'name' => 'memory-write',
             'arguments' => [
                 'organization' => 'test-org',
+                'title' => 'Test Memory Title',
                 'scope_type' => 'organization',
                 'memory_type' => 'fact',
                 'current_content' => 'Test Content',
@@ -59,6 +60,7 @@ it('can write a memory via tool', function (): void {
 
     $response->assertStatus(200);
     $this->assertDatabaseHas('memories', [
+        'title' => 'Test Memory Title',
         'current_content' => 'Test Content',
         'organization' => 'test-org',
     ]);
@@ -74,6 +76,7 @@ it('can write a memory via tool with missing default fields', function (): void 
             'name' => 'memory-write',
             'arguments' => [
                 'organization' => 'test-org',
+                'title' => 'Missing Fields Title',
                 'current_content' => 'Missing Fields Content',
             ],
         ],
@@ -82,6 +85,7 @@ it('can write a memory via tool with missing default fields', function (): void 
 
     $response->assertStatus(200);
     $this->assertDatabaseHas('memories', [
+        'title' => 'Missing Fields Title',
         'current_content' => 'Missing Fields Content',
         'organization' => 'test-org',
         'memory_type' => 'fact',
@@ -99,6 +103,7 @@ it('rejects JSON format in current_content', function (): void {
             'name' => 'memory-write',
             'arguments' => [
                 'organization' => 'test-org',
+                'title' => 'JSON Rejection Title',
                 'current_content' => json_encode(['foo' => 'bar']),
             ],
         ],
@@ -120,6 +125,7 @@ it('accepts markdown format in current_content', function (): void {
             'name' => 'memory-write',
             'arguments' => [
                 'organization' => 'test-org',
+                'title' => 'Markdown Title',
                 'current_content' => "# Title\n\n- Item 1\n- Item 2",
             ],
         ],
@@ -138,6 +144,7 @@ it('excludes draft memories from search results', function (): void {
     Memory::query()->create([
         'organization' => 'test-org',
         'repository' => 'test-repo',
+        'title' => 'Draft Content Hidden',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -149,6 +156,7 @@ it('excludes draft memories from search results', function (): void {
     Memory::query()->create([
         'organization' => 'test-org',
         'repository' => 'test-repo',
+        'title' => 'Active Content Visible',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -169,8 +177,12 @@ it('excludes draft memories from search results', function (): void {
     ]);
 
     $response->assertStatus(200);
+    $response->dump();
     $response->assertJsonPath('result.content.0.text', function (string $text) {
-        return ! str_contains($text, 'Draft Content Hidden') && str_contains($text, 'Active Content Visible');
+        $data = json_decode($text, true);
+        $titles = collect($data)->pluck('title')->toArray();
+
+        return ! in_array('Draft Content Hidden', $titles) && in_array('Active Content Visible', $titles);
     });
 });
 
@@ -181,6 +193,7 @@ it('can search memories via tool (team context)', function (): void {
     Memory::query()->create([
         'organization' => 'search-org',
         'repository' => 'search-repo',
+        'title' => 'Team Fact Title',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -205,7 +218,7 @@ it('can search memories via tool (team context)', function (): void {
     ]);
 
     $response->assertStatus(200);
-    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'Team Fact'));
+    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'Team Fact Title'));
 });
 
 it('can search memories via multi-query tool', function (): void {
@@ -238,7 +251,7 @@ it('can search memories via multi-query tool', function (): void {
     ]);
 
     $response->assertStatus(200);
-    $response->dump();
+    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'Module Overview'));
 });
 
 it('can delete a memory via tool', function (): void {
@@ -247,6 +260,7 @@ it('can delete a memory via tool', function (): void {
 
     $memory = Memory::query()->create([
         'organization' => 'del-org',
+        'title' => 'Delete Me Title',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -276,6 +290,7 @@ it('can read a memory via resource', function (): void {
 
     $memory = Memory::query()->create([
         'organization' => 'res-org',
+        'title' => 'Read Me Title',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -303,6 +318,7 @@ it('can search memories with user hierarchy', function (): void {
     Memory::query()->create([
         'organization' => 'hier-org',
         'repository' => 'hier-repo',
+        'title' => 'Repo Fact Title',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -314,6 +330,7 @@ it('can search memories with user hierarchy', function (): void {
     Memory::query()->create([
         'organization' => 'hier-org',
         'repository' => 'hier-repo',
+        'title' => 'User Fact Title',
         'scope_type' => 'user',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -341,9 +358,9 @@ it('can search memories with user hierarchy', function (): void {
     // Values are returned as JSON string in result.content[0].text
     $response->assertJsonPath('result.content.0.text', function (string $text): bool {
         $data = json_decode($text, true);
-        $contents = collect($data)->pluck('current_content')->toArray();
+        $titles = collect($data)->pluck('title')->toArray();
 
-        return in_array('User Fact', $contents) && in_array('Repo Fact', $contents);
+        return in_array('User Fact Title', $titles) && in_array('Repo Fact Title', $titles);
     });
 });
 
@@ -352,6 +369,7 @@ it('cannot update locked memory via tool', function (): void {
 
     $memory = Memory::query()->create([
         'organization' => 'lock-org',
+        'title' => 'Locked Memory',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -367,6 +385,7 @@ it('cannot update locked memory via tool', function (): void {
             'arguments' => [
                 'id' => $memory->id,
                 'organization' => 'lock-org',
+                'title' => 'Locked Memory',
                 'scope_type' => 'repository',
                 'memory_type' => 'fact',
                 'current_content' => 'Attempted Change',
@@ -392,6 +411,7 @@ it('enforces immutable types for AI updates', function (): void {
             'name' => 'memory-write',
             'arguments' => [
                 'organization' => 'rule-org',
+                'title' => 'System Constraint',
                 'scope_type' => 'system',
                 'memory_type' => 'system_constraint',
                 'current_content' => 'Human setting system constraint',
@@ -413,6 +433,7 @@ it('can search memories without repository argument', function (): void {
     Memory::query()->create([
         'organization' => 'global-org',
         'repository' => 'repo-a',
+        'title' => 'Title A',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -423,6 +444,7 @@ it('can search memories without repository argument', function (): void {
     Memory::query()->create([
         'organization' => 'global-org',
         'repository' => 'repo-b',
+        'title' => 'Title B',
         'scope_type' => 'repository',
         'memory_type' => 'fact',
         'created_by_type' => 'human',
@@ -445,9 +467,9 @@ it('can search memories without repository argument', function (): void {
     $response->assertStatus(200);
     $response->assertJsonPath('result.content.0.text', function (string $text): bool {
         $data = json_decode($text, true);
-        $contents = collect($data)->pluck('current_content')->toArray();
+        $titles = collect($data)->pluck('title')->toArray();
 
-        return count($contents) >= 2;
+        return count($titles) >= 2;
     });
 });
 
