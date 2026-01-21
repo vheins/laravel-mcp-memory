@@ -263,6 +263,11 @@ class MemoryService
                 new Enum(MemoryType::class),
                 new ImmutableTypeRule($actorType),
             ],
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+            ],
             'status' => [
                 'sometimes',
                 'required',
