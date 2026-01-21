@@ -15,7 +15,7 @@ class MemoryResource extends Resource implements HasUriTemplate
 {
     public function description(): string
     {
-        return 'Read a specific memory entry by its UUID.';
+        return 'Read the full content and metadata of a specific memory entry.';
     }
 
     public function handle(Request $request): Response
@@ -24,13 +24,26 @@ class MemoryResource extends Resource implements HasUriTemplate
         $id = $request->get('id');
         $memory = Memory::query()->findOrFail($id);
 
-        return Response::text($memory->current_content)
-            ->withMeta([
-                'type' => $memory->memory_type,
-                'status' => $memory->status,
+        return Response::json([
+            'id' => $memory->id,
+            'title' => $memory->title,
+            'content' => $memory->current_content,
+            'type' => $memory->memory_type->value,
+            'scope' => $memory->scope_type->value,
+            'status' => $memory->status->value,
+            'importance' => $memory->importance,
+            'context' => [
                 'organization' => $memory->organization,
                 'repository' => $memory->repository,
-            ]);
+                'user_id' => $memory->user_id,
+                'created_by' => $memory->created_by_type,
+            ],
+            'metadata' => $memory->metadata,
+            'dates' => [
+                'created_at' => $memory->created_at->toIso8601String(),
+                'updated_at' => $memory->updated_at->toIso8601String(),
+            ],
+        ]);
     }
 
     public function name(): string

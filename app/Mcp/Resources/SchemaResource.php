@@ -27,46 +27,100 @@ class SchemaResource extends Resource
                     'description' => 'Categorizes the nature of the stored information.',
                     'options' => array_map(fn (MemoryType $case): array => [
                         'value' => $case->value,
-                        'label' => method_exists($case, 'getLabel') ? $case->getLabel() : $case->name,
-                        'description' => $this->getEnumDescription($case),
+                        'label' => $case->getLabel() ?? ucfirst(str_replace('_', ' ', $case->value)),
+                        'description' => match ($case) {
+                            MemoryType::BusinessRule => 'Core logic or policy (e.g., "Discounts expire after 30 days")',
+                            MemoryType::Fact => 'Immutable truth (e.g., "Server IP is 10.0.0.1")',
+                            MemoryType::SystemConstraint => 'Hard technical limit (e.g., "Max upload size 10MB")',
+                            MemoryType::Preference => 'User-specific setting (e.g., "Dark mode enabled")',
+                            default => $case->getLabel(),
+                        },
                     ], MemoryType::cases()),
                 ],
                 'MemoryStatus' => [
                     'description' => 'Tracks the lifecycle state of a memory.',
                     'options' => array_map(fn (MemoryStatus $case): array => [
                         'value' => $case->value,
-                        'label' => method_exists($case, 'getLabel') ? $case->getLabel() : $case->name,
-                        'description' => $this->getEnumDescription($case),
+                        'label' => $case->getLabel(),
+                        'description' => match ($case) {
+                            MemoryStatus::Draft => 'Initial state, pending verification.',
+                            MemoryStatus::Active => 'Verified and currently in use.',
+                            MemoryStatus::Deprecated => 'No longer valid but kept for history.',
+                            default => $case->getLabel(),
+                        },
                     ], MemoryStatus::cases()),
                 ],
                 'MemoryScope' => [
                     'description' => 'Defines the visibility and access level of the memory.',
                     'options' => array_map(fn (MemoryScope $case): array => [
                         'value' => $case->value,
-                        'label' => method_exists($case, 'getLabel') ? $case->getLabel() : $case->name,
-                        'description' => $this->getEnumDescription($case),
+                        'label' => $case->getLabel(),
+                        'description' => match ($case) {
+                            MemoryScope::System => 'Global application knowledge.',
+                            MemoryScope::Organization => 'Shared across a team or tenant.',
+                            MemoryScope::User => 'Private to a specific user.',
+                            default => $case->getLabel(),
+                        },
                     ], MemoryScope::cases()),
                 ],
             ],
+            'tools_compatibility' => [
+                'memory_write' => [
+                    'required' => ['organization', 'scope_type', 'memory_type', 'current_content'],
+                    'optional' => ['title', 'status', 'importance', 'metadata', 'repository'],
+                ],
+            ],
             'attributes' => [
-                'id' => 'Unique identifier (UUID).',
-                'memory_type' => 'Type of memory (entry, knowledge_base, etc.).',
-                'scope_type' => 'Visibility scope (user, team, global).',
-                'status' => 'Current status of the memory.',
-                'title' => 'Concise summary of the memory.',
-                'content' => 'The main body of information to be stored.',
-                'importance' => 'Numerical score (1-10) indicating how critical the memory is.',
-                'metadata' => 'Extensible JSON object for custom key-value pairs.',
-                'repository' => 'Repository unique identifier or slug.',
-                'organization' => 'Organization identifier.',
-                'user_id' => 'System user identifier associated with the memory.',
-                'created_at' => 'Timestamp of creation.',
-                'updated_at' => 'Timestamp of last update.',
+                'id' => [
+                    'type' => 'uuid',
+                    'description' => 'Unique identifier. Required for updates, ignored for creates.',
+                ],
+                'memory_type' => [
+                    'type' => 'enum',
+                    'options' => array_column(MemoryType::cases(), 'value'),
+                    'description' => 'Categorization (see enums). Required.',
+                ],
+                'scope_type' => [
+                    'type' => 'enum',
+                    'options' => array_column(MemoryScope::cases(), 'value'),
+                    'description' => 'Visibility scope. Required.',
+                ],
+                'status' => [
+                    'type' => 'enum',
+                    'options' => array_column(MemoryStatus::cases(), 'value'),
+                    'description' => 'Lifecycle state. Default: draft.',
+                ],
+                'title' => [
+                    'type' => 'string',
+                    'limit' => '12 words',
+                    'description' => 'Concise summary for search/indexing.',
+                ],
+                'current_content' => [
+                    'type' => 'text',
+                    'description' => 'The actual knowledge to be stored.',
+                ],
+                'importance' => [
+                    'type' => 'integer',
+                    'range' => '1-10',
+                    'description' => 'Relevance score. Higher = more important.',
+                ],
+                'metadata' => [
+                    'type' => 'json',
+                    'limit' => '5 keys',
+                    'description' => 'Flat key-value pairs for filtering.',
+                ],
+                'organization' => [
+                    'type' => 'string', // slug
+                    'description' => 'Organization context (slug).',
+                ],
+                'repository' => [
+                    'type' => 'string', // slug
+                    'description' => 'Repository context (slug).',
+                ],
             ],
         ];
 
-        return Response::text(json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))
-            ->withMeta(['mimeType' => 'application/json']);
+        return Response::json($schema);
     }
 
     public function name(): string
@@ -84,9 +138,5 @@ class SchemaResource extends Resource
         return 'schema://schema';
     }
 
-    protected function getEnumDescription(mixed $case): ?string
-    {
-        // If we decide to add getDescription() to enums later, it will pick it up automatically
-        return method_exists($case, 'getDescription') ? $case->getDescription() : null;
-    }
+
 }

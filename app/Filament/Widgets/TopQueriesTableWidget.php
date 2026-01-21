@@ -28,6 +28,7 @@ class TopQueriesTableWidget extends TableWidget
                     ->where('query', '!=', '')
                     ->groupBy('query')
                     ->orderByDesc('count')
+                    ->orderByDesc('last_searched_at')
                     ->limit(10)
             )
             ->heading('Top Search Queries')

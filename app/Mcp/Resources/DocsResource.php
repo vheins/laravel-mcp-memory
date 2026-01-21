@@ -167,9 +167,9 @@ This guide explains the available tools and their intended usage.
 ### 4. `memory-search`
 - **Purpose**: Find memories using text query and filters.
 - **When to use**: You need to answer a question or understand context. ALWAYS use this before deciding to write new memory to avoid duplicates.
-- **Features**: Supports filtering by status, type, and scope.
+- **Features**: Supports filtering by status, type, and scope. Now allows multiple `queries` in one request.
 
-### 5. `memory-batch-write`
+### 5. `memory-bulk-write`
 - **Purpose**: Create multiple memories in a single request.
 - **When to use**: You have extracted a list of facts (e.g., from a document analysis) and want to save them efficiently.
 

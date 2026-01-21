@@ -21,6 +21,7 @@ class MemoryIndexResource extends Resource
         // Strict field selection based on Memory Index Policy
         // forbidden: current_content
         $memories = Memory::query()
+            ->where('user_id', auth()->id())
             ->latest()
             ->limit(50) // Expanded limit for better discovery since payload is lighter
             ->get()
