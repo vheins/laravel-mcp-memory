@@ -71,6 +71,9 @@ class SearchMemoriesTool extends Tool
             'created_at' => $memory->created_at->toIso8601String(),
             'current_content' => $memory->current_content,
             'metadata' => $memory->metadata,
+            // Creator and viewer names
+            'creator_name' => $memory->userRel?->name ?? null,
+            'viewer_name' => $request->user()?->name ?? null,
         ])->all();
 
         return Response::make([
