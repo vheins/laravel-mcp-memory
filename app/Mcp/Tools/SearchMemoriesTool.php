@@ -24,14 +24,35 @@ class SearchMemoriesTool extends Tool
     public function handle(Request $request, MemoryService $service): ResponseFactory
     {
         $filters = $request->get('filters', []);
+        $inputQueries = $request->get('queries', []);
+        $singleQuery = $request->get('query');
 
-        $results = $service->search(
-            $request->get('query'),
-            $filters
-        );
+        if (is_string($inputQueries)) {
+            $inputQueries = [$inputQueries];
+        }
+
+        if ($singleQuery) {
+            $inputQueries[] = $singleQuery;
+        }
+
+        $inputQueries = array_unique(array_filter($inputQueries));
+        $allResults = new \Illuminate\Database\Eloquent\Collection();
+
+        if (empty($inputQueries)) {
+            // If no query provided, just run search once with null to respect filters
+            $allResults = $service->search(null, $filters);
+        } else {
+            foreach ($inputQueries as $query) {
+                $results = $service->search($query, $filters);
+                $allResults = $allResults->merge($results);
+            }
+        }
+
+        // Deduplicate by ID
+        $allResults = $allResults->unique('id')->values();
 
         return Response::make([
-            Response::text(json_encode($results->toArray())),
+            Response::text(json_encode($allResults->toArray())),
         ]);
     }
 
@@ -44,6 +65,7 @@ class SearchMemoriesTool extends Tool
     {
         return [
             'query' => $schema->string()->description('The search query string. Use specific keywords to pinpoint relevant memories.'),
+            'queries' => $schema->array()->items($schema->string())->description('Array of search queries or a single string queries. Used to perform multiple searches and merge results.'),
             'filters' => $schema->object([
                 'repository' => $schema->string()->description('The specific repository to restrict the search to. Omit to search across all accessible repositories.'),
                 'memory_type' => $schema->string()
