@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\MemoryScope;
+use App\Enums\MemoryStatus;
+use App\Enums\MemoryType;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -37,7 +40,7 @@ class GeminiService
                     'temperature' => 0.7,
                     'topK' => 40,
                     'topP' => 0.95,
-                    'maxOutputTokens' => 8192,
+                    'maxOutputTokens' => config('services.gemini.max_output_tokens', 65536),
                     'responseMimeType' => 'application/json',
                 ],
             ]);
@@ -60,6 +63,10 @@ class GeminiService
 
     protected function buildSystemPrompt(string $userPrompt): string
     {
+        $scopeTypes = implode("', '", array_column(MemoryScope::cases(), 'value'));
+        $memoryTypes = implode("', '", array_column(MemoryType::cases(), 'value'));
+        $statuses = implode("', '", array_column(MemoryStatus::cases(), 'value'));
+
         return <<<EOT
 You are an intelligent assistant for a Memory Management System.
 Your task is to generate a structured JSON object representing a "Memory" based on the user's prompt.
@@ -69,13 +76,12 @@ User Prompt: "{$userPrompt}"
 The output MUST be a valid JSON object with the following structure:
 {
     "title": "A concise title for the memory",
-    "slug": "url-friendly-slug",
     "organization": "Default Organization (or inferred)",
     "repository": "Default Repository (or inferred)",
-    "scope_type": "One of: 'system', 'organization', 'repository', 'user'",
-    "memory_type": "One of: 'business_rule', 'decision_log', 'preference', 'system_constraint', 'documentation_ref', 'tech_stack'",
+    "scope_type": "One of: '{$scopeTypes}'",
+    "memory_type": "One of: '{$memoryTypes}'",
     "current_content": "The full markdown content of the memory. Be detailed.",
-    "status": "One of: 'draft', 'verified', 'locked', 'deprecated', 'active' (Default: active)",
+    "status": "One of: '{$statuses}' (Default: active)",
     "importance": 3 (integer 1-10),
     "metadata": {
         "key_from_content": "value_from_content",
@@ -92,7 +98,7 @@ EOT;
     public function enhanceMemory(array $currentData, string $instruction): array
     {
         $apiKey = config('services.gemini.api_key');
-        $model = config('services.gemini.model', 'gemini-1.5-flash');
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
 
         if (! $apiKey) {
             throw new \Exception('Gemini API key is not configured.');
@@ -120,7 +126,7 @@ EOT;
                     'temperature' => 0.7,
                     'topK' => 40,
                     'topP' => 0.95,
-                    'maxOutputTokens' => 8192,
+                    'maxOutputTokens' => config('services.gemini.max_output_tokens', 65536),
                     'responseMimeType' => 'application/json',
                 ],
             ]);
@@ -143,6 +149,10 @@ EOT;
 
     protected function buildEnhancePrompt(string $context, string $instruction): string
     {
+        $scopeTypes = implode("', '", array_column(MemoryScope::cases(), 'value'));
+        $memoryTypes = implode("', '", array_column(MemoryType::cases(), 'value'));
+        $statuses = implode("', '", array_column(MemoryStatus::cases(), 'value'));
+
         return <<<EOT
 You are an intelligent assistant for a Memory Management System.
 Your task is to ENHANCE an existing "Memory" object based on the user's instruction.
@@ -157,9 +167,9 @@ User Instruction for Enhancement:
 
 The output MUST be a valid JSON object with the same structure as the input, but with improved content/metadata.
 Structure constraints:
-- "scope_type": One of: 'system', 'organization', 'repository', 'user'
-- "memory_type": One of: 'business_rule', 'decision_log', 'preference', 'system_constraint', 'documentation_ref', 'tech_stack'
-- "status": One of: 'draft', 'verified', 'locked', 'deprecated', 'active'
+- "scope_type": One of: '{$scopeTypes}'
+- "memory_type": One of: '{$memoryTypes}'
+- "status": One of: '{$statuses}'
 - "metadata": Key-value pairs extracted from content.
 
 Ensure the "current_content" is improved according to the instruction (e.g., fixed grammar, added examples, expanded details) and formatted in Markdown.
