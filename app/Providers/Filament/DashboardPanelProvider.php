@@ -32,7 +32,7 @@ class DashboardPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login()
             ->font('Inter')
-            // ->spa(true,true)
+            ->spa(true,true)
             ->databaseNotifications()
             ->databaseTransactions()
             ->maxContentWidth(Width::Full)
