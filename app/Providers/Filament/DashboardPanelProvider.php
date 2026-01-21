@@ -28,9 +28,12 @@ class DashboardPanelProvider extends PanelProvider
 {
     public function boot(): void
     {
-        FilamentAsset::register([
-            Js::make('filament-spa-fix', resource_path('js/filament-spa-fix.js')),
-        ]);
+    FilamentAsset::register([
+        Js::make(
+            'filament-spa-fix',
+            asset('filament/spa-livewire-fix.js')
+        ),
+    ]);
     }
 
     public function panel(Panel $panel): Panel
