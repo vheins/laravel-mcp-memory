@@ -53,8 +53,14 @@ class UpdateMemoryTool extends Tool
 
         try {
             $memory = $service->write($arguments, $actorId, $actorType);
-        } catch (\Exception $e) {
-            throw new JsonRpcException($e->getMessage(), -32000, $request->get('id'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return Response::make([
+                Response::text(json_encode($e->errors())),
+            ]);
+        } catch (\Throwable $e) {
+            return Response::make([
+                Response::text(json_encode(['error' => $e->getMessage()])),
+            ]);
         }
 
         return Response::make([
