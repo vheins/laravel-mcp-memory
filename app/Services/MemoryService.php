@@ -136,11 +136,11 @@ class MemoryService
         // 2. Apply Scope Isolation only if context is provided
         if ($repository || auth()->id() || $orgId) {
             $q->where(function (Builder $group) use ($repository, $orgId): void {
-                $group->where('scope_type', 'system')
-                    ->when($orgId, fn ($q) => $q->orWhere(fn (Builder $sub) => $sub->where('scope_type', 'organization')->where('organization', $orgId)))
-                    ->when($repository, fn ($q) => $q->orWhere(fn (Builder $sub) => $sub->where('scope_type', 'repository')->where('repository', $repository)))
-                    ->unless($repository, fn ($q) => $q->orWhere('scope_type', 'repository'))
-                    ->orWhere(fn (Builder $sub) => $sub->where('scope_type', 'user')
+                $group->where('scope_type', MemoryScope::System)
+                    ->when($orgId, fn ($q) => $q->orWhere(fn (Builder $sub) => $sub->where('scope_type', MemoryScope::Organization)->where('organization', $orgId)))
+                    ->when($repository, fn ($q) => $q->orWhere(fn (Builder $sub) => $sub->where('scope_type', MemoryScope::Repository)->where('repository', $repository)))
+                    ->unless($repository, fn ($q) => $q->orWhere('scope_type', MemoryScope::Repository))
+                    ->orWhere(fn (Builder $sub) => $sub->where('scope_type', MemoryScope::User)
                         ->where('user_id', auth()->id())
                         ->when($repository, fn ($deep) => $deep->where(fn (Builder $d) => $d->where('repository', $repository)->orWhereNull('repository')))
                     );
