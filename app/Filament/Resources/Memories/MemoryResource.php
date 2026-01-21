@@ -57,13 +57,6 @@ class MemoryResource extends Resource
         ];
     }
 
-    public static function getWidgets(): array
-    {
-        return [
-            MemoryStatsOverview::class,
-        ];
-    }
-
     public static function table(Table $table): Table
     {
         return MemoriesTable::configure($table)
