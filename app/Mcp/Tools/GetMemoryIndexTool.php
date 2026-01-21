@@ -13,7 +13,7 @@ class GetMemoryIndexTool extends Tool
 {
     public function description(): string
     {
-        return 'Get a lightweight index of user memories for discovery (excluding content). Use this to find available memories before searching or reading.';
+        return 'Get a lightweight, metadata-only index of user memories. Use this tool FIRST to discover available memories, understand the knowledge graph structure, and find IDs before using `memory-search` (for content) or `memory-audit` (for history). Returns a list of 50 most recent memories.';
     }
 
     public function handle(Request $request): Response

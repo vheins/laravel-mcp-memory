@@ -12,7 +12,7 @@ class MemoryCorePrompt extends Prompt
 {
     public function description(): string
     {
-        return 'The core behavioral contract for all agents interacting with the Memory MCP.';
+        return 'The core behavioral contract for all agents interacting with the Memory MCP. Enforces atomic memory creation, mandatory prior search, resource awareness, and correct scope usage to maintain knowledge graph integrity.';
     }
 
     public function handle(Request $request): Response
@@ -36,7 +36,7 @@ You MUST adhere to the following core behavioral contract:
    - You must read `docs://mcp-overview` and `docs://tools-guide` if unread.
    - You must consult `docs://memory-rules` before creating content.
    - You must use `memory-index` to discover available memories before searching or reading.
-   - You must use `memory-history` context only when relevant to changes.
+   - You must use `memory-audit` context only when relevant to changes.
 
 4. SCOPE CORRECTNESS
    - Use `system` scope for global truths.

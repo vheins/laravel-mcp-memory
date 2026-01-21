@@ -12,7 +12,10 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -26,9 +29,29 @@ class AuditLogsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('event')
-                    ->required()
-                    ->maxLength(255),
+                Tabs::make('Changes')
+                    ->tabs([
+                        Tab::make('Old Value')
+                            ->schema([
+                                KeyValue::make('old_value')
+                                    ->label('Old Value')
+                                    ->disabled()
+                                    ->reorderable(false)
+                                    ->addable(false)
+                                    ->deletable(false)
+                                    ->columnSpanFull(),
+                            ]),
+                        Tab::make('New Value')
+                            ->schema([
+                                KeyValue::make('new_value')
+                                    ->label('New Value')
+                                    ->disabled()
+                                    ->reorderable(false)
+                                    ->addable(false)
+                                    ->deletable(false)
+                                    ->columnSpanFull(),
+                            ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
@@ -40,9 +63,17 @@ class AuditLogsRelationManager extends RelationManager
                 TextColumn::make('event')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'created' => 'success',
-                        'updated' => 'warning',
-                        'deleted' => 'danger',
+                        'create' => 'success',
+                        'update' => 'warning',
+                        'delete' => 'danger',
+                        default => 'gray',
+                    }),
+                TextColumn::make('actor_type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'human' => 'success',
+                        'ai' => 'info',
+                        'system' => 'gray',
                         default => 'gray',
                     }),
                 TextColumn::make('created_at')
@@ -50,10 +81,12 @@ class AuditLogsRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('old_value')
                     ->limit(50)
-                    ->wrap(),
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('new_value')
                     ->limit(50)
-                    ->wrap(),
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

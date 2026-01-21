@@ -13,7 +13,7 @@ class MemoryIndexResource extends Resource
 {
     public function description(): string
     {
-        return 'Discovery endpoint listing recent memories. Returns a JSON array of lightweight objects for topic discovery and de-duplication. NEVER contains full content.';
+        return 'A lightweight, read-only discovery endpoint for user memories. Returns a JSON array of recent memories containing only metadata (ID, title, type, scope, etc.) and explicitly EXCLUDING full content. Use this to discover knowledge graph availability before deep diving.';
     }
 
     public function handle(Request $request): Response

@@ -16,7 +16,7 @@ class GetMemoryHistoryTool extends Tool
 {
     public function description(): string
     {
-        return 'Retrieve full version history and audit logs for a memory by its ID.';
+        return 'Retrieve the complete version history and audit logs for a specific memory. Returns a detailed timeline of changes, including who made them (actor), what changed (diff), and when. Use this to track the evolution of a memory or debug unexpected states.';
     }
 
     public function handle(Request $request): ResponseFactory
@@ -70,7 +70,7 @@ class GetMemoryHistoryTool extends Tool
 
     public function name(): string
     {
-        return 'memory-history';
+        return 'memory-audit';
     }
 
     public function schema(JsonSchema $schema): array

@@ -12,7 +12,7 @@ class ToolUsagePrompt extends Prompt
 {
     public function description(): string
     {
-        return 'Strict guidelines on when to use (and when NOT to use) each MCP tool.';
+        return 'Comprehensive guide and strict rules for using Memory MCP tools. Defines when to use search, index, write, update, and audit tools to ensure data integrity and avoid memory pollution.';
     }
 
     public function handle(Request $request): Response
@@ -56,7 +56,7 @@ TOOL USAGE GUIDELINES
    - OUTPUT: Lightweight list of user memories.
    - REQUIREMENT: Use this first to avoid blind searching.
 
-9. memory-history
+9. memory-audit
    - USE WHEN: You need to see the evolution of a memory or audit who changed what.
    - OUTPUT: Full version history and audit logs.
 TEXT
