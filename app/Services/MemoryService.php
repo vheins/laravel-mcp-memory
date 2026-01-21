@@ -83,7 +83,7 @@ class MemoryService
             ]);
         }
 
-        $this->logAccess('link', auth()->id(), null, null, [
+        $this->logAccess('link', (string) auth()->id(), null, null, [
             'source_id' => $sourceId,
             'target_id' => $targetId,
             'relation_type' => $type,
@@ -130,6 +130,7 @@ class MemoryService
         }
 
         $q = Memory::query()
+            ->disableCache()
             ->unless($repository || auth()->id() || $orgId, function ($query): void {
                 $query->whereIn('status', [MemoryStatus::Active, MemoryStatus::Verified]);
             }, function ($query): void {
@@ -208,7 +209,7 @@ class MemoryService
         $results = $q->orderByDesc('importance')->latest()
             ->get();
 
-        $this->logAccess('search', auth()->id(), $query, $filters, ['repository' => $repository], $results->count());
+        $this->logAccess('search', (string) auth()->id(), $query, $filters, ['repository' => $repository], $results->count());
 
         return $results;
     }
@@ -222,7 +223,7 @@ class MemoryService
         $candidates = $this->search(null, array_merge($filters, ['repository' => $repository]));
 
         // search() above already logs access with the correct repository context.
-        $this->logAccess('vector_search', auth()->id(), null, $filters, ['repository' => $repository], $candidates->count());
+        $this->logAccess('vector_search', (string) auth()->id(), null, $filters, ['repository' => $repository], $candidates->count());
 
         // 2. Calculate similarity and rank
         return $candidates->map(function (Memory $memory) use ($inputEmbedding): Memory {
