@@ -16,12 +16,14 @@ yarn build
 # clear cache
 php artisan modelCache:clear
 php artisan optimize:clear
+php artisan filament:optimize-clear
 
 php artisan optimize
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan event:cache
+php artisan filament:optimize
 
 php artisan storage:link
 php artisan queue:restart
