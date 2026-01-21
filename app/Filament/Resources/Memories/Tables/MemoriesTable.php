@@ -69,14 +69,14 @@ class MemoriesTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (Memory $record) => $record->status !== 'verified' && $record->status !== 'locked')
+                    ->visible(fn (Memory $record) => $record->status === \App\Enums\MemoryStatus::Draft)
                     ->action(fn (Memory $record) => $record->update(['status' => 'verified'])),
                 \Filament\Actions\Action::make('lock')
                     ->label('Lock')
                     ->icon('heroicon-o-lock-closed')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn (Memory $record) => $record->status !== 'locked')
+                    ->visible(fn (Memory $record) => $record->status !== \App\Enums\MemoryStatus::Locked)
                     ->action(fn (Memory $record) => $record->update(['status' => 'locked'])),
             ])
             ->bulkActions([
@@ -85,6 +85,14 @@ class MemoriesTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
+            ])
+            ->groups([
+                \Filament\Tables\Grouping\Group::make('userRel.name')
+                    ->label('User'),
+                \Filament\Tables\Grouping\Group::make('organization'),
+                \Filament\Tables\Grouping\Group::make('memory_type'),
+                \Filament\Tables\Grouping\Group::make('scope_type'),
+                \Filament\Tables\Grouping\Group::make('status'),
             ]);
     }
 }
