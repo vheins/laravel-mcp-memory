@@ -51,8 +51,22 @@ class SearchMemoriesTool extends Tool
         // Deduplicate by ID
         $allResults = $allResults->unique('id')->values();
 
+        // Map to lightweight locator DTOs
+        $mappedResults = $allResults->map(fn ($memory) => [
+            'id' => $memory->id,
+            'title' => $memory->title,
+            'score' => $memory->relevance ?? null, // MySQL fulltext score if available
+            'memory_type' => $memory->memory_type->value,
+            'scope_type' => $memory->scope_type->value,
+            'repository' => $memory->repository,
+            'status' => $memory->status->value,
+            'importance' => (int) $memory->importance,
+            'created_at' => $memory->created_at->toIso8601String(),
+            // STRICTLY EXCLUDED: current_content, embedding
+        ])->all();
+
         return Response::make([
-            Response::text(json_encode($allResults->toArray())),
+            Response::text(json_encode($mappedResults)),
         ]);
     }
 

@@ -27,10 +27,11 @@ You MUST adhere to the following core behavioral contract:
    - You must never store raw chat logs or user conversations.
    - You must never store ephemeral debugging data.
 
-2. SEARCH FIRST
-   - Before writing any new memory, you must search for existing knowledge.
+2. SEARCH FIRST & READ
+   - Before writing, you must search (`memory-search`) to find relevant IDs.
+   - Search results are LOCATORS (metadata only). They do not contain content.
+   - You MUST read the full content using `read_resource("memory://{id}")` before acting on it.
    - Duplicate memories corrupt the knowledge graph.
-   - You must use `memory-search` effectively before `memory-write`.
 
 3. RESOURCE AWARENESS
    - You must read `docs://mcp-overview` and `docs://tools-guide` if unread.

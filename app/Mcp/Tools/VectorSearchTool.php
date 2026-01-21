@@ -33,8 +33,21 @@ class VectorSearchTool extends Tool
             throw new JsonRpcException($exception->getMessage(), -32000, $request->get('id'));
         }
 
+        // Map to lightweight locator DTOs
+        $mappedResults = $results->map(fn ($memory) => [
+            'id' => $memory->id,
+            'title' => $memory->title,
+            'score' => $memory->similarity ?? 0, // Vector similarity score
+            'memory_type' => $memory->memory_type->value,
+            'scope_type' => $memory->scope_type->value,
+            'repository' => $memory->repository,
+            'status' => $memory->status->value,
+            'importance' => (int) $memory->importance,
+            // STRICTLY EXCLUDED: current_content
+        ])->values()->all();
+
         return Response::make([
-            Response::text(json_encode($results->toArray())),
+            Response::text(json_encode($mappedResults)),
         ]);
     }
 
