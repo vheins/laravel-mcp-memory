@@ -89,6 +89,48 @@ it('can write a memory via tool with missing default fields', function (): void 
     ]);
 });
 
+it('rejects JSON format in current_content', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    $response = $this->postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'method' => 'tools/call',
+        'params' => [
+            'name' => 'memory-write',
+            'arguments' => [
+                'organization' => 'test-org',
+                'current_content' => json_encode(['foo' => 'bar']),
+            ],
+        ],
+        'id' => 1,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJsonPath('result.isError', true);
+    $response->assertJsonPath('result.content.0.text', fn(string $text) => str_contains($text, 'must be plain text or markdown'));
+});
+
+it('accepts markdown format in current_content', function (): void {
+    Sanctum::actingAs(User::factory()->create());
+
+    $response = $this->postJson('/api/v1/mcp/memory', [
+        'jsonrpc' => '2.0',
+        'method' => 'tools/call',
+        'params' => [
+            'name' => 'memory-write',
+            'arguments' => [
+                'organization' => 'test-org',
+                'current_content' => "# Title\n\n- Item 1\n- Item 2",
+            ],
+        ],
+        'id' => 1,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJsonPath('result.isError', false);
+    $this->assertDatabaseHas('memories', ['current_content' => "# Title\n\n- Item 1\n- Item 2"]);
+});
+
 it('can search memories via tool (team context)', function (): void {
     Sanctum::actingAs(User::factory()->create());
     $anotherUser = User::factory()->create();

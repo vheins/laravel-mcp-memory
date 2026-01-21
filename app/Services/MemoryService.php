@@ -13,6 +13,7 @@ use App\Models\MemoryAuditLog;
 use App\Models\MemoryVersion;
 use App\Models\Repository;
 use App\Rules\ImmutableTypeRule;
+use App\Rules\PlaintextContentRule;
 use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -275,6 +276,11 @@ class MemoryService
                 'sometimes',
                 'required',
                 new Enum(MemoryScope::class),
+            ],
+            'current_content' => [
+                'required',
+                'string',
+                new PlaintextContentRule,
             ],
         ])->validate();
 
