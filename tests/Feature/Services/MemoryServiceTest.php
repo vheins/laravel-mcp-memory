@@ -10,6 +10,11 @@ use App\Models\User;
 use App\Services\MemoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * @property MemoryService $service
+ * @property User $user
+ * @property Repository $repository
+ */
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {

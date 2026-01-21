@@ -29,7 +29,7 @@ it('can get memory history via tool', function (): void {
         'jsonrpc' => '2.0',
         'method' => 'tools/call',
         'params' => [
-            'name' => 'memory-history',
+            'name' => 'memory-audit',
             'arguments' => [
                 'id' => $memory->id,
             ],

@@ -15,7 +15,7 @@ class MemoryResource extends Resource implements HasUriTemplate
 {
     public function description(): string
     {
-        return 'Read the full content and metadata of a specific memory entry.';
+        return 'Read access to memory content. Use this to retrieve full details of a specific memory (knowledge) after discovering it via `memory-index` or `memory-search`. Represents the core knowledge unit.';
     }
 
     public function handle(Request $request): Response

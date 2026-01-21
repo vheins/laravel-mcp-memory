@@ -14,7 +14,7 @@ class DocsResource extends Resource implements HasUriTemplate
 {
     public function description(): string
     {
-        return 'Essential documentation for using this MCP server correctly.';
+        return 'Access to dynamic, repository-aware documentation and rules. Returns behavior policies, technical specs, and project constraints tailored to the current context. Essential for maintaining compliance with project standards.';
     }
 
     public function handle(Request $request): Response

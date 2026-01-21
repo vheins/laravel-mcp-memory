@@ -12,7 +12,7 @@ use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 use Throwable;
 
-class GetMemoryHistoryTool extends Tool
+class GetMemoryAuditTool extends Tool
 {
     public function description(): string
     {

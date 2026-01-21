@@ -16,7 +16,7 @@ class VectorSearchTool extends Tool
 {
     public function description(): string
     {
-        return 'Semantic search using vector embeddings. The client must provide the vector.';
+        return 'Perform a semantic search using embeddings. This tool finds memories that are conceptually similar to the query vector, even if keywords don\'t match exactly. Best for finding "related" or "similar" concepts. The client must provide the vector.';
     }
 
     public function handle(Request $request, MemoryService $service): ResponseFactory

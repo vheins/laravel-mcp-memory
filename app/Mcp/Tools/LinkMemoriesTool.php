@@ -17,7 +17,7 @@ class LinkMemoriesTool extends Tool
 {
     public function description(): string
     {
-        return 'Create a relationship between two existing memories (Knowledge Graph).';
+        return 'Create a semantic relationship between two existing memories (Knowledge Graph). Use this to connect related concepts, identify conflicts, or establish supporting evidence. Requires valid UUIDs for both source and target memories.';
     }
 
     public function handle(Request $request, MemoryService $service): ResponseFactory

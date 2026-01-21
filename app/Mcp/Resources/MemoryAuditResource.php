@@ -11,7 +11,7 @@ use Laravel\Mcp\Server\Contracts\HasUriTemplate;
 use Laravel\Mcp\Server\Resource;
 use Laravel\Mcp\Support\UriTemplate;
 
-class MemoryHistoryResource extends Resource implements HasUriTemplate
+class MemoryAuditResource extends Resource implements HasUriTemplate
 {
     public function description(): string
     {
@@ -56,16 +56,16 @@ class MemoryHistoryResource extends Resource implements HasUriTemplate
 
     public function name(): string
     {
-        return 'memory-history';
+        return 'memory-audit';
     }
 
     public function title(): string
     {
-        return 'Memory Version History';
+        return 'Memory Audit History';
     }
 
     public function uriTemplate(): UriTemplate
     {
-        return new UriTemplate('memory://{id}/history');
+        return new UriTemplate('memory://{id}/audit');
     }
 }

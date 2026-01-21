@@ -8,13 +8,14 @@ use App\Mcp\Prompts\MemoryCorePrompt;
 use App\Mcp\Prompts\MemoryIndexPolicyPrompt;
 use App\Mcp\Prompts\ToolUsagePrompt;
 use App\Mcp\Resources\DocsResource;
-use App\Mcp\Resources\MemoryHistoryResource;
+use App\Mcp\Resources\MemoryAuditResource;
 use App\Mcp\Resources\MemoryIndexResource;
 use App\Mcp\Resources\MemoryResource;
 use App\Mcp\Resources\SchemaResource;
 use App\Mcp\Tools\BatchWriteMemoryTool;
 use App\Mcp\Tools\DeleteMemoryTool;
-use App\Mcp\Tools\GetMemoryHistoryTool;
+use App\Mcp\Tools\GetMemoryAuditTool;
+use App\Mcp\Tools\GetMemoryIndexTool;
 use App\Mcp\Tools\LinkMemoriesTool;
 use App\Mcp\Tools\SearchMemoriesTool;
 use App\Mcp\Tools\UpdateMemoryTool;
@@ -41,11 +42,11 @@ class MemoryMcpServer extends Server
     ];
 
     /**
-     * @var array<int, class-string<MemoryResource>|class-string<MemoryHistoryResource>|class-string<SchemaResource>|class-string<DocsResource>|class-string<MemoryIndexResource>>
+     * @var array<int, class-string<MemoryResource>|class-string<MemoryAuditResource>|class-string<SchemaResource>|class-string<DocsResource>|class-string<MemoryIndexResource>>
      */
     protected array $resources = [
         MemoryResource::class,
-        MemoryHistoryResource::class,
+        MemoryAuditResource::class,
         SchemaResource::class,
         DocsResource::class,
         MemoryIndexResource::class,
@@ -62,7 +63,7 @@ class MemoryMcpServer extends Server
         BatchWriteMemoryTool::class,
         LinkMemoriesTool::class,
         VectorSearchTool::class,
-        GetMemoryHistoryTool::class,
+        GetMemoryAuditTool::class,
         GetMemoryIndexTool::class,
     ];
 

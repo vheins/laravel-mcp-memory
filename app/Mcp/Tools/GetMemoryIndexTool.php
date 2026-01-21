@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Mcp\Tools;
 
 use App\Models\Memory;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -48,12 +49,9 @@ class GetMemoryIndexTool extends Tool
         return 'memory-index';
     }
 
-    public function schema(): array
+    public function schema(JsonSchema $schema): array
     {
-        return [
-            'type' => 'object',
-            'properties' => [], // No arguments needed for the index
-        ];
+        return [];
     }
 
     /**
@@ -63,7 +61,7 @@ class GetMemoryIndexTool extends Tool
     {
         return array_filter(
             $metadata,
-            fn ($value) => ! is_null($value) && is_scalar($value)
+            fn ($value) => ! \is_null($value) && \is_scalar($value)
         );
     }
 }

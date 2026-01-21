@@ -29,7 +29,7 @@ it('can retrieve memory core prompt', function (): void {
             'jsonrpc' => '2.0',
             'id' => 1,
             'result' => [
-                'description' => 'The core behavioral contract for all agents interacting with the Memory MCP.',
+                'description' => 'The core behavioral contract for all agents interacting with the Memory MCP. Enforces atomic memory creation, mandatory prior search, resource awareness, and correct scope usage to maintain knowledge graph integrity.',
                 'messages' => [
                     [
                         'role' => 'user',
@@ -85,7 +85,7 @@ it('can retrieve tool usage prompt', function (): void {
             'jsonrpc' => '2.0',
             'id' => 3,
             'result' => [
-                'description' => 'Strict guidelines on when to use (and when NOT to use) each MCP tool.',
+                'description' => 'Comprehensive guide and strict rules for using Memory MCP tools. Defines when to use search, index, write, update, and audit tools to ensure data integrity and avoid memory pollution.',
             ],
         ]);
 });

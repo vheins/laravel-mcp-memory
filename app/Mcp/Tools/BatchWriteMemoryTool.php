@@ -20,7 +20,7 @@ class BatchWriteMemoryTool extends Tool
 {
     public function description(): string
     {
-        return 'Create or update multiple memory entries in a single batch.';
+        return 'Create or update multiple memory entries in a single batch operation. Use this for bulk imports, migrations, or when processing large datasets to ensure atomicity and consistency. Significantly more efficient than individual calls.';
     }
 
     public function handle(Request $request, MemoryService $service): ResponseFactory

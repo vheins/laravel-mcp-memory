@@ -21,7 +21,7 @@ class WriteMemoryTool extends Tool
 {
     public function description(): string
     {
-        return 'Create a new memory entry. Supports facts, preferences, and business rules.';
+        return 'Create a new memory entry. Supports multiple types (facts, rules, preferences, etc.) and scopes (system, organization, user). Requires precise content and correct classification to ensure effective retrieval. Returns the created memory UUID.';
     }
 
     public function handle(Request $request, MemoryService $service): ResponseFactory

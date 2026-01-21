@@ -16,7 +16,7 @@ class DeleteMemoryTool extends Tool
 {
     public function description(): string
     {
-        return 'Soft-delete a memory entry by its UUID.';
+        return 'Soft-delete a memory entry by its UUID. This action is reversible but removes the memory from standard search results. Use this to archive obsolete or incorrect information.';
     }
 
     public function handle(Request $request): ResponseFactory

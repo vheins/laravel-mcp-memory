@@ -19,7 +19,7 @@ class SearchMemoriesTool extends Tool
 {
     public function description(): string
     {
-        return 'Search for memories with hierarchical resolution and filtering.';
+        return 'Search for memories using full-text search with fuzzy matching and filtering. Results are ranked by relevance and importance. Returns content, metadata, and relationships to provide full context.';
     }
 
     public function handle(Request $request, MemoryService $service): ResponseFactory

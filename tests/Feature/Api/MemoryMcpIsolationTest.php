@@ -6,6 +6,12 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 
+/**
+ * @property User $user
+ * @property User $otherUser
+ * @property string $orgId
+ * @property Repository $repo
+ */
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {

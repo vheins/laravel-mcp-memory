@@ -20,7 +20,7 @@ class UpdateMemoryTool extends Tool
 {
     public function description(): string
     {
-        return 'Update an existing memory entry by its UUID.';
+        return 'Update an existing memory entry by its UUID. Supports partial updates (changing only specific fields) or full content replacement. Use this to refine facts, correct errors, or change status/importance.';
     }
 
     public function handle(Request $request, MemoryService $service): ResponseFactory

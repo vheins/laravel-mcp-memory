@@ -13,10 +13,9 @@ use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -76,6 +75,10 @@ class AuditLogsRelationManager extends RelationManager
                         'system' => 'gray',
                         default => 'gray',
                     }),
+                TextColumn::make('actor_id')
+                    ->label('Actor ID')
+                    ->limit(8)
+                    ->tooltip(fn ($record) => $record->actor_id),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
